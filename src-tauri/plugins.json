@@ -1,0 +1,137 @@
+{
+  "extensions": {
+    "txt": {
+      "status": "browser-default",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "纯文本文件",
+      "name": "文本编辑器"
+    },
+    "jpeg": {
+      "status": "browser-default",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "JPEG 图片",
+      "name": "图片预览"
+    },
+    "docx": {
+      "status": "undeveloped",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "Word 文档",
+      "name": "Office 文档查看器"
+    },
+    "png": {
+      "status": "browser-default",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "PNG 图片",
+      "name": "图片预览"
+    },
+    "xls": {
+      "status": "undeveloped",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "Excel 表格",
+      "name": "Office 文档查看器"
+    },
+    "mp4": {
+      "status": "browser-default",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "MP4 视频",
+      "name": "视频播放器"
+    },
+    "ppt": {
+      "status": "undeveloped",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "PPT 演示文稿",
+      "name": "Office 文档查看器"
+    },
+    "gif": {
+      "status": "browser-default",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "GIF 动图",
+      "name": "图片预览"
+    },
+    "doc": {
+      "status": "undeveloped",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "Word 文档",
+      "name": "Office 文档查看器"
+    },
+    "pptx": {
+      "status": "undeveloped",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "PPT 演示文稿",
+      "name": "Office 文档查看器"
+    },
+    "md": {
+      "status": "undeveloped",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "Markdown 文档",
+      "name": "Markdown 渲染器"
+    },
+    "zip": {
+      "status": "undeveloped",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "ZIP 压缩包",
+      "name": "ZIP 解压器"
+    },
+    "pdf": {
+      "status": "browser-default",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "PDF 文档",
+      "name": "PDF 阅读器"
+    },
+    "svg": {
+      "status": "browser-default",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "SVG 矢量图",
+      "name": "图片预览"
+    },
+    "xlsx": {
+      "status": "undeveloped",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "Excel 表格",
+      "name": "Office 文档查看器"
+    },
+    "ggb": {
+      "status": "enabled",
+      "pluginId": "ggb",
+      "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
+      "description": "GeoGebra 交互式数学课件",
+      "name": "GeoGebra 插件"
+    },
+    "jpg": {
+      "status": "browser-default",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "JPG 图片",
+      "name": "图片预览"
+    },
+    "html": {
+      "status": "browser-default",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "HTML 网页",
+      "name": "HTML 页面"
+    },
+    "mp3": {
+      "status": "browser-default",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "MP3 音频",
+      "name": "音频播放器"
+    }
+  }
+}

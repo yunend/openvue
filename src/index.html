@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      height: 100%;
+    }
+    body {
+      font-family: "Segoe UI", Arial, "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%);
+      overflow: hidden;
+    }
+    
+    /* ---------- 整体布局 ---------- */
+    .app-layout {
+      display: flex;
+      height: 100vh;
+      padding: 16px;
+      gap: 16px;
+    }
+    
+    /* ---------- 左侧：导航栏 ---------- */
+    .sidebar {
+      width: 220px;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 2px 14px rgba(26, 35, 126, 0.10);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .sidebar-header {
+      padding: 22px 20px;
+      background: linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%);
+      color: white;
+    }
+    .sidebar-header h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .sidebar-header p {
+      font-size: 0.8rem;
+      opacity: 0.9;
+    }
+    .nav-list {
+      list-style: none;
+      padding: 14px 10px;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .nav-item { margin-bottom: 4px; }
+    .nav-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border: none;
+      background: transparent;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #3949ab;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+    .nav-btn:hover { background: #e8eaf6; }
+    .nav-btn.active {
+      background: linear-gradient(90deg, #3f51b5, #5c6bc0);
+      color: white;
+      box-shadow: 0 2px 8px rgba(63, 81, 181, 0.35);
+    }
+    .nav-icon {
+      font-size: 1.1rem;
+      width: 22px;
+      text-align: center;
+    }
+    .sidebar-footer {
+      padding: 14px 20px;
+      font-size: 0.78rem;
+      color: #7986cb;
+      border-top: 1px solid #e8eaf6;
+    }
+    
+    /* ---------- 右侧：内容区 ---------- */
+    .content {
+      flex: 1;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 2px 14px rgba(26, 35, 126, 0.10);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .content-header {
+      padding: 22px 30px;
+      border-bottom: 1px solid #e8eaf6;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .content-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #1a237e;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .content-title .icon { font-size: 1.5rem; }
+    .content-body {
+      flex: 1;
+      padding: 28px 34px;
+      overflow-y: auto;
+    }
+    .panel {
+      display: none;
+      animation: fadeIn 0.22s ease;
+    }
+    .panel.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* ---------- 通用区块样式 ---------- */
+    .panel-section {
+      background: #f8f9ff;
+      border: 1px solid #e8eaf6;
+      border-radius: 12px;
+      padding: 22px 26px;
+      margin-bottom: 22px;
+    }
+    .panel-section-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1a237e;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e8eaf6;
+    }
+    
+    /* ---------- 第 1 区：状态显示 ---------- */
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    .status-item {
+      background: white;
+      border: 1px solid #e8eaf6;
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+    .status-item.full { grid-column: span 2; }
+    .status-label {
+      font-size: 0.85rem;
+      color: #5c6bc0;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .status-value {
+      font-size: 1.05rem;
+      color: #1a237e;
+      font-weight: 600;
+      word-break: break-all;
+    }
+    .status-value.running { color: #2e7d32; }
+    .status-value.stopped { color: #c62828; }
+    .control-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    
+    /* ---------- 第 2 区：配置读写 ---------- */
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: block;
+      font-size: 0.9rem;
+      color: #1a237e;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 11px 15px;
+      border: 2px solid #c5cae9;
+      border-radius: 9px;
+      font-size: 1rem;
+      color: #1a237e;
+      background: white;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #3f51b5;
+    }
+    .form-hint {
+      font-size: 0.8rem;
+      color: #7986cb;
+      margin-top: 5px;
+    }
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: white;
+      border: 1px solid #e8eaf6;
+      border-radius: 10px;
+      margin-bottom: 14px;
+    }
+    .switch-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1a237e;
+    }
+    .switch-desc {
+      font-size: 0.8rem;
+      color: #7986cb;
+      margin-top: 2px;
+    }
+    
+    /* ---------- 通用按钮 ---------- */
+    .btn {
+      flex: 1;
+      padding: 12px 18px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      white-space: nowrap;
+    }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-green { background: #4caf50; color: white; }
+    .btn-green:hover:not(:disabled) { background: #388e3c; }
+    .btn-red { background: #f44336; color: white; }
+    .btn-red:hover:not(:disabled) { background: #d32f2f; }
+    .btn-blue { background: #2196f3; color: white; }
+    .btn-blue:hover:not(:disabled) { background: #1976d2; }
+    .btn-purple { background: #7c4dff; color: white; }
+    .btn-purple:hover:not(:disabled) { background: #651fff; }
+    .btn-orange { background: #ff9800; color: white; }
+    .btn-orange:hover:not(:disabled) { background: #f57c00; }
+    .btn-grey { background: #78909c; color: white; }
+    .btn-grey:hover:not(:disabled) { background: #546e7a; }
+    .btn-outline {
+      flex: 0 0 auto;
+      padding: 10px 20px;
+      background: white;
+      color: #3f51b5;
+      border: 2px solid #3f51b5;
+      font-weight: 600;
+    }
+    .btn-outline:hover {
+      background: #3f51b5;
+      color: white;
+    }
+    
+    /* ---------- 第 3 区：系统设置 ---------- */
+    .setting-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: white;
+      border: 1px solid #e8eaf6;
+      border-radius: 10px;
+      margin-bottom: 14px;
+    }
+    .setting-info { flex: 1; }
+    .setting-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1a237e;
+      margin-bottom: 3px;
+    }
+    .setting-desc {
+      font-size: 0.82rem;
+      color: #7986cb;
+    }
+    .setting-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .setting-status {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .setting-status.enabled { color: #2e7d32; }
+    .setting-status.disabled { color: #c62828; }
+    
+    /* ---------- 开关控件 ---------- */
+    .toggle-switch {
+      position: relative;
+      width: 54px;
+      height: 30px;
+      flex-shrink: 0;
+      display: inline-block;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #c5cae9;
+      transition: 0.3s;
+      border-radius: 30px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    input:checked + .slider { background-color: #3f51b5; }
+    input:checked + .slider:before { transform: translateX(24px); }
+    
+    /* ---------- 第 4 区：关于 ---------- */
+    .about-card {
+      max-width: 560px;
+      margin: 20px auto;
+      text-align: center;
+      padding: 30px 24px;
+    }
+    .about-logo {
+      font-size: 4.2rem;
+      margin-bottom: 14px;
+    }
+    .about-name {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #1a237e;
+      margin-bottom: 6px;
+    }
+    .about-version {
+      display: inline-block;
+      padding: 5px 14px;
+      background: #e8eaf6;
+      color: #3f51b5;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+    .about-desc {
+      color: #5c6bc0;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      margin-bottom: 24px;
+    }
+    .about-info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+    .about-info-item {
+      background: #f8f9ff;
+      border: 1px solid #e8eaf6;
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .about-info-label {
+      font-size: 0.8rem;
+      color: #7986cb;
+      margin-bottom: 4px;
+    }
+    .about-info-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1a237e;
+      word-break: break-all;
+    }
+    .about-links {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+    }
+    .about-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      background: #3f51b5;
+      color: white;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.22s ease;
+    }
+    .about-link:hover {
+      background: #1a237e;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+    }
+    .about-link.github { background: #24292e; }
+    .about-link.github:hover { background: #0d1117; }
+    
+    /* ---------- 提示条 ---------- */
+    #toast {
+      position: fixed;
+      top: 26px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-140%);
+      padding: 13px 26px;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 4px 22px rgba(0,0,0,0.22);
+      transition: transform 0.4s ease;
+      z-index: 99999;
+      max-width: 90%;
+      font-size: 0.95rem;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.success { background: linear-gradient(135deg, #2e7d32, #43a047); }
+    #toast.error { background: linear-gradient(135deg, #c62828, #e53935); }
+    #toast.info { background: linear-gradient(135deg, #1565c0, #1e88e5); }
+    
+    .url-link {
+      color: #3f51b5;
+      text-decoration: none;
+    }
+    .url-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    
+    <!-- ===================== 左侧：分类导航 ===================== -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🎛️ Tauri 控制台</h1>
+        <p>HTTP 文件服务管理器</p>
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <button class="nav-btn active" data-panel="panel-status" onclick="switchPanel(this)">
+            <span class="nav-icon">📊</span>
+            <span>当前服务状态</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" data-panel="panel-config" onclick="switchPanel(this)">
+            <span class="nav-icon">⚙️</span>
+            <span>配置文件管理</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" data-panel="panel-system" onclick="switchPanel(this)">
+            <span class="nav-icon">🖥️</span>
+            <span>系统设置</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" data-panel="panel-plugins" onclick="switchPanel(this)">
+            <span class="nav-icon">🧩</span>
+            <span>插件配置</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" data-panel="panel-about" onclick="switchPanel(this)">
+            <span class="nav-icon">ℹ️</span>
+            <span>关于</span>
+          </button>
+        </li>
+      </ul>
+      <div class="sidebar-footer">
+        v<span id="sidebarVersion">0.1.0</span>
+      </div>
+    </aside>
+    
+    <!-- ===================== 右侧：内容区 ===================== -->
+    <main class="content">
+      <div class="content-header">
+        <div class="content-title" id="contentTitle">
+          <span class="icon">📊</span>
+          <span>当前服务状态</span>
+        </div>
+        <button class="btn-outline" onclick="restartHttpService()">🔄 重启HTTP服务</button>
+      </div>
+      
+      <div class="content-body">
+        
+        <!-- ============ 面板 1：当前服务状态 ============ -->
+        <div class="panel active" id="panel-status">
+          <div class="panel-section">
+            <div class="panel-section-title">🟢 运行概览</div>
+            <div class="status-grid">
+              <div class="status-item">
+                <div class="status-label">HTTP 服务</div>
+                <div class="status-value stopped" id="svcStatus">⏸️ 未启动</div>
+              </div>
+              <div class="status-item">
+                <div class="status-label">监听端口</div>
+                <div class="status-value" id="portStatus">-</div>
+              </div>
+              <div class="status-item full">
+                <div class="status-label">公共文件根目录</div>
+                <div class="status-value" id="folderStatus">-</div>
+              </div>
+              <div class="status-item full">
+                <div class="status-label">访问地址</div>
+                <div class="status-value" id="urlStatus">（服务未启动）</div>
+              </div>
+            </div>
+            <div class="control-row">
+              <button class="btn btn-green" id="startBtn" onclick="startServer()">▶ 启动服务</button>
+              <button class="btn btn-red" id="stopBtn" onclick="stopServer()" disabled>■ 停止服务</button>
+              <button class="btn btn-grey" onclick="refreshStatus()">🔄 刷新</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- ============ 面板 2：配置文件管理 ============ -->
+        <div class="panel" id="panel-config">
+          <div class="panel-section">
+            <div class="panel-section-title">⚙️ 基础配置</div>
+            
+            <div class="form-group">
+              <label class="form-label">HTTP 服务端口号</label>
+              <input type="number" class="form-input" id="cfgPort" min="1" max="65535" placeholder="例如：8005">
+              <div class="form-hint">取值范围 1 - 65535，修改后需重启 HTTP 服务生效</div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">公共文件根目录路径</label>
+              <div style="display:flex; gap:10px; align-items:stretch;">
+                <input type="text" class="form-input" id="cfgFolder" 
+                       placeholder="例如：static 或 D:/MyWebsite"
+                       style="flex:1;">
+                <button type="button" class="btn btn-grey" 
+                        style="flex:0 0 auto; padding:0 20px;"
+                        onclick="browseFolder()">
+                  📁 浏览...
+                </button>
+              </div>
+              <div class="form-hint">支持相对路径（相对于 config.json 所在目录）或绝对路径；点击右侧按钮可直接选择文件夹</div>
+            </div>
+            
+            <!-- ✅ enableUpload 开关（save_config 第三个参数来源） -->
+            <div class="switch-row">
+              <div>
+                <div class="switch-name">启用文件上传功能</div>
+                <div class="switch-desc">开启后，前端用户可通过 /api/upload 上传文件</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="cfgEnableUpload">
+                <span class="slider"></span>
+              </label>
+            </div>
+            
+            <div class="control-row">
+              <button class="btn btn-purple" onclick="loadConfig()">📥 读取当前配置</button>
+              <button class="btn btn-orange" onclick="saveConfig()">💾 保存到 config.json</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- ============ 面板 3：系统设置 ============ -->
+        <div class="panel" id="panel-system">
+          <div class="panel-section">
+            <div class="panel-section-title">🖥️ 操作系统行为</div>
+            
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-name">开机自动启动</div>
+                <div class="setting-desc">Windows 用户登录后自动启动本应用</div>
+              </div>
+              <div class="setting-right">
+                <span class="setting-status disabled" id="autoStartStatus">已禁用</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="autoStartToggle" onchange="toggleAutostart(this)">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-name">最小化到系统托盘</div>
+                <div class="setting-desc">隐藏主窗口，HTTP 服务继续在后台运行</div>
+              </div>
+              <div class="setting-right">
+                <button class="btn btn-blue" style="flex: 0 0 150px;" onclick="hideToTray()">
+                  📦 隐藏到托盘
+                </button>
+              </div>
+            </div>
+            
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-name">退出应用程序</div>
+                <div class="setting-desc">停止 HTTP 服务并完全关闭本程序</div>
+              </div>
+              <div class="setting-right">
+                <button class="btn btn-red" style="flex: 0 0 150px;" onclick="quitApp()">
+                  🚪 退出应用
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- ============ 面板 5：插件配置 ============ -->
+        <div class="panel" id="panel-plugins">
+          <div class="panel-section">
+            <div class="panel-section-title">🧩 扩展名与插件映射表</div>
+            <div class="form-hint" style="margin-bottom:18px;">
+              • <b>已启用</b>：点击对应插件页打开（需 plugins 目录下已放置资源）<br>
+              • <b>未启用</b>：虽安装了插件，但暂不使用，按浏览器默认行为打开<br>
+              • <b>浏览器默认支持</b>：浏览器原生能渲染的格式（图片/视频/HTML 等）<br>
+              • <b>未开发</b>：未来计划支持，当前走浏览器默认（会直接下载）
+            </div>
+
+            <!-- 分类 Tab -->
+            <div style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+              <button class="btn btn-grey" style="flex:0 0 auto;" onclick="filterPlugins('all')">全部</button>
+              <button class="btn btn-grey" style="flex:0 0 auto; background:#2e7d32;" onclick="filterPlugins('enabled')">✅ 已启用</button>
+              <button class="btn btn-grey" style="flex:0 0 auto; background:#c62828;" onclick="filterPlugins('disabled')">⏸️ 未启用</button>
+              <button class="btn btn-grey" style="flex:0 0 auto; background:#1565c0;" onclick="filterPlugins('browser-default')">🌐 浏览器默认</button>
+              <button class="btn btn-grey" style="flex:0 0 auto; background:#757575;" onclick="filterPlugins('undeveloped')">🚧 未开发</button>
+            </div>
+
+            <!-- 插件列表容器 -->
+            <div id="pluginsList" style="display:flex; flex-direction:column; gap:12px;">
+              <div style="text-align:center; color:#7986cb; padding:40px 0;">⏳ 正在加载插件配置...</div>
+            </div>
+
+            <div class="control-row" style="margin-top:24px;">
+              <button class="btn btn-blue" onclick="loadPluginsConfig()">🔄 重新加载配置</button>
+              <button class="btn btn-grey" onclick="filterPlugins('all')">🗑️ 清除筛选</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ 面板 4：关于 ============ -->
+        <div class="panel" id="panel-about">
+          <div class="panel-section about-card">
+            <div class="about-logo">🎛️</div>
+            <div class="about-name">Tauri HTTP Server</div>
+            <div class="about-version">v<span id="aboutVersion">0.1.0</span></div>
+            <div class="about-desc">
+              基于 Tauri 2 + Axum 构建的轻量级本地 HTTP 文件服务工具。<br>
+              一键启动、开机自启、托盘常驻、目录浏览、文件上传，<br>
+              配置灵活，开箱即用。
+            </div>
+            
+            <div class="about-info-grid">
+              <div class="about-info-item">
+                <div class="about-info-label">当前版本</div>
+                <div class="about-info-value" id="infoVersion">0.1.0</div>
+              </div>
+              <div class="about-info-item">
+                <div class="about-info-label">构建平台</div>
+                <div class="about-info-value">Tauri 2.x + Axum</div>
+              </div>
+              <div class="about-info-item">
+                <div class="about-info-label">GUI 框架</div>
+                <div class="about-info-value">WebView2（Windows）</div>
+              </div>
+              <div class="about-info-item">
+                <div class="about-info-label">后端语言</div>
+                <div class="about-info-value">Rust (tokio)</div>
+              </div>
+            </div>
+            
+            <div class="about-links">
+              <a class="about-link github" href="https://github.com/" target="_blank" rel="noopener">
+                <span>🐙</span>
+                <span>GitHub 仓库</span>
+              </a>
+              <a class="about-link" href="https://tauri.app/" target="_blank" rel="noopener">
+                <span>🌐</span>
+                <span>Tauri 官方文档</span>
+              </a>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </main>
+  </div>
+  
+  <div id="toast"></div>
+
+  <script>
+    const { invoke } = window.__TAURI__.core;
+    let isRunning = false;
+
+    // ============================================================
+    // 初始化
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initAll();
+
+      // ================================================================
+      // ✅ 打开控制台后自动启动 HTTP 服务（如果当前未启动）
+      // ================================================================
+      if (!isRunning) {
+        console.log('🔌 控制台已打开，正在自动启动 HTTP 服务...');
+        showToast('🔌 正在自动启动 HTTP 服务...', 'info');
+        // 小延时确保界面渲染完毕再启动（视觉上更流畅）
+        setTimeout(async () => {
+          try {
+            await startServer();
+            // 启动成功后再刷新一次状态（确保面板 1 上所有数据正确显示）
+            await refreshStatus();
+          } catch (e) {
+            console.error('自动启动服务失败:', e);
+            showToast('自动启动服务失败: ' + e, 'error');
+          }
+        }, 300);
+      }
+    });
+
+    // ============================================================
+    // 面板 5：插件配置
+    // ============================================================
+    let pluginsCache = {};   // 原始配置缓存
+    let pluginsFilter = 'all';
+
+    /** 状态 → 徽章显示 */
+    function statusBadge(s) {
+      const MAP = {
+        'enabled':         { label: '✅ 已启用',         color: '#2e7d32', bg: '#e8f5e9' },
+        'disabled':        { label: '⏸️ 未启用',         color: '#c62828', bg: '#ffebee' },
+        'browser-default': { label: '🌐 浏览器默认支持', color: '#1565c0', bg: '#e3f2fd' },
+        'undeveloped':     { label: '🚧 未开发',         color: '#6d4c41', bg: '#efebe9' },
+      };
+      const cfg = MAP[s] || MAP['browser-default'];
+      return `<span style="display:inline-block; padding:4px 10px; border-radius:30px; background:${cfg.bg}; color:${cfg.color}; font-size:0.82rem; font-weight:600;">${cfg.label}</span>`;
+    }
+
+    /** 状态 kebab-case → 显示文本（给下拉切换用） */
+    function statusText(s) {
+      return {
+        'enabled': '已启用',
+        'disabled': '未启用',
+        'browser-default': '浏览器默认支持',
+        'undeveloped': '未开发'
+      }[s] || s;
+    }
+
+    /** 渲染插件列表 */
+    function renderPluginsList() {
+      const box = document.getElementById('pluginsList');
+      const exts = Object.keys(pluginsCache.extensions || {}).sort();
+      if (exts.length === 0) {
+        box.innerHTML = `<div style="text-align:center; color:#7986cb; padding:40px 0;">plugins.json 为空，请先添加条目</div>`;
+        return;
+      }
+
+      let html = '';
+      let count = 0;
+      for (const ext of exts) {
+        const e = pluginsCache.extensions[ext];
+        const statusKey = ({ // 把 Rust 的 kebab-case 枚举转为字符串 key
+          'BrowserDefault': 'browser-default',
+          'Enabled': 'enabled',
+          'Disabled': 'disabled',
+          'Undeveloped': 'undeveloped'
+        })[e.status] || e.status || 'browser-default';
+
+        if (pluginsFilter !== 'all' && statusKey !== pluginsFilter) continue;
+        count++;
+
+        // 只有 enabled/disabled 两种可以互相切换
+        const canToggle = (statusKey === 'enabled' || statusKey === 'disabled');
+        const toggleTarget = statusKey === 'enabled' ? 'disabled' : 'enabled';
+
+        html += `
+          <div class="switch-row" style="padding:16px 20px; align-items:flex-start;">
+            <div style="flex:1;">
+              <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:6px;">
+                <span style="font-size:1.5rem;">${fileExtIcon(ext)}</span>
+                <div>
+                  <div class="switch-name" style="font-size:1.05rem;">
+                    .${ext}
+                    <span style="color:#7986cb; font-weight:500; font-size:0.88rem; margin-left:8px;">${e.name || ext.toUpperCase() + ' 文件'}</span>
+                  </div>
+                  <div class="switch-desc" style="margin-top:4px;">${e.description || ''}</div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                ${statusBadge(statusKey)}
+                ${e.pluginId ? `<span style="font-size:0.82rem; color:#5c6bc0;">🔗 插件ID: <b>${e.pluginId}</b></span>` : ''}
+                ${e.urlTemplate ? `<span style="font-size:0.78rem; color:#78909c; word-break:break-all;">URL: <code style="background:#f3f4f8; padding:2px 6px; border-radius:4px;">${e.urlTemplate}</code></span>` : ''}
+              </div>
+            </div>
+            <div style="flex-shrink:0; display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+              ${canToggle ? `
+                <button class="btn ${statusKey === 'enabled' ? 'btn-red' : 'btn-green'}" style="flex:0 0 auto; padding:8px 16px; font-size:0.88rem;" 
+                        onclick="togglePlugin('${ext}', '${toggleTarget}')">
+                  ${statusKey === 'enabled' ? '⏸️ 禁用' : '▶️ 启用'}
+                </button>
+              ` : `
+                <span style="font-size:0.8rem; color:#b0bec5; padding:8px 0;">（此状态不可快速切换）</span>
+                <select onchange="togglePlugin('${ext}', this.value); this.value='__';" style="padding:6px 10px; border-radius:8px; border:1px solid #c5cae9; font-size:0.85rem;">
+                  <option value="__">强制更改状态 ▾</option>
+                  <option value="enabled">已启用</option>
+                  <option value="disabled">未启用</option>
+                  <option value="browser-default">浏览器默认支持</option>
+                  <option value="undeveloped">未开发</option>
+                </select>
+              `}
+            </div>
+          </div>
+        `;
+      }
+
+      if (count === 0) {
+        html = `<div style="text-align:center; color:#7986cb; padding:30px 0;">该分类下暂无条目</div>`;
+      }
+      box.innerHTML = html;
+    }
+
+    /** 扩展名 → emoji 图标（简单映射）*/
+    function fileExtIcon(ext) {
+      const e = ext.toLowerCase();
+      if (['jpg','jpeg','png','gif','svg','bmp','webp'].includes(e)) return '🖼️';
+      if (['mp4','avi','mov','mkv','webm','flv'].includes(e)) return '🎬';
+      if (['mp3','wav','flac','aac','ogg'].includes(e)) return '🎵';
+      if (['pdf'].includes(e)) return '📕';
+      if (['doc','docx'].includes(e)) return '📘';
+      if (['xls','xlsx','csv'].includes(e)) return '📗';
+      if (['ppt','pptx'].includes(e)) return '📙';
+      if (['zip','rar','7z','tar','gz'].includes(e)) return '🗜️';
+      if (['md'].includes(e)) return '📝';
+      if (['txt','log'].includes(e)) return '📄';
+      if (['html','htm'].includes(e)) return '🌐';
+      if (['ggb'].includes(e)) return '📐';
+      return '📎';
+    }
+
+    /** 筛选列表 */
+    function filterPlugins(type) {
+      pluginsFilter = type;
+      renderPluginsList();
+    }
+
+    /** 从 Tauri 后端加载插件配置 */
+    async function loadPluginsConfig() {
+      try {
+        document.getElementById('pluginsList').innerHTML = `<div style="text-align:center; color:#7986cb; padding:40px 0;">⏳ 正在加载插件配置...</div>`;
+        pluginsCache = await invoke('get_plugins_config');
+        renderPluginsList();
+        showToast('🧩 插件配置已加载', 'info');
+      } catch (e) {
+        console.error('加载插件配置失败:', e);
+        document.getElementById('pluginsList').innerHTML = `<div style="text-align:center; color:#c62828; padding:30px 0;">❌ 加载失败: ${e}</div>`;
+        showToast('加载插件配置失败: ' + e, 'error');
+      }
+    }
+
+    /** 切换某扩展名的状态 */
+    async function togglePlugin(ext, newStatus) {
+      if (!newStatus || newStatus === '__') return;
+      try {
+        showToast(`💾 正在更新 .${ext} 状态 → ${statusText(newStatus)}...`, 'info');
+        const msg = await invoke('save_plugin_extension_status', { ext, status: newStatus });
+        // 重新加载最新配置（保证内存一致）
+        await loadPluginsConfig();
+        showToast(msg, 'success');
+      } catch (e) {
+        console.error(e);
+        showToast('❌ 切换失败: ' + e, 'error');
+      }
+    }
+
+    async function initAll() {
+      await Promise.all([
+        refreshStatus(),
+        loadConfig(),
+        initAutostartStatus(),
+        loadVersionInfo(),
+        loadPluginsConfig(),
+      ]);
+    }
+
+    async function restartHttpService() {
+      try {
+        showToast('🔄 正在重启 HTTP 服务...', 'info');
+        // 如果服务正在运行，先停止
+        if (isRunning) {
+          try {
+            await invoke('stop_server');
+            // 等待 500ms 确保服务完全停止
+            await new Promise(resolve => setTimeout(resolve, 500));
+          } catch (e) {
+            console.warn('停止服务时出错（可能服务已停止）:', e);
+          }
+        }
+        // 启动服务
+        const msg = await invoke('start_server');
+        showToast('✅ HTTP 服务已重启: ' + msg, 'success');
+        // 刷新状态和配置
+        setTimeout(async () => {
+          await refreshStatus();
+        }, 300);
+      } catch (e) {
+        showToast('❌ 重启 HTTP 服务失败: ' + e, 'error');
+      }
+    }
+
+    // ============================================================
+    // 导航切换（左右两栏联动 + 顶部标题变化）
+    // ============================================================
+    const PANEL_INFO = {
+      'panel-status':  { title: '当前服务状态', icon: '📊' },
+      'panel-config':  { title: '配置文件管理', icon: '⚙️' },
+      'panel-system':  { title: '系统设置',       icon: '🖥️' },
+      'panel-plugins': { title: '插件配置',       icon: '🧩' },
+      'panel-about':   { title: '关于',           icon: 'ℹ️' },
+    };
+
+    function switchPanel(btn) {
+      // ① 左侧按钮高亮切换
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      // ② 右侧面板显示切换（带淡入动画）
+      const targetId = btn.dataset.panel;
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById(targetId).classList.add('active');
+      // ③ 顶部标题同步更新
+      const info = PANEL_INFO[targetId] || { title: '', icon: '' };
+      document.getElementById('contentTitle').innerHTML =
+        `<span class="icon">${info.icon}</span><span>${info.title}</span>`;
+    }
+
+    // ============================================================
+    // 面板 1：服务状态 + HTTP 控制
+    // ============================================================
+    async function refreshStatus() {
+      try {
+        const status = await invoke('get_server_status');
+        isRunning = status.isRunning;
+        document.getElementById('portStatus').textContent = status.port;
+        document.getElementById('folderStatus').textContent = status.staticFolder;
+
+        const svcEl = document.getElementById('svcStatus');
+        if (status.isRunning) {
+          svcEl.textContent = '✅ 运行中';
+          svcEl.className = 'status-value running';
+        } else {
+          svcEl.textContent = '⏸️ 未启动';
+          svcEl.className = 'status-value stopped';
+        }
+
+        const urlEl = document.getElementById('urlStatus');
+        if (status.url) {
+          urlEl.innerHTML = `<a class="url-link" href="${status.url}" target="_blank">${status.url}</a>`;
+        } else {
+          urlEl.textContent = '（服务未启动）';
+        }
+        updateButtons();
+      } catch (e) {
+        console.error('刷新状态失败:', e);
+        showToast('刷新状态失败: ' + e, 'error');
+      }
+    }
+
+    async function startServer() {
+      try {
+        const msg = await invoke('start_server');
+        showToast('✅ ' + msg, 'success');
+        setTimeout(refreshStatus, 300);
+      } catch (e) { showToast('❌ ' + e, 'error'); }
+    }
+
+    async function stopServer() {
+      try {
+        const msg = await invoke('stop_server');
+        showToast('🛑 ' + msg, 'success');
+        setTimeout(refreshStatus, 200);
+      } catch (e) { showToast('❌ ' + e, 'error'); }
+    }
+
+    function updateButtons() {
+      document.getElementById('startBtn').disabled = isRunning;
+      document.getElementById('stopBtn').disabled = !isRunning;
+    }
+
+    // ============================================================
+    // 面板 2：配置读写（★★ 修复 save_config 缺少 enableUpload ★★）
+    // ============================================================
+    async function loadConfig() {
+      try {
+        const cfg = await invoke('get_config');
+        document.getElementById('cfgPort').value = cfg.port;
+        document.getElementById('cfgFolder').value = cfg.staticFolder;
+        // ✅ 读取 enableUpload
+        document.getElementById('cfgEnableUpload').checked = !!cfg.enableUpload;
+        showToast('📥 配置已读取', 'info');
+      } catch (e) {
+        showToast('读取配置失败: ' + e, 'error');
+      }
+    }
+
+    async function saveConfig() {
+      const port = parseInt(document.getElementById('cfgPort').value, 10);
+      const staticFolder = document.getElementById('cfgFolder').value.trim();
+      // ✅ 修复：从开关获取 enableUpload（原 bug 原因就是缺这行 + 没传）
+      const enableUpload = document.getElementById('cfgEnableUpload').checked;
+
+      if (!port || port < 1 || port > 65535) {
+        showToast('请输入有效的端口号 (1-65535)', 'error');
+        return;
+      }
+      if (!staticFolder) {
+        showToast('请输入公共文件目录路径', 'error');
+        return;
+      }
+
+      try {
+        // ✅ 修复：第三个参数 enableUpload 必须传入（驼峰命名）
+        const msg = await invoke('save_config', { port, staticFolder, enableUpload });
+        showToast('💾 ' + msg, 'success');
+        //await refreshStatus();
+      } catch (e) {
+        showToast('保存失败: ' + e, 'error');
+      }
+    }
+
+    // ============================================================
+    // 面板 3：系统设置
+    // ============================================================
+    async function initAutostartStatus() {
+      try {
+        const enabled = await invoke('plugin:autostart|is_enabled');
+        document.getElementById('autoStartToggle').checked = enabled;
+        updateAutostartDisplay(enabled);
+      } catch (e) { console.error('获取自启动状态失败:', e); }
+    }
+
+    function updateAutostartDisplay(enabled, customText) {
+      const el = document.getElementById('autoStartStatus');
+      if (customText) {
+        el.textContent = customText;
+        el.className = 'setting-status disabled';
+      } else {
+        el.textContent = enabled ? '已启用' : '已禁用';
+        el.className = 'setting-status ' + (enabled ? 'enabled' : 'disabled');
+      }
+    }
+
+    async function toggleAutostart(checkbox) {
+      const shouldEnable = checkbox.checked;
+      try {
+        if (shouldEnable) {
+          await invoke('plugin:autostart|enable');
+          updateAutostartDisplay(true);
+          showToast('✅ 已开启开机自启动', 'success');
+        } else {
+          await invoke('plugin:autostart|disable');
+          updateAutostartDisplay(false);
+          showToast('❌ 已关闭开机自启动', 'success');
+        }
+      } catch (e) {
+        checkbox.checked = !shouldEnable;
+        updateAutostartDisplay(!shouldEnable, '失败');
+        showToast('操作失败: ' + e, 'error');
+      }
+    }
+
+    async function hideToTray() {
+      try {
+        await invoke('hide_window');
+        showToast('📦 已最小化到系统托盘（双击托盘图标恢复）', 'info');
+      } catch (e) { showToast('隐藏失败: ' + e, 'error'); }
+    }
+
+    async function quitApp() {
+      if (isRunning && !confirm('⚠️ HTTP 服务正在运行，确定要退出吗？')) return;
+      try { await invoke('quit_app'); } catch (e) { console.error(e); }
+    }
+
+    // ============================================================
+    // 面板 4：关于（版本 + GitHub 链接）
+    // ============================================================
+    async function loadVersionInfo() {
+      try {
+        // ✅ 调用后端 get_version 命令获取真实的 Cargo.toml 版本号
+        const ver = await invoke('get_version');
+        document.getElementById('aboutVersion').textContent = ver;
+        document.getElementById('sidebarVersion').textContent = ver;
+        document.getElementById('infoVersion').textContent = ver;
+      } catch (e) {
+        console.warn('获取版本号失败，使用默认值:', e);
+        // 失败兜底，不阻塞界面显示
+        const fallback = '0.1.0';
+        document.getElementById('aboutVersion').textContent = fallback;
+        document.getElementById('sidebarVersion').textContent = fallback;
+        document.getElementById('infoVersion').textContent = fallback;
+      }
+    }
+
+    // ============================================================
+    // 通用：Toast 提示
+    // ============================================================
+    function showToast(msg, type = 'info') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = 'show ' + type;
+      setTimeout(() => { el.className = type; }, 2800);
+    }
+
+     // ------------------------------------------------------------
+    // 📁 弹出文件夹选择对话框 → 自动填入 cfgFolder
+    // ------------------------------------------------------------
+    async function browseFolder() {
+      try {
+        const initial = document.getElementById('cfgFolder').value.trim() || null;
+        const chosen = await invoke('choose_folder', { initialDir: initial });
+        if (chosen) {
+          document.getElementById('cfgFolder').value = chosen;
+          showToast('📁 已选择目录: ' + chosen, 'info');
+        }
+      } catch (e) {
+        console.error('browseFolder 失败:', e);
+        showToast('打开文件夹选择失败: ' + e, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

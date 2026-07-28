@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1E3A8A;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- 蓝色圆形背景 -->
+  <circle cx="100" cy="100" r="90" fill="url(#grad)"/>
+  <!-- 白色圆环装饰 -->
+  <circle cx="100" cy="100" r="75" fill="none" stroke="white" stroke-width="3" opacity="0.3"/>
+  <!-- 更大的 V 字形 -->
+  <path d="M45 55 L100 160 L155 55 L125 55 L100 110 L75 55 Z" fill="white"/>
+</svg>

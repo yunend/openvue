@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GGB编辑 - 文件视界</title>
+    <script src="./tailwind.js"></script>
+    <script src="./GeoGebra/deployggb.js"></script>
+    <link rel="shortcut icon" href="../images/ggblogo.ico" type="image/x-icon">
+    
+    <style>
+        /* loading动画 */
+        .sk-spinner-pulse {
+            width: 150px;
+            height: 150px;
+            background-color: #10b981;
+            border-radius: 100%;
+            animation: sk-pulseScaleOut 1s infinite ease-in-out;
+        }
+
+        @keyframes sk-pulseScaleOut {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); opacity: 0; }
+        }
+
+        #loading {
+            position: absolute;
+            z-index: 99999;
+        }
+
+        #ggb-element {
+            position: relative;
+        }
+
+        .file-list-container {
+            transition: left 0.3s ease;
+        }
+
+        .toggle-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-100 flex flex-col">
+    <!-- 导航栏 -->
+    <nav class="w-full bg-blue-700">
+        <section class="h-20 w-10/12 mx-auto font-mono text-white flex items-center gap-x-3">
+            <a class="text-4xl px-5 py-3 hover:translate-x-5 duration-300" href="/">OpenVue</a>
+            <ul class="hidden md:flex gap-x-5 mx-3 items-center">
+                <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><a href="/">主页</a></li>
+                <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><a href="../upload.html">上传文件</a></li>
+                <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><a href="./GeoGebra/HTML5/5.0/GeoGebra.html" target="_blank">GGB编辑</a></li>
+            </ul>
+        </section>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="flex-1 flex flex-col items-center justify-center py-8">
+        <!-- 标题显示 -->
+        <div id="current-file-title" class="text-center text-blue-600 font-bold text-2xl mb-6">
+        </div>
+
+        <!-- GGB容器 -->
+        <div class="ggb-container w-[85%] max-w-[1280px] aspect-video relative p-0 overflow-hidden flex justify-center items-center border-3 border-blue-600 rounded-xl shadow-lg shadow-blue-600/30 transition-colors">
+            <div id="loading" class="sk-spinner-pulse"></div>
+            <div id="ggb-element"></div>
+        </div>
+
+        <!-- 工具栏切换按钮 -->
+        <button 
+            onclick="toggleToolBar()"
+            class="fixed right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/30 border border-gray-300/30 rounded-full shadow-md flex items-center justify-center hover:bg-blue-600/30 hover:text-white transition-all z-50 text-xl"
+            title = "显示/隐藏工具按钮"
+        >
+            🔧
+        </button>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="w-full bg-blue-700 text-white py-4">
+        <p class="text-center">Email:303218145@qq.com</p>
+    </footer>
+
+    <script>
+        const queryString = location.search;
+        const queryParams = new URLSearchParams(queryString);
+        let ggbFilePath = queryParams.has('path') ? queryParams.get('path') : "";
+
+        let ggbAppletConfig = {
+            "appName": "classic",
+            "scaleContainerClass": "ggb-container",
+            "showToolBar": false,
+            "showAlgebraInput": false,
+            "showMenuBar": false,
+            "filename": ggbFilePath,
+            "width": 1280,
+            "height": 720,
+            "borderColor": "#3c3c3c",
+            "showFullscreenButton": true,
+            showResetIcon: true,
+            enableRightClick: false,
+        };
+
+        function initGGBApplet(config) {
+            let applet = new GGBApplet(config);
+            applet.setHTML5Codebase('./GeoGebra/HTML5/5.0/web3d/');
+            applet.inject('ggb-element', 'html5');
+            document.getElementById('loading').style.display = 'block';
+            updateTitle(config.filename);
+            observe();
+            return applet;
+        }
+
+        function updateTitle(filePath) {
+            const titleElement = document.getElementById('current-file-title');
+            if (filePath) {
+                const fileName = filePath.split('/').pop();
+                titleElement.textContent = `${fileName}`;
+            } else {
+                titleElement.textContent = '未选择文件';
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", function () {
+           initGGBApplet(ggbAppletConfig);   
+        });
+
+        function toggleToolBar() {
+            if (typeof ggbApplet !== 'undefined') {
+                const isToolBarVisible = !ggbAppletConfig.showToolBar;
+                ggbAppletConfig.showToolBar = isToolBarVisible;
+                ggbAppletConfig.showAlgebraInput = isToolBarVisible;
+                ggbAppletConfig.showMenuBar = isToolBarVisible;
+                ggbAppletConfig.enableRightClick = isToolBarVisible;
+                initGGBApplet(ggbAppletConfig);
+            }
+        }
+
+        let loading = document.getElementById('loading');
+        function observe() {
+            const checkInterval = setInterval(() => {
+                if (document.getElementsByClassName('EuclidianPanel').length > 0) {
+                    loading.style.display = 'none';
+                    clearInterval(checkInterval);
+                }
+            }, 100);
+        }
+    </script>
+</body>
+</html>
