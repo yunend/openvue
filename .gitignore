@@ -28,7 +28,6 @@ dist-ssr
 # Rust / Tauri build output
 src-tauri/target/
 src-tauri/WixTools/
-src-tauri/icons/
 
 # Tauri dev server
 .svelte-kit/
