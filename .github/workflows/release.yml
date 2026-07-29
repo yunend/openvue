@@ -46,7 +46,6 @@ jobs:
       - name: Install dependencies (Windows)
         if: matrix.target == 'windows'
         run: |
-          dism /online /enable-feature /featurename:NetFx3 /all /quiet /norestart
           npm install
 
       - name: Install dependencies (Linux)
@@ -61,7 +60,16 @@ jobs:
         run: |
           npm install
 
-      - name: Build Tauri app
+      - name: Build Tauri app (Windows)
+        if: matrix.target == 'windows'
+        run: |
+          # 直接调用 tauri build 并指定只生成 NSIS
+          npm run tauri build -- --target x86_64-pc-windows-msvc --bundles nsis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Tauri app (Other platforms)
+        if: matrix.target != 'windows'
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -72,7 +80,6 @@ jobs:
           releaseBody: "See the assets to download this version and install."
           releaseDraft: true
           prerelease: false
-          
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
