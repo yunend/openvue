@@ -21,7 +21,7 @@
   },
   "bundle": {
     "active": true,
-    "targets":  ["nsis"],
+    "targets": "all",
     "resources": [
       "config.json",
       "plugins.json",
