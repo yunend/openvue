@@ -71,13 +71,7 @@ jobs:
           releaseBody: "See the assets to download this version and install."
           releaseDraft: true
           prerelease: false
-          ${{ if matrix.target == 'windows' }}:
-            config: |
-              {
-                "bundle": {
-                  "targets": "nsis"
-                }
-              }
+          config: ${{ matrix.target == 'windows' && '{"bundle":{"targets":"nsis"}}' || '{}' }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
