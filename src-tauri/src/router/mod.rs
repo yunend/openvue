@@ -11,6 +11,7 @@ pub mod upload;
 use axum::Router;
 use std::path::PathBuf;
 use tower_http::services::ServeDir;
+use tower_http::services::ServeFile;
 use axum::extract::State;
 use crate::plugins::PluginsConfig;
 
@@ -69,7 +70,7 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
     if enable_upload {
         println!(
             "✅ 文件上传已启用，文件将保存到: {}",
-            root_path.join("uploads").display()
+            root_path.join("upload").display()
         );
     } else {
         println!("❌ 文件上传已禁用（config.enableUpload = false）");
@@ -81,7 +82,11 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
         .merge(api_routes)
         .with_state(state) 
         .nest_service("/public", ServeDir::new(root_path))
-        .nest_service("/", ServeDir::new(&static_dir))
+        .nest_service(
+            "/",
+            ServeDir::new(&static_dir)
+                .fallback(ServeFile::new(static_dir.join("404.html"))),
+        )
         
 }
 

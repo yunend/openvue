@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "tauri-app",
-  "version": "0.1.0",
-  "identifier": "com.administrator.tauri-app",
+  "productName": "openvue",
+  "version": "0.2.0",
+  "identifier": "com.administrator.openvue",
   "build": {
     "frontendDist": "../src"
   },
@@ -10,7 +10,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "Tauri App",
+        "title": "OpenVue",
         "width": 800,
         "height": 600
       }

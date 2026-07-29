@@ -8,8 +8,8 @@
     
 
 </head>
-<body>
-<div id="app">
+<body class="flex flex-col min-h-screen">
+<div id="app" class="flex flex-col flex-1">
 
     <nav class="w-full bg-blue-700"> 
     <section class="h-20 w-10/12 mx-auto font-mono text-white flex items-center gap-x-3">
@@ -21,10 +21,6 @@
        
        
       </ul>
- 
-      <form class="hidden xl:block" action="">
-        <input class="bg-white px-5 py-2  outline-none rounded caret-blue-900 text-blue-900 hover:scale-x-105 duration-300" type="text"  placeholder="Go"/>
-      </form>
 
        <ul class="hidden lg:flex  mx-3 items-center ml-auto">
         <!-- ✅ 桌面端「关于」：打开模态框 -->
@@ -55,7 +51,7 @@
 
    </nav>
 
-   <div class="w-full h-500 bg-slate-100">
+   <main class="flex-1 bg-slate-100">
     <div id="file-browser" class="w-12/12 bg-slate-50 h-300 mx-auto mt-1 flex flex-col items-center gap-1 overflow-y-auto p-4">
       <!-- 当前目录 -->
       <div class="w-full text-sm text-blue-600 font-medium mb-1">
@@ -117,11 +113,14 @@
         </div>
       </div>
     </div>
-   </div>
+  </main>
 
    <footer class="w-full bg-blue-700 text-white py-4">
-    <p class="text-center">Email:303218145@qq.com</p>
-   </footer>
+  <p class="text-center text-sm">
+    © {{ new Date().getFullYear() }} OpenVue · 
+    <a href="https://github.com/yunend/openvue" target="_blank" class="underline hover:text-blue-200">GitHub</a>
+  </p>
+</footer>
 
    <!-- ============================================================
         ✅ 「关于」模态框（默认隐藏，Vue v-if="aboutOpen" 控制显示）

@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'windows-latest'
+            args: '--target x86_64-pc-windows-msvc'
+            target: 'windows'
+          - platform: 'ubuntu-22.04'
+            args: '--target x86_64-unknown-linux-gnu'
+            target: 'linux'
+          - platform: 'macos-latest'
+            args: '--target x86_64-apple-darwin'
+            target: 'macos-intel'
+          - platform: 'macos-latest'
+            args: '--target aarch64-apple-darwin'
+            target: 'macos-arm'
+
+    runs-on: ${{ matrix.platform }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target == 'macos-arm' && 'aarch64-apple-darwin' || matrix.target == 'macos-intel' && 'x86_64-apple-darwin' || matrix.target == 'linux' && 'x86_64-unknown-linux-gnu' || 'x86_64-pc-windows-msvc' }}
+
+      - name: Install dependencies (Windows)
+        if: matrix.target == 'windows'
+        run: |
+          npm install
+
+      - name: Install dependencies (Linux)
+        if: matrix.target == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          npm install
+
+      - name: Install dependencies (macOS)
+        if: startsWith(matrix.target, 'macos')
+        run: |
+          npm install
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: ${{ matrix.args }}
+          tagName: ${{ github.ref_name }}
+          releaseName: "Release ${{ github.ref_name }}"
+          releaseBody: "See the assets to download this version and install."
+          releaseDraft: true
+          prerelease: false
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ matrix.target }}-build-logs
+          path: |
+            src-tauri/target/*/release/bundle/
+            src-tauri/target/release/
+          retention-days: 30
