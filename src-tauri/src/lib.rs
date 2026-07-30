@@ -63,6 +63,7 @@ pub fn run() {
             // ✅ 插件配置管理
             get_plugins_config,
             save_plugin_extension_status,
+            open_url,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -397,4 +398,9 @@ fn save_plugin_extension_status(
         ext.to_lowercase(),
         new_status
     ))
+}
+
+#[tauri::command]
+async fn open_url(url: String) -> Result<(), String> {
+    open::that(&url).map_err(|e| e.to_string())
 }

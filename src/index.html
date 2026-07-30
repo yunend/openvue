@@ -417,6 +417,45 @@
     }
     .about-link.github { background: #24292e; }
     .about-link.github:hover { background: #0d1117; }
+
+    /* ---------- 更新按钮 & 状态 ---------- */
+    .update-section {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .update-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 24px;
+      background: #2ea44f;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .update-btn:hover { background: #2c974b; transform: translateY(-1px); }
+    .update-btn:disabled { background: #6e7681; cursor: not-allowed; transform: none; }
+    .update-btn.loading { animation: pulse-btn 1.5s ease-in-out infinite; }
+    @keyframes pulse-btn {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    .update-status {
+      margin-top: 12px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .update-status.up-to-date { background: #e6f4ea; color: #1a7f37; border: 1px solid #a7d8b9; }
+    .update-status.available { background: #fff8c5; color: #7d4e00; border: 1px solid #f0d48a; }
+    .update-status.error { background: #ffebe9; color: #a0111f; border: 1px solid #f5a8a3; }
+    .update-status a { color: inherit; font-weight: 600; text-decoration: underline; }
+    
     
     /* ---------- 提示条 ---------- */
     #toast {
@@ -688,15 +727,25 @@
             </div>
             
             <div class="about-links">
-              <a class="about-link github" href="https://github.com/yunend/openvue/" target="_blank" rel="noopener">
+              <a class="about-link github" href="https://github.com/yunend/openvue/" target="_blank" rel="noopener" onclick="openExternal(event, 'https://github.com/yunend/openvue')">
                 <span>🐙</span>
                 <span>GitHub 仓库</span>
               </a>
-              <a class="about-link" href="https://tauri.app/" target="_blank" rel="noopener">
-                <span>🌐</span>
+              <a class="about-link" href="https://tauri.app/" target="_blank" rel="noopener" onclick="openExternal(event, 'https://tauri.app/')">
                 <span>Tauri 官方文档</span>
               </a>
             </div>
+              <!-- ✅ 版本更新检查 -->
+            <div class="update-section">
+              <button class="update-btn" id="checkUpdateBtn" onclick="checkForUpdates()">
+                <span>🔄</span>
+                <span>检查更新</span>
+              </button>
+              <div class="update-status" id="updateStatus" style="display:none;"></div>
+            </div>
+
+
+
           </div>
         </div>
         
@@ -971,7 +1020,7 @@
 
         const urlEl = document.getElementById('urlStatus');
         if (status.url) {
-          urlEl.innerHTML = `<a class="url-link" href="${status.url}" target="_blank">${status.url}</a>`;
+          urlEl.innerHTML = `<a class="url-link" href="${status.url}" target="_blank" onclick="openExternal(event, '${status.url}')">${status.url}</a>`;
         } else {
           urlEl.textContent = '（服务未启动）';
         }
@@ -1118,6 +1167,92 @@
     }
 
     // ============================================================
+    // ✅ 版本更新检查（调 GitHub Releases API）
+    // ============================================================
+    async function checkForUpdates() {
+      const btn = document.getElementById('checkUpdateBtn');
+      const statusEl = document.getElementById('updateStatus');
+      
+      // 获取当前版本号
+      const currentVersion = document.getElementById('infoVersion').textContent.trim();
+      
+      // 按钮进入加载状态
+      btn.disabled = true;
+      btn.classList.add('loading');
+      btn.innerHTML = '<span>⏳</span><span>检查中...</span>';
+      statusEl.style.display = 'none';
+      
+      try {
+        // 调 GitHub API 获取最新 release
+        const res = await fetch('https://api.github.com/repos/yunend/openvue/releases/latest', {
+          headers: { 'Accept': 'application/vnd.github.v3+json' },
+        });
+        
+        if (!res.ok) {
+          throw new Error(`GitHub API 返回 ${res.status}`);
+        }
+        
+        const data = await res.json();
+        const latestVersion = data.tag_name || data.name;
+        
+        if (!latestVersion) {
+          throw new Error('未找到版本信息');
+        }
+        
+        // 去掉版本号前面的 v（如 v1.2.3 → 1.2.3）
+        const cleanLatest = latestVersion.replace(/^v/, '');
+        const cleanCurrent = currentVersion.replace(/^v/, '');
+        
+        // 语义化版本比较
+        const comparison = compareSemver(cleanCurrent, cleanLatest);
+        
+        statusEl.style.display = 'block';
+        
+        if (comparison >= 0) {
+          // 当前版本 >= 最新版本 → 已是最新
+          statusEl.className = 'update-status up-to-date';
+          statusEl.innerHTML = `✅ 已是最新版本（${currentVersion}）`;
+        } else {
+          // 有更新可用
+          const releaseUrl = data.html_url || `https://github.com/yunend/openvue/releases/tag/${latestVersion}`;
+          const releaseNotes = data.body ? `<br><br>📝 更新内容：<br>${data.body.replace(/\n/g, '<br>')}` : '';
+          statusEl.className = 'update-status available';
+          statusEl.innerHTML = `🎉 发现新版本 <strong>${latestVersion}</strong>（当前 ${currentVersion}）<br>
+            <a href="${releaseUrl}" target="_blank" rel="noopener" onclick="openExternal(event, '${releaseUrl}')">前往下载 →</a>
+            ${releaseNotes}`;
+        }
+      } catch (e) {
+        statusEl.style.display = 'block';
+        statusEl.className = 'update-status error';
+        statusEl.innerHTML = `❌ 检查更新失败：${e.message}<br>请检查网络连接后重试。`;
+        console.error('检查更新失败:', e);
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        btn.innerHTML = '<span>🔄</span><span>检查更新</span>';
+      }
+    }
+
+    /**
+     * 语义化版本比较
+     * @returns {number} 1 = a > b, 0 = a === b, -1 = a < b
+     */
+    function compareSemver(a, b) {
+      const pa = a.split('.').map(Number);
+      const pb = b.split('.').map(Number);
+      const len = Math.max(pa.length, pb.length);
+      for (let i = 0; i < len; i++) {
+        const na = pa[i] || 0;
+        const nb = pb[i] || 0;
+        if (na > nb) return 1;
+        if (na < nb) return -1;
+      }
+      return 0;
+    }
+
+
+
+    // ============================================================
     // 通用：Toast 提示
     // ============================================================
     function showToast(msg, type = 'info') {
@@ -1143,6 +1278,11 @@
         showToast('打开文件夹选择失败: ' + e, 'error');
       }
     }
+
+    async function openExternal(e, url) {
+        e.preventDefault();
+        await invoke('open_url', { url });
+      }
   </script>
 </body>
 </html>
