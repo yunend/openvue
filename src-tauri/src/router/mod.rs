@@ -77,7 +77,17 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
     }
     let exe_path = std::env::current_exe().expect("无法获取可执行文件路径");
     let exe_dir = exe_path.parent().expect("无法获取可执行文件目录");
-    let static_dir = exe_dir.join("static");
+    
+    // ✅ 优先使用 Vite 构建产物（dist-web），如果没有则回退到源码目录
+    let dist_web_dir = exe_dir.join("dist-web");
+    let static_dir = if dist_web_dir.exists() {
+        println!("✅ 使用 Vite 构建产物: {:?}", dist_web_dir);
+        dist_web_dir
+    } else {
+        let fallback = exe_dir.join("static");
+        println!("⚠️ 未找到构建产物，使用源码目录: {:?}", fallback);
+        fallback
+    };
     Router::new()
         .merge(api_routes)
         .with_state(state) 

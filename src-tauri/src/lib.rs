@@ -9,6 +9,7 @@ use tokio_util::sync::CancellationToken;
 use tauri_plugin_autostart::MacosLauncher;
 use tauri::{tray::TrayIconBuilder, menu::Menu, AppHandle, Manager};
 
+
 struct ServerState {
     cancel_token: Option<CancellationToken>,
     app_config: config::AppConfig,
@@ -150,7 +151,7 @@ fn start_server(state: tauri::State<'_, Arc<Mutex<ServerState>>>) -> Result<Stri
         let version_str = env!("CARGO_PKG_VERSION").to_string();
         let app = router::create_router(static_folder, enable_upload, version_str, port, plugins_for_router); // ✅ 传 plugins_config
         
-        let addr = format!("127.0.0.1:{}", port);
+        let addr = format!("0.0.0.0:{}", port);
         let listener = tokio::net::TcpListener::bind(&addr)
             .await
             .expect(&format!("无法绑定端口 {}", port));
@@ -263,21 +264,42 @@ fn save_config(
     Ok(msg.to_string())
 }
 
+/// 获取本机所有 IPv4 地址（排除回环地址）
+fn get_local_ips() -> Vec<String> {
+    let mut ips: Vec<String> = Vec::new();
+    ips.push("127.0.0.1".to_string());
+    if let Ok(ifaces) = get_if_addrs::get_if_addrs() {
+        for iface in ifaces {
+            if let get_if_addrs::IfAddr::V4(v4) = iface.addr {
+                let ip = v4.ip;
+                if !ip.is_loopback() && !ip.is_unspecified() {
+                    ips.push(ip.to_string());
+                }
+            }
+        }
+    }
+    ips
+}
+
 /// 获取服务器运行状态
 #[tauri::command]
 fn get_server_status(state: tauri::State<'_, Arc<Mutex<ServerState>>>) -> Result<serde_json::Value, String> {
     let state = state.lock().map_err(|e| e.to_string())?;
     let is_running = state.cancel_token.is_some();
+    let urls: Vec<String> = if is_running {
+        get_local_ips()
+            .iter()
+            .map(|ip| format!("http://{}:{}", ip, state.app_config.port))
+            .collect()
+    } else {
+        vec![]
+    };
     Ok(serde_json::json!({
         "isRunning": is_running,
         "port": state.app_config.port,
         "staticFolder": state.app_config.static_folder.to_string_lossy().to_string(),
         "enableUpload": state.app_config.enable_upload,
-        "url": if is_running {
-            serde_json::Value::String(format!("http://127.0.0.1:{}", state.app_config.port))
-        } else {
-            serde_json::Value::Null
-        }
+        "urls": urls
     }))
 }
 

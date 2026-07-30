@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>文件上传 - OpenVue</title>
-    <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
-    <script src="/js/tailwind.js"></script>
+    <link rel="icon" href="/logo.svg" type="image/svg+xml">
+    <script src="/tailwind.js"></script>
+    
 </head>
 <body class="min-h-screen bg-slate-100 flex flex-col">
     <!-- 导航栏 -->
@@ -78,13 +79,16 @@
     <!-- 页脚 -->
     <footer class="w-full bg-blue-700 text-white py-4">
         <p class="text-center text-sm">
-         © {{ new Date().getFullYear() }} OpenVue · 
+         © <span id="currentYear"></span> OpenVue · 
          <a href="https://github.com/yunend/openvue" target="_blank" class="underline hover:text-blue-200">GitHub</a>
         </p>
     </footer>
 
     <script>
        document.addEventListener('DOMContentLoaded', async function() {
+            // 设置当前年份
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+
             try {
                 const response = await fetch('/api/upload-status');
                 const data = await response.json();
