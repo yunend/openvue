@@ -1,5 +1,5 @@
 <template>
-  <div class="panel" :class="{ active: isActive }">
+  <div class="panel">
     <div class="panel-section">
       <div class="panel-section-title">🟢 运行概览</div>
       <div class="status-grid">
@@ -17,7 +17,7 @@
           <div class="status-value">{{ status.port || '-' }}</div>
         </div>
         <div class="status-item full">
-          <div class="status-label">公共文件根目录</div>
+          <div class="status-label">指定文件根目录</div>
           <div class="status-value">{{ status.staticFolder || '-' }}</div>
         </div>
         <div class="status-item full">
@@ -103,10 +103,6 @@ async function copyUrl(url: string) {
     console.error('复制失败:', e)
   }
 }
-
-defineProps({
-  isActive: Boolean
-})
 
 onMounted(async () => {
   await refreshStatus()

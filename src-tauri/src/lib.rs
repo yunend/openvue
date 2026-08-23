@@ -224,7 +224,7 @@ fn save_config(
         return Err("端口号不能为 0".to_string());
     }
     if static_folder.trim().is_empty() {
-        return Err("公共文件目录不能为空".to_string());
+        return Err("指定文件目录不能为空".to_string());
     }
 
     let path = config::get_default_config_path().map_err(|e| e.to_string())?;
@@ -335,7 +335,7 @@ async fn choose_folder(
 
     // ── 第 1 步：构建对话框 ──
     let mut builder = app.dialog().file();
-    builder = builder.set_title("选择公共文件根目录");
+    builder = builder.set_title("选择指定文件根目录");
 
     if let Some(dir) = initial_dir {
         let p = PathBuf::from(&dir);

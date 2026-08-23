@@ -40,7 +40,7 @@ export function useConfigManager() {
     }
 
     if (!staticFolder) {
-      showToast('请输入公共文件目录路径', 'error')
+      showToast('请输入指定文件目录路径', 'error')
       return false
     }
 

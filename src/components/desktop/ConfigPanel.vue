@@ -1,5 +1,5 @@
 <template>
-  <div class="panel" :class="{ active: isActive }">
+  <div class="panel">
     <div class="panel-section">
       <div class="panel-section-title">⚙️ 基础配置</div>
       
@@ -17,7 +17,7 @@
       </div>
       
       <div class="form-group">
-        <label class="form-label">公共文件根目录路径</label>
+        <label class="form-label">指定文件根目录路径</label>
         <div style="display:flex; gap:10px; align-items:stretch;">
           <input
             type="text"
@@ -68,9 +68,6 @@ import { useConfigManager } from '../../composables/useConfigManager'
 const { config, loadConfig, saveConfig, browseFolder } = useConfigManager()
 const localConfig = ref({ port: 8005, staticFolder: 'static', enableUpload: false })
 
-defineProps({
-  isActive: Boolean
-})
 
 onMounted(async () => {
   await loadConfig()

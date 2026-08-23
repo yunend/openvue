@@ -1,5 +1,5 @@
 <template>
-  <div class="panel" :class="{ active: isActive }">
+  <div class="panel">
     <div class="panel-section">
       <div class="panel-section-title">🖥️ 操作系统行为</div>
       
@@ -72,10 +72,6 @@ const {
   hideToTray,
   quitApp
 } = useSystemSettings()
-
-defineProps({
-  isActive: Boolean
-})
 
 onMounted(async () => {
   await initAutostartStatus()

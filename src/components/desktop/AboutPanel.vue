@@ -1,5 +1,5 @@
 <template>
-  <div class="panel" :class="{ active: isActive }">
+  <div class="panel">
     <div class="panel-section about-card">
       <div class="about-logo">🎛️</div>
       <div class="about-name">Tauri HTTP Server</div>
@@ -72,18 +72,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useToast } from '../../composables/useToast'
+import { ref } from 'vue'
+
 
 const props = defineProps({
-  isActive: Boolean,
+  
   version: {
     type: String,
     default: '0.1.0'
   }
 })
 
-const { showToast } = useToast()
+
 const isCheckingUpdate = ref(false)
 const updateStatus = ref({ display: false, type: '', message: '' })
 

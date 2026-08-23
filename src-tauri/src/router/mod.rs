@@ -23,7 +23,7 @@ use crate::plugins::PluginsConfig;
 ///
 #[derive(Clone)]
 pub struct RouterState {
-    /// 公共文件根目录（同时也是目录浏览 API 的根）
+    /// 指定文件根目录（同时也是目录浏览 API 的根）
     pub root_path: PathBuf,
     /// 是否启用文件上传功能（双重校验用）
     pub enable_upload: bool,
@@ -47,13 +47,13 @@ pub struct RouterState {
 /// Tauri 命令 start_server() 调用此函数获取 Router。
 ///
 /// # 参数
-/// - `root_path`    : 公共文件 / 目录浏览根目录
+/// - `root_path`    : 指定文件 / 目录浏览根目录
 /// - `enable_upload`: 是否启用文件上传（config.json 中的 enableUpload 字段）
 /// - `version`      : App 版本号（来自 Cargo.toml，编译期 env! 宏）
 /// - `config_port`  : 当前配置的 HTTP 监听端口（/api/about 回显用）
 ///
 /// # 返回
-/// 包含所有 API 路由 + 公共文件服务的完整 Router
+/// 包含所有 API 路由 + 指定文件服务的完整 Router
 pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, config_port: u16, plugins_config: PluginsConfig) -> Router {
     let state = RouterState {
         config_static_folder: root_path.to_string_lossy().replace('\\', "/"),
@@ -66,7 +66,7 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
 
     let api_routes = register_api_routes(enable_upload);
 
-    println!("📂 公共文件目录: {}", root_path.display());
+    println!("📂 指定文件目录: {}", root_path.display());
     if enable_upload {
         println!(
             "✅ 文件上传已启用，文件将保存到: {}",
@@ -117,7 +117,7 @@ fn register_api_routes(enable_upload: bool) -> Router<RouterState> {
         .route("/api/dir", axum::routing::post(dir::handle_dir_list))
         // ================================================================
         //   GET /api/about（始终可用，不依赖任何开关）
-        //    公共文件首页（index.html）的「关于」按钮 fetch 此接口后显示模态框
+        //    指定文件首页（index.html）的「关于」按钮 fetch 此接口后显示模态框
         //    返回内容：版本号 + 当前配置（config.json 核心字段）+ 帮助链接
         // ================================================================
         .route(

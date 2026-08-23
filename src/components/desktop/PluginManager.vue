@@ -1,5 +1,5 @@
 <template>
-  <div class="panel" :class="{ active: isActive }">
+  <div class="panel">
     <div class="panel-section">
       <div class="panel-section-title">🧩 扩展名与插件映射表</div>
       <div class="form-hint" style="margin-bottom:18px;">
@@ -92,7 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { onMounted } from 'vue'
 import { usePluginManager, fileExtIcon } from '../../composables/usePluginManager'
 
 const {
@@ -104,9 +104,6 @@ const {
   filterPlugins
 } = usePluginManager()
 
-defineProps({
-  isActive: Boolean
-})
 
 const filters = [
   { label: '全部', value: 'all', color: '#78909c' },

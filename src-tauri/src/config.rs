@@ -1,7 +1,7 @@
 // e:\dev\test-tauri\tauri-app\src-tauri\src\config.rs
 //! 配置管理模块
 //!
-//! 从 config.json 加载应用配置（端口号、公共文件路径、上传开关等）
+//! 从 config.json 加载应用配置（端口号、指定文件路径、上传开关等）
 
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -16,7 +16,7 @@ pub struct AppConfig {
     /// HTTP 服务器端口号
     pub port: u16,
 
-    /// 公共文件目录路径
+    /// 指定文件目录路径
     /// config.json 中写 "staticFolder"，Rust 中读为 static_folder
     pub static_folder: PathBuf,
 
@@ -81,7 +81,7 @@ pub fn load_config(config_path: Option<&str>) -> Result<AppConfig, String> {
     println!("✅ 配置加载成功:");
     println!("   配置文件: {}", path.display());
     println!("   端口: {}", config.port);
-    println!("   公共文件目录: {}", config.static_folder.display());
+    println!("   指定文件目录: {}", config.static_folder.display());
     println!("   文件上传: {}", if config.enable_upload { "✅ 启用" } else { "❌ 禁用" });
 
     Ok(config)
@@ -145,7 +145,7 @@ pub fn validate_config(config: &AppConfig) -> Result<(), String> {
 
     if !config.static_folder.exists() {
         return Err(format!(
-            "公共文件目录不存在: {}",
+            "指定文件目录不存在: {}",
             config.static_folder.display()
         ));
     }
