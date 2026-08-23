@@ -71,7 +71,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useToast } from '../../composables/useToast'
 
@@ -87,7 +87,7 @@ const { showToast } = useToast()
 const isCheckingUpdate = ref(false)
 const updateStatus = ref({ display: false, type: '', message: '' })
 
-async function openExternal(url) {
+async function openExternal(url: string) {
   try {
     const { invoke } = window.__TAURI__.core
     await invoke('open_url', { url })
@@ -128,7 +128,7 @@ async function checkForUpdates() {
     updateStatus.value = {
       display: true,
       type: 'error',
-      message: `❌ 检查更新失败：${e.message}<br>请检查网络连接后重试。`
+      message: `❌ 检查更新失败：${(e as Error).message}<br>请检查网络连接后重试。`
     }
     console.error('检查更新失败:', e)
   } finally {
@@ -136,7 +136,7 @@ async function checkForUpdates() {
   }
 }
 
-function compareSemver(a, b) {
+function compareSemver(a: string, b: string) {
   const pa = a.split('.').map(Number)
   const pb = b.split('.').map(Number)
   const len = Math.max(pa.length, pb.length)

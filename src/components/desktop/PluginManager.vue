@@ -91,7 +91,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, computed } from 'vue'
 import { usePluginManager, fileExtIcon } from '../../composables/usePluginManager'
 
@@ -114,10 +114,10 @@ const filters = [
   { label: '⏸️ 未启用', value: 'disabled', color: '#c62828' },
   { label: '🌐 浏览器默认', value: 'browser-default', color: '#1565c0' },
   { label: '🚧 未开发', value: 'undeveloped', color: '#757575' }
-]
+] as const
 
-function mapStatus(status) {
-  const map = {
+function mapStatus(status: string) {
+  const map: Record<string, string> = {
     'BrowserDefault': 'browser-default',
     'Enabled': 'enabled',
     'Disabled': 'disabled',
@@ -126,9 +126,9 @@ function mapStatus(status) {
   return map[status] || status || 'browser-default'
 }
 
-function statusLabel(status) {
+function statusLabel(status: string) {
   const key = mapStatus(status)
-  const labels = {
+  const labels: Record<string, string> = {
     'enabled': '✅ 已启用',
     'disabled': '⏸️ 未启用',
     'browser-default': '🌐 浏览器默认支持',
@@ -137,9 +137,9 @@ function statusLabel(status) {
   return labels[key] || status
 }
 
-function statusBadgeStyle(status) {
+function statusBadgeStyle(status: string) {
   const key = mapStatus(status)
-  const styles = {
+  const styles: Record<string, string> = {
     'enabled': 'display:inline-block; padding:4px 10px; border-radius:30px; background:#e8f5e9; color:#2e7d32; font-size:0.82rem; font-weight:600;',
     'disabled': 'display:inline-block; padding:4px 10px; border-radius:30px; background:#ffebee; color:#c62828; font-size:0.82rem; font-weight:600;',
     'browser-default': 'display:inline-block; padding:4px 10px; border-radius:30px; background:#e3f2fd; color:#1565c0; font-size:0.82rem; font-weight:600;',
@@ -148,17 +148,17 @@ function statusBadgeStyle(status) {
   return styles[key] || styles['browser-default']
 }
 
-function canToggle(status) {
+function canToggle(status: string) {
   const key = mapStatus(status)
   return key === 'enabled' || key === 'disabled'
 }
 
-function toggleTarget(status) {
+function toggleTarget(status: string) {
   const key = mapStatus(status)
   return key === 'enabled' ? 'disabled' : 'enabled'
 }
 
-async function handleToggle(ext, newStatus) {
+async function handleToggle(ext: string, newStatus: string) {
   await togglePlugin(ext, newStatus)
 }
 

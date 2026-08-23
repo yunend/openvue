@@ -19,7 +19,7 @@
             <input
               type="checkbox"
               :checked="autoStartEnabled"
-              @change="handleToggleAutostart($event.target.checked)"
+              @change="handleToggleAutostart($event)"
             >
             <span class="slider"></span>
           </label>
@@ -61,7 +61,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted } from 'vue'
 import { useSystemSettings } from '../../composables/useSystemSettings'
 
@@ -81,11 +81,13 @@ onMounted(async () => {
   await initAutostartStatus()
 })
 
-async function handleToggleAutostart(checked) {
+async function handleToggleAutostart(e: Event) {
+  const target = e.target as HTMLInputElement
+  const originalChecked = !target.checked
   try {
-    await toggleAutostart(checked)
+    await toggleAutostart(target.checked)
   } catch (e) {
-    // 错误已在 composable 中处理
+    target.checked = originalChecked
   }
 }
 </script>

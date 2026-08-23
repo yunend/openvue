@@ -1,8 +1,15 @@
 import { ref } from 'vue'
 import { useToast } from './useToast'
 
+interface ServerStatus {
+  isRunning: boolean
+  port: number | string
+  staticFolder: string
+  urls: string[]
+}
+
 const isRunning = ref(false)
-const status = ref({
+const status = ref<ServerStatus>({
   isRunning: false,
   port: '-',
   staticFolder: '-',
@@ -12,10 +19,10 @@ const status = ref({
 export function useServerControl() {
   const { showToast } = useToast()
 
-  async function refreshStatus() {
+  async function refreshStatus(): Promise<void> {
     try {
       const { invoke } = window.__TAURI__.core
-      const result = await invoke('get_server_status')
+      const result = await invoke('get_server_status') as ServerStatus
       status.value = result
       isRunning.value = result.isRunning
     } catch (e) {
@@ -24,10 +31,10 @@ export function useServerControl() {
     }
   }
 
-  async function startServer() {
+  async function startServer(): Promise<void> {
     try {
       const { invoke } = window.__TAURI__.core
-      const msg = await invoke('start_server')
+      const msg = await invoke('start_server') as string
       showToast('✅ ' + msg, 'success')
       setTimeout(refreshStatus, 300)
     } catch (e) {
@@ -35,10 +42,10 @@ export function useServerControl() {
     }
   }
 
-  async function stopServer() {
+  async function stopServer(): Promise<void> {
     try {
       const { invoke } = window.__TAURI__.core
-      const msg = await invoke('stop_server')
+      const msg = await invoke('stop_server') as string
       showToast('🛑 ' + msg, 'success')
       setTimeout(refreshStatus, 200)
     } catch (e) {
@@ -46,10 +53,9 @@ export function useServerControl() {
     }
   }
 
-  async function restartHttpService() {
+  async function restartHttpService(): Promise<void> {
     try {
       showToast('🔄 正在重启 HTTP 服务...', 'info')
-      
       if (isRunning.value) {
         try {
           const { invoke } = window.__TAURI__.core
@@ -59,7 +65,6 @@ export function useServerControl() {
           console.warn('停止服务时出错:', e)
         }
       }
-      
       await startServer()
       setTimeout(refreshStatus, 300)
     } catch (e) {

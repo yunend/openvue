@@ -71,7 +71,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted } from 'vue'
 import { useServerControl } from '../../composables/useServerControl'
 import { useToast } from '../../composables/useToast'
@@ -86,7 +86,7 @@ const {
 
 const { showToast } = useToast()
 
-async function openExternal(url) {
+async function openExternal(url: string) {
   try {
     const { invoke } = window.__TAURI__.core
     await invoke('open_url', { url })
@@ -95,7 +95,7 @@ async function openExternal(url) {
   }
 }
 
-async function copyUrl(url) {
+async function copyUrl(url: string) {
   try {
     await navigator.clipboard.writeText(url)
     showToast('📋 已复制: ' + url, 'success')

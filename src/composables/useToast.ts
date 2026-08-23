@@ -1,32 +1,34 @@
 import { ref } from 'vue'
 
-// 单一 Toast 状态（固定位置，无内容时隐藏）
-const toast = ref({
+type ToastType = 'info' | 'success' | 'error'
+
+interface ToastState {
+  show: boolean
+  message: string
+  type: ToastType
+}
+
+const toast = ref<ToastState>({
   show: false,
   message: '',
   type: 'info'
 })
 
-let hideTimer = null
+let hideTimer: ReturnType<typeof setTimeout> | null = null
 
 export function useToast() {
-  function showToast(message, type = 'info', duration = 2800) {
-    // 清除之前的定时器
+  function showToast(message: string, type: ToastType = 'info', duration: number = 2800): void {
     if (hideTimer) {
       clearTimeout(hideTimer)
       hideTimer = null
     }
-    
-    // 显示新消息
     toast.value = { show: true, message, type }
-    
-    // 自动隐藏
     hideTimer = setTimeout(() => {
       toast.value.show = false
     }, duration)
   }
 
-  function hideToast() {
+  function hideToast(): void {
     toast.value.show = false
     if (hideTimer) {
       clearTimeout(hideTimer)

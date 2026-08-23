@@ -7,8 +7,8 @@
     "dev": "vite --mode desktop",
     "dev:desktop": "vite --mode desktop",
     "dev:web": "vite --mode web",
-    "build:desktop": "vite build --mode desktop",
-    "build:web": "vite build --mode web",
+    "build:desktop": "vue-tsc --noEmit && vite build --mode desktop",
+    "build:web": "vue-tsc --noEmit && vite build --mode web",
     "build:all": "npm run build:desktop && npm run build:web",
     "preview:desktop": "vite preview --mode desktop",
     "preview:web": "vite preview --mode web",
@@ -22,10 +22,13 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.5.1",
+    "@types/node": "^26.2.0",
     "@vitejs/plugin-vue": "^5.0.4",
     "autoprefixer": "^10.4.18",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
-    "vite": "^5.2.0"
+    "typescript": "~5.7.3",
+    "vite": "^5.2.0",
+    "vue-tsc": "^2.2.2"
   }
 }
