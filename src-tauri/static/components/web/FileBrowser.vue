@@ -117,7 +117,77 @@ function getFileExtension(filename) {
 }
 
 function downloadFile(item) {
-  window.open('/public' + item.path, '_blank')
+  const url = '/public' + item.path
+  const a = document.createElement('a')
+  a.href = url
+  a.download = item.name
+  a.style.display = 'none'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+}
+
+// 需要用 Blob URL 预览的文本类扩展名（fetch 解码确保 UTF-8 正确）
+const TEXT_EXTENSIONS = ['txt', 'md', 'json', 'xml', 'html', 'htm', 'css', 'js', 'ts', 'yaml', 'yml', 'csv', 'log', 'ini', 'conf', 'toml', 'rs', 'py', 'java', 'c', 'cpp', 'h', 'vue', 'jsx', 'tsx', 'sql', 'sh', 'bat', 'ps1', 'yml', 'properties', 'env', 'gitignore', 'editorconfig', 'js', 'ts']
+
+// 文本类型到 MIME 的映射
+function getMimeType(ext) {
+  const map = {
+    txt: 'text/plain',
+    md: 'text/markdown',
+    json: 'application/json',
+    xml: 'application/xml',
+    html: 'text/html',
+    htm: 'text/html',
+    css: 'text/css',
+    js: 'application/javascript',
+    ts: 'application/javascript',
+    vue: 'text/plain',
+    yaml: 'text/yaml',
+    yml: 'text/yaml',
+    csv: 'text/csv',
+    log: 'text/plain',
+    ini: 'text/plain',
+    conf: 'text/plain',
+    toml: 'text/plain',
+    rs: 'text/plain',
+    py: 'text/plain',
+    java: 'text/plain',
+    c: 'text/plain',
+    cpp: 'text/plain',
+    h: 'text/plain',
+    sql: 'text/plain',
+    sh: 'text/plain',
+    bat: 'text/plain',
+    properties: 'text/plain',
+    env: 'text/plain',
+  }
+  return map[ext] || 'text/plain'
+}
+
+async function previewFile(item) {
+  const url = '/public' + item.path
+  const ext = getFileExtension(item.name)
+
+  // 文本类文件：fetch 后用 Blob URL 打开，确保 UTF-8 编码正确
+  if (TEXT_EXTENSIONS.includes(ext)) {
+    try {
+      const res = await fetch(url)
+      const text = await res.text()
+      const mime = getMimeType(ext)
+      const blob = new Blob([text], { type: mime + ';charset=utf-8' })
+      const blobUrl = URL.createObjectURL(blob)
+      window.open(blobUrl, '_blank')
+      // 延迟释放 Blob URL
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000)
+    } catch (e) {
+      // fetch 失败则回退到直接打开
+      window.open(url, '_blank')
+    }
+  } else {
+    // 图片、视频、PDF 等：直接打开，浏览器自带预览
+    window.open(url, '_blank')
+  }
 }
 
 function handleClick(item) {
@@ -137,8 +207,8 @@ function handleClick(item) {
     console.log(`🧩 使用插件打开 .${ext}：`, pluginUrl)
     window.open(pluginUrl, `${ext}_viewer`)
   } else {
-    console.log(`🌐 浏览器默认打开 .${ext}：`, publicPath)
-    downloadFile(item)
+    console.log(`👁️ 预览文件 .${ext}：`, publicPath)
+    previewFile(item)
   }
 }
 

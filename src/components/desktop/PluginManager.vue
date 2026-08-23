@@ -75,19 +75,6 @@
                 {{ mapStatus(plugin.status) === 'enabled' ? '⏸️ 禁用' : '▶️ 启用' }}
               </button>
             </template>
-            <template v-else>
-              <span style="font-size:0.8rem; color:#b0bec5; padding:8px 0;">（此状态不可快速切换）</span>
-              <select
-                @change="handleToggle(plugin.ext, $event.target.value); $event.target.value='__';"
-                style="padding:6px 10px; border-radius:8px; border:1px solid #c5cae9; font-size:0.85rem;"
-              >
-                <option value="__">强制更改状态 ▾</option>
-                <option value="enabled">已启用</option>
-                <option value="disabled">未启用</option>
-                <option value="browser-default">浏览器默认支持</option>
-                <option value="undeveloped">未开发</option>
-              </select>
-            </template>
           </div>
         </div>
       </div>

@@ -4,8 +4,8 @@
       <a class="text-4xl px-5 py-3 hover:translate-x-5 duration-300" href="/">OpenVue</a>
       
       <ul class="hidden md:flex gap-x-5 mx-3 items-center">
-        <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><a href="/">主页</a></li>
-        <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><a href="/upload.html">上传文件</a></li>
+        <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><router-link to="/">主页</router-link></li>
+        <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><router-link to="/upload">上传文件</router-link></li>
       </ul>
       
       <ul class="hidden lg:flex mx-3 items-center ml-auto">
@@ -43,8 +43,8 @@
             </svg>
           </button>
         </li>
-        <li class="p-3 hover:bg-blue-900/50 cursor-pointer duration-300"><a href="/">主页</a></li>
-        <li class="p-3 hover:bg-blue-900/50 cursor-pointer duration-300"><a href="/upload.html">上传文件</a></li>
+        <li class="p-3 hover:bg-blue-900/50 cursor-pointer duration-300"><router-link to="/">主页</router-link></li>
+        <li class="p-3 hover:bg-blue-900/50 cursor-pointer duration-300"><router-link to="/upload">上传文件</router-link></li>
         <li 
           class="p-3 hover:bg-blue-900/50 cursor-pointer duration-300"
           @click="$emit('open-about'); $emit('close-menu')"
