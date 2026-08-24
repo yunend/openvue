@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { useToast } from './useToast'
+import { i18n } from '../i18n'
 
 type PluginStatus = 'browser-default' | 'enabled' | 'disabled' | 'undeveloped'
 
@@ -15,7 +16,7 @@ interface PluginsData {
   extensions: Record<string, PluginEntry>
 }
 
-type PluginFilter = 'all' | 'enabled' | 'disabled' | 'browser-default' | 'undeveloped'
+export type PluginFilter = 'all' | 'enabled' | 'disabled' | 'browser-default' | 'undeveloped'
 
 interface PluginItem {
   ext: string
@@ -76,10 +77,10 @@ export function usePluginManager() {
     try {
       const { invoke } = window.__TAURI__.core
       pluginsCache.value = await invoke('get_plugins_config') as PluginsData
-      showToast('🧩 插件配置已加载', 'info')
+      showToast(i18n.global.t('toast.pluginsLoaded'), 'info')
     } catch (e) {
-      console.error('加载插件配置失败:', e)
-      showToast('加载插件配置失败: ' + e, 'error')
+      console.error('load plugins failed:', e)
+      showToast(i18n.global.t('toast.pluginsLoadFailed', { err: String(e) }), 'error')
     }
   }
 
@@ -88,13 +89,13 @@ export function usePluginManager() {
 
     try {
       const { invoke } = window.__TAURI__.core
-      showToast(`💾 正在更新 .${ext} 状态...`, 'info')
+      showToast(i18n.global.t('toast.pluginUpdating', { ext }), 'info')
       const msg = await invoke('save_plugin_extension_status', { ext, status: newStatus }) as string
       await loadPluginsConfig()
       showToast(msg, 'success')
     } catch (e) {
       console.error(e)
-      showToast('❌ 切换失败: ' + e, 'error')
+      showToast(i18n.global.t('toast.pluginToggleFailed', { err: String(e) }), 'error')
     }
   }
 

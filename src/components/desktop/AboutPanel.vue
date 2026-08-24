@@ -4,27 +4,23 @@
       <div class="text-[4.2rem] mb-[14px]">🎛️</div>
       <div class="text-[1.7rem] font-bold text-primary-900 mb-[6px]">Tauri HTTP Server</div>
       <div class="inline-block px-[14px] py-[5px] bg-primary-50 text-primary-500 rounded-full text-[0.85rem] font-semibold mb-6">v{{ version }}</div>
-      <div class="text-primary-400 text-[0.95rem] leading-loose mb-6">
-        基于 Tauri 2 + Axum 构建的轻量级本地 HTTP 文件服务工具。<br>
-        一键启动、开机自启、托盘常驻、目录浏览、文件上传，<br>
-        配置灵活，开箱即用。
-      </div>
+      <div class="text-primary-400 text-[0.95rem] leading-loose mb-6" v-html="t('about.desc')"></div>
       
       <div class="grid grid-cols-2 gap-[14px] text-left mb-7">
         <div class="bg-primary-50 border border-primary-50 rounded-[10px] px-4 py-[14px]">
-          <div class="text-[0.8rem] text-primary-300 mb-[4px]">当前版本</div>
+          <div class="text-[0.8rem] text-primary-300 mb-[4px]">{{ t('about.currentVersion') }}</div>
           <div class="text-[0.95rem] font-semibold text-primary-900 break-all">{{ version }}</div>
         </div>
         <div class="bg-primary-50 border border-primary-50 rounded-[10px] px-4 py-[14px]">
-          <div class="text-[0.8rem] text-primary-300 mb-[4px]">构建平台</div>
+          <div class="text-[0.8rem] text-primary-300 mb-[4px]">{{ t('about.platform') }}</div>
           <div class="text-[0.95rem] font-semibold text-primary-900 break-all">Tauri 2.x + Axum</div>
         </div>
         <div class="bg-primary-50 border border-primary-50 rounded-[10px] px-4 py-[14px]">
-          <div class="text-[0.8rem] text-primary-300 mb-[4px]">GUI 框架</div>
-          <div class="text-[0.95rem] font-semibold text-primary-900 break-all">WebView2（Windows）</div>
+          <div class="text-[0.8rem] text-primary-300 mb-[4px]">{{ t('about.gui') }}</div>
+          <div class="text-[0.95rem] font-semibold text-primary-900 break-all">WebView2 (Windows)</div>
         </div>
         <div class="bg-primary-50 border border-primary-50 rounded-[10px] px-4 py-[14px]">
-          <div class="text-[0.8rem] text-primary-300 mb-[4px]">后端语言</div>
+          <div class="text-[0.8rem] text-primary-300 mb-[4px]">{{ t('about.backend') }}</div>
           <div class="text-[0.95rem] font-semibold text-primary-900 break-all">Rust (tokio)</div>
         </div>
       </div>
@@ -37,7 +33,7 @@
           @click.prevent="openExternal('https://github.com/yunend/openvue/')"
         >
           <span>🐙</span>
-          <span>GitHub 仓库</span>
+          <span>{{ t('about.github') }}</span>
         </a>
         <a
           class="inline-flex items-center gap-2 px-[22px] py-[11px] bg-primary-500 text-white rounded-[10px] no-underline font-semibold text-[0.9rem] transition-all duration-200 hover:bg-primary-900 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(26,35,126,0.3)]"
@@ -45,7 +41,7 @@
           target="_blank"
           @click.prevent="openExternal('https://tauri.app/')"
         >
-          <span>Tauri 官方文档</span>
+          <span>{{ t('about.tauriDocs') }}</span>
         </a>
       </div>
       
@@ -58,7 +54,7 @@
           @click="checkForUpdates"
         >
           <span>{{ isCheckingUpdate ? '⏳' : '🔄' }}</span>
-          <span>{{ isCheckingUpdate ? '检查中...' : '检查更新' }}</span>
+          <span>{{ isCheckingUpdate ? t('about.checking') : t('about.checkUpdate') }}</span>
         </button>
         <div
           v-if="updateStatus.display"
@@ -73,6 +69,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   isActive: Boolean,
@@ -112,12 +111,12 @@ async function checkForUpdates() {
       headers: { 'Accept': 'application/vnd.github.v3+json' }
     })
     
-    if (!res.ok) throw new Error(`GitHub API 返回 ${res.status}`)
+    if (!res.ok) throw new Error(t('about.apiError', { status: res.status }))
     
     const data = await res.json()
     const latestVersion = data.tag_name || data.name
     
-    if (!latestVersion) throw new Error('未找到版本信息')
+    if (!latestVersion) throw new Error(t('about.noVersion'))
     
     const cleanLatest = latestVersion.replace(/^v/, '')
     const cleanCurrent = props.version.replace(/^v/, '')
@@ -127,17 +126,16 @@ async function checkForUpdates() {
       display: true,
       type: comparison >= 0 ? 'up-to-date' : 'available',
       message: comparison >= 0 
-        ? `✅ 已是最新版本（${props.version}）`
-        : `🎉 发现新版本 <strong>${latestVersion}</strong>（当前 ${props.version}）<br>` +
-          `<a href="${data.html_url}" target="_blank" onclick="event.preventDefault(); window.open('${data.html_url}')">前往下载 →</a>`
+        ? t('about.latest', { version: props.version })
+        : t('about.available', { latest: latestVersion, current: props.version, url: data.html_url })
     }
   } catch (e) {
     updateStatus.value = {
       display: true,
       type: 'error',
-      message: `❌ 检查更新失败：${(e as Error).message}<br>请检查网络连接后重试。`
+      message: t('about.updateError', { msg: (e as Error).message })
     }
-    console.error('检查更新失败:', e)
+    console.error('check update failed:', e)
   } finally {
     isCheckingUpdate.value = false
   }

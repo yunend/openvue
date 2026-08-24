@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { useToast } from './useToast'
+import { i18n } from '../i18n'
 
 interface ServerStatus {
   isRunning: boolean
@@ -26,49 +27,49 @@ export function useServerControl() {
       status.value = result
       isRunning.value = result.isRunning
     } catch (e) {
-      console.error('刷新状态失败:', e)
-      showToast('刷新状态失败: ' + e, 'error')
+      console.error('refresh status failed:', e)
+      showToast(i18n.global.t('toast.refreshFailed', { err: String(e) }), 'error')
     }
   }
 
   async function startServer(): Promise<void> {
     try {
       const { invoke } = window.__TAURI__.core
-      const msg = await invoke('start_server') as string
-      showToast('✅ ' + msg, 'success')
+      await invoke('start_server')
+      showToast(i18n.global.t('toast.started'), 'success')
       setTimeout(refreshStatus, 300)
     } catch (e) {
-      showToast('❌ ' + e, 'error')
+      showToast(i18n.global.t('toast.startFailed', { err: String(e) }), 'error')
     }
   }
 
   async function stopServer(): Promise<void> {
     try {
       const { invoke } = window.__TAURI__.core
-      const msg = await invoke('stop_server') as string
-      showToast('🛑 ' + msg, 'success')
+      await invoke('stop_server')
+      showToast(i18n.global.t('toast.stopped'), 'success')
       setTimeout(refreshStatus, 200)
     } catch (e) {
-      showToast('❌ ' + e, 'error')
+      showToast(i18n.global.t('toast.stopFailed', { err: String(e) }), 'error')
     }
   }
 
   async function restartHttpService(): Promise<void> {
     try {
-      showToast('🔄 正在重启 HTTP 服务...', 'info')
+      showToast(i18n.global.t('toast.restarting'), 'info')
       if (isRunning.value) {
         try {
           const { invoke } = window.__TAURI__.core
           await invoke('stop_server')
           await new Promise(resolve => setTimeout(resolve, 500))
         } catch (e) {
-          console.warn('停止服务时出错:', e)
+          console.warn('stop during restart failed:', e)
         }
       }
       await startServer()
       setTimeout(refreshStatus, 300)
     } catch (e) {
-      showToast('❌ 重启 HTTP 服务失败: ' + e, 'error')
+      showToast(i18n.global.t('toast.restartFailed', { err: String(e) }), 'error')
     }
   }
 

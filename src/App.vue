@@ -3,8 +3,8 @@
     <!-- 左侧导航 -->
     <aside class="w-[220px] bg-white rounded-[14px] shadow-[0_2px_14px_rgba(26,35,126,0.10)] flex flex-col overflow-hidden shrink-0">
       <div class="px-5 py-[22px] bg-gradient-to-br from-primary-500 to-primary-400 text-white">
-        <h1 class="text-[1.2rem] font-bold mb-[6px]">🎛️ Tauri 控制台</h1>
-        <p class="text-[0.8rem] opacity-90">HTTP 文件服务管理器</p>
+        <h1 class="text-[1.2rem] font-bold mb-[6px]">{{ t('app.title') }}</h1>
+        <p class="text-[0.8rem] opacity-90">{{ t('app.subtitle') }}</p>
       </div>
       <ul class="list-none px-[10px] py-[14px] flex-1 overflow-y-auto">
         <li v-for="item in navItems" :key="item.id" class="mb-1">
@@ -18,7 +18,13 @@
           </button>
         </li>
       </ul>
-      <div class="px-5 py-[14px] text-[0.78rem] text-primary-300 border-t border-primary-50">v{{ version }}</div>
+      <div class="px-5 py-[14px] border-t border-primary-50 flex items-center justify-between">
+        <span class="text-[0.78rem] text-primary-300">v{{ version }}</span>
+        <button
+          class="text-[0.78rem] px-2 py-1 border-none bg-primary-50 text-primary-500 rounded cursor-pointer hover:bg-primary-100 transition-colors"
+          @click="toggleLocale"
+        >🌐 {{ t('language.switchTo') }}</button>
+      </div>
     </aside>
 
     <!-- 右侧内容区 -->
@@ -28,7 +34,7 @@
           <span class="text-[1.5rem]">{{ currentPanelInfo.icon }}</span>
           <span>{{ currentPanelInfo.label }}</span>
         </div>
-        <button class="flex-none px-5 py-[10px] bg-white text-primary-500 border-2 border-primary-500 font-semibold rounded-[9px] transition-all duration-200 hover:bg-primary-500 hover:text-white" @click="restartHttpService">🔄 重启HTTP服务</button>
+        <button class="flex-none px-5 py-[10px] bg-white text-primary-500 border-2 border-primary-500 font-semibold rounded-[9px] transition-all duration-200 hover:bg-primary-500 hover:text-white" @click="restartHttpService">{{ t('app.restartService') }}</button>
       </div>
 
       <div class="flex-1 px-[34px] py-7 overflow-y-auto">
@@ -55,7 +61,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import StatusPanel from './components/desktop/StatusPanel.vue'
 import ConfigPanel from './components/desktop/ConfigPanel.vue'
 import SystemSettings from './components/desktop/SystemSettings.vue'
@@ -63,26 +70,33 @@ import PluginManager from './components/desktop/PluginManager.vue'
 import AboutPanel from './components/desktop/AboutPanel.vue'
 import ToastContainer from './components/desktop/ToastContainer.vue'
 import { useServerControl } from './composables/useServerControl'
+import { setLocale, getLocale, type Locale } from './i18n'
 
+const { t } = useI18n()
 const { restartHttpService } = useServerControl()
 
 const activePanel = ref('status')
 const version = ref('0.1.0')
 
-const navItems = [
-  { id: 'status', icon: '📊', label: '当前服务状态' },
-  { id: 'config', icon: '⚙️', label: '配置文件管理' },
-  { id: 'system', icon: '🖥️', label: '系统设置' },
-  { id: 'plugins', icon: '🧩', label: '插件配置' },
-  { id: 'about', icon: 'ℹ️', label: '关于' }
-]
+const navItems = computed(() => [
+  { id: 'status', icon: '📊', label: t('nav.status') },
+  { id: 'config', icon: '⚙️', label: t('nav.config') },
+  { id: 'system', icon: '🖥️', label: t('nav.system') },
+  { id: 'plugins', icon: '🧩', label: t('nav.plugins') },
+  { id: 'about', icon: 'ℹ️', label: t('nav.about') }
+])
 
 const currentPanelInfo = computed(() => {
-  return navItems.find(item => item.id === activePanel.value) || navItems[0]
+  return navItems.value.find(item => item.id === activePanel.value) || navItems.value[0]
 })
 
 function switchPanel(panelId:string) {
   activePanel.value = panelId
+}
+
+function toggleLocale() {
+  const next: Locale = getLocale() === 'zh' ? 'en' : 'zh'
+  setLocale(next)
 }
 
 onMounted(async () => {

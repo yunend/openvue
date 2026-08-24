@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { useToast } from './useToast'
+import { i18n } from '../i18n'
 
 interface AppConfig {
   port: number
@@ -25,9 +26,9 @@ export function useConfigManager() {
         publicFolder: cfg.publicFolder || 'public',
         enableUpload: !!cfg.enableUpload
       }
-      showToast('📥 配置已读取', 'info')
+      showToast(i18n.global.t('toast.configLoaded'), 'info')
     } catch (e) {
-      showToast('读取配置失败: ' + e, 'error')
+      showToast(i18n.global.t('toast.configLoadFailed', { err: String(e) }), 'error')
     }
   }
 
@@ -35,27 +36,27 @@ export function useConfigManager() {
     const { port, publicFolder, enableUpload } = newConfig
 
     if (!port || port < 1 || port > 65535) {
-      showToast('请输入有效的端口号 (1-65535)', 'error')
+      showToast(i18n.global.t('toast.invalidPort'), 'error')
       return false
     }
 
     if (!publicFolder) {
-      showToast('请输入指定文件目录路径', 'error')
+      showToast(i18n.global.t('toast.emptyFolder'), 'error')
       return false
     }
 
     try {
       const { invoke } = window.__TAURI__.core
-      const msg = await invoke('save_config', {
+      await invoke('save_config', {
         port: parseInt(String(port), 10),
         publicFolder,
         enableUpload
-      }) as string
+      })
       config.value = { port: parseInt(String(port), 10), publicFolder, enableUpload: !!enableUpload }
-      showToast('💾 ' + msg, 'success')
+      showToast(i18n.global.t('toast.saved'), 'success')
       return true
     } catch (e) {
-      showToast('保存失败: ' + e, 'error')
+      showToast(i18n.global.t('toast.saveFailed', { err: String(e) }), 'error')
       return false
     }
   }
@@ -65,11 +66,11 @@ export function useConfigManager() {
       const { invoke } = window.__TAURI__.core
       const chosen = await invoke('choose_folder', { initialDir: initialDir || null }) as string | null
       if (chosen) {
-        showToast('📁 已选择目录: ' + chosen, 'info')
+        showToast(i18n.global.t('toast.folderSelected', { path: chosen }), 'info')
       }
       return chosen
     } catch (e) {
-      showToast('打开文件夹选择失败: ' + e, 'error')
+      showToast(i18n.global.t('toast.browseFailed', { err: String(e) }), 'error')
       return null
     }
   }

@@ -1,5 +1,6 @@
 import { ref, type Ref } from 'vue'
 import { useToast } from './useToast'
+import { i18n } from '../i18n'
 
 interface UseSystemSettingsReturn {
   autoStartEnabled: Ref<boolean>
@@ -33,14 +34,14 @@ export function useSystemSettings(): UseSystemSettingsReturn {
       const { invoke } = window.__TAURI__.core
       if (shouldEnable) {
         await invoke('plugin:autostart|enable')
-        showToast('✅ 已开启开机自启动', 'success')
+        showToast(i18n.global.t('toast.autoStartEnabled'), 'success')
       } else {
         await invoke('plugin:autostart|disable')
-        showToast('❌ 已关闭开机自启动', 'success')
+        showToast(i18n.global.t('toast.autoStartDisabled'), 'success')
       }
       autoStartEnabled.value = shouldEnable
     } catch (e) {
-      showToast('操作失败: ' + e, 'error')
+      showToast(i18n.global.t('toast.operationFailed', { err: String(e) }), 'error')
       throw e
     }
   }
@@ -49,14 +50,14 @@ export function useSystemSettings(): UseSystemSettingsReturn {
     try {
       const { invoke } = window.__TAURI__.core
       await invoke('hide_window')
-      showToast('📦 已最小化到系统托盘', 'info')
+      showToast(i18n.global.t('toast.minimized'), 'info')
     } catch (e) {
-      showToast('隐藏失败: ' + e, 'error')
+      showToast(i18n.global.t('toast.hideFailed', { err: String(e) }), 'error')
     }
   }
 
   async function quitApp(): Promise<boolean> {
-    if (isRunning.value && !confirm('⚠️ HTTP 服务正在运行，确定要退出吗？')) {
+    if (isRunning.value && !confirm(i18n.global.t('toast.quitConfirm'))) {
       return false
     }
 

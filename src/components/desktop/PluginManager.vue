@@ -1,18 +1,18 @@
 <template>
   <div class="animate-fadeIn" :class="isActive ? 'block' : 'hidden'">
     <div class="bg-primary-50 border border-primary-50 rounded-xl px-[26px] py-[22px] mb-[22px]">
-      <div class="text-[1.05rem] font-bold text-primary-900 mb-4 pb-[10px] border-b border-primary-50">🧩 扩展名与插件映射表</div>
+      <div class="text-[1.05rem] font-bold text-primary-900 mb-4 pb-[10px] border-b border-primary-50">{{ t('plugins.title') }}</div>
       <div class="text-[0.8rem] text-primary-300 mt-[5px] mb-[18px] leading-relaxed">
-        • <b class="text-primary-700">已启用</b>：点击对应插件页打开（需 plugins 目录下已放置资源）<br>
-        • <b class="text-primary-700">未启用</b>：虽安装了插件，但暂不使用，按浏览器默认行为打开<br>
-        • <b class="text-primary-700">浏览器默认支持</b>：浏览器原生能渲染的格式（图片/视频/HTML 等）<br>
-        • <b class="text-primary-700">未开发</b>：未来计划支持，当前走浏览器默认（会直接下载）
+        <span v-html="t('plugins.desc1')"></span><br>
+        <span v-html="t('plugins.desc2')"></span><br>
+        <span v-html="t('plugins.desc3')"></span><br>
+        <span v-html="t('plugins.desc4')"></span>
       </div>
 
       <!-- 筛选按钮 -->
       <div class="flex gap-[10px] mb-[18px] flex-wrap">
         <button
-          v-for="filter in filters"
+          v-for="filter in filters" 
           :key="filter.value"
           class="flex-none px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap"
           :style="{ background: filter.color }"
@@ -28,7 +28,7 @@
           v-if="filteredPlugins.length === 0"
           class="text-center text-primary-300 py-10"
         >
-          {{ pluginsFilter !== 'all' ? '该分类下暂无条目' : '⏳ 正在加载插件配置...' }}
+          {{ pluginsFilter !== 'all' ? t('plugins.empty') : t('plugins.loading') }}
         </div>
         
         <div
@@ -43,7 +43,7 @@
                 <div class="text-[1.05rem] font-semibold text-primary-900">
                   .{{ plugin.ext }}
                   <span class="text-primary-300 font-medium text-[0.88rem] ml-2">
-                    {{ plugin.name || plugin.ext.toUpperCase() + ' 文件' }}
+                    {{ plugin.name || (plugin.ext.toUpperCase() + t('plugins.fileSuffix')) }}
                   </span>
                 </div>
                 <div class="text-[0.8rem] text-primary-300 mt-[2px]">{{ plugin.description || '' }}</div>
@@ -54,7 +54,7 @@
                 {{ statusLabel(plugin.status) }}
               </span>
               <span v-if="plugin.pluginId" class="text-[0.82rem] text-primary-400">
-                🔗 插件ID: <b>{{ plugin.pluginId }}</b>
+                🔗 {{ t('plugins.pluginId') }}: <b>{{ plugin.pluginId }}</b>
               </span>
               <span v-if="plugin.urlTemplate" class="text-[0.78rem] text-primary-500 break-all">
                 URL: <code class="bg-[#f3f4f8] px-[6px] py-[2px] rounded">{{ plugin.urlTemplate }}</code>
@@ -69,7 +69,7 @@
                 :class="mapStatus(plugin.status) === 'enabled' ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-green-500 text-white hover:bg-green-600'"
                 @click="handleToggle(plugin.ext, toggleTarget(plugin.status))"
               >
-                {{ mapStatus(plugin.status) === 'enabled' ? '⏸️ 禁用' : '▶️ 启用' }}
+                {{ mapStatus(plugin.status) === 'enabled' ? t('plugins.disable') : t('plugins.enable') }}
               </button>
             </template>
           </div>
@@ -78,10 +78,10 @@
 
       <div class="flex gap-3 mt-6">
         <button class="flex-1 px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap bg-blue-500 text-white hover:bg-blue-600" @click="loadPluginsConfig">
-          🔄 重新加载配置
+          {{ t('plugins.reload') }}
         </button>
         <button class="flex-1 px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap bg-slate-500 text-white hover:bg-slate-600" @click="filterPlugins('all')">
-          🗑️ 清除筛选
+          {{ t('plugins.clear') }}
         </button>
       </div>
     </div>
@@ -89,10 +89,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { usePluginManager, fileExtIcon } from '../../composables/usePluginManager'
+import { onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { usePluginManager, fileExtIcon, type PluginFilter } from '../../composables/usePluginManager'
 
 defineProps({ isActive: Boolean })
+
+const { t } = useI18n()
 
 const {
   pluginsCache,
@@ -104,13 +107,13 @@ const {
 } = usePluginManager()
 
 
-const filters = [
-  { label: '全部', value: 'all', color: '#78909c' },
-  { label: '✅ 已启用', value: 'enabled', color: '#2e7d32' },
-  { label: '⏸️ 未启用', value: 'disabled', color: '#c62828' },
-  { label: '🌐 浏览器默认', value: 'browser-default', color: '#1565c0' },
-  { label: '🚧 未开发', value: 'undeveloped', color: '#757575' }
-] as const
+const filters = computed<{ label: string; value: PluginFilter; color: string }[]>(() => [
+  { label: t('plugins.filters.all'), value: 'all', color: '#78909c' },
+  { label: t('plugins.filters.enabled'), value: 'enabled', color: '#2e7d32' },
+  { label: t('plugins.filters.disabled'), value: 'disabled', color: '#c62828' },
+  { label: t('plugins.filters.browserDefault'), value: 'browser-default', color: '#1565c0' },
+  { label: t('plugins.filters.undeveloped'), value: 'undeveloped', color: '#757575' }
+])
 
 function mapStatus(status: string) {
   const map: Record<string, string> = {
@@ -125,10 +128,10 @@ function mapStatus(status: string) {
 function statusLabel(status: string) {
   const key = mapStatus(status)
   const labels: Record<string, string> = {
-    'enabled': '✅ 已启用',
-    'disabled': '⏸️ 未启用',
-    'browser-default': '🌐 浏览器默认支持',
-    'undeveloped': '🚧 未开发'
+    'enabled': t('plugins.status.enabled'),
+    'disabled': t('plugins.status.disabled'),
+    'browser-default': t('plugins.status.browserDefault'),
+    'undeveloped': t('plugins.status.undeveloped')
   }
   return labels[key] || status
 }
