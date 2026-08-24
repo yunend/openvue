@@ -204,7 +204,7 @@ function handleClick(item: FileItem): void {
   if (item.type !== 'file') return
 
   const ext = getFileExtension(item.name)
-  const publicPath = '/public' + item.path
+  const publicPath ='/public' + item.path
   const pluginUrl = resolvePluginUrl(ext, publicPath)
 
   if (pluginUrl) {
