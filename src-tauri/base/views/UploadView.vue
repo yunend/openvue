@@ -1,8 +1,8 @@
 <!-- src-tauri/static/views/UploadView.vue -->
 <template>
-  <main class="flex-1 flex items-start justify-center py-12">
-    <div class="w-10/12 max-w-2xl bg-white rounded-lg shadow-lg p-8">
-      <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">多文件上传</h2>
+  <main class="flex-1 flex items-start justify-center py-12 bg-page-bg">
+    <div class="w-10/12 max-w-2xl bg-card-bg text-text-primary rounded-lg shadow-lg p-8 border border-border-color">
+      <h2 class="text-2xl font-bold text-center mb-6">多文件上传</h2>
 
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div>
@@ -22,17 +22,17 @@
         </button>
       </form>
 
-      <div class="mt-3 text-sm text-blue-600 text-center">每个文件不能大于1G</div>
+      <div class="mt-3 text-sm text-blue-600 dark:text-blue-400 text-center">每个文件不能大于1G</div>
 
       <div v-if="showProgress" class="mt-6">
-        <h5 class="text-lg font-semibold text-gray-700 mb-3">上传进度</h5>
-        <div class="text-sm text-gray-600 mb-2">
+        <h5 class="text-lg font-semibold mb-3">上传进度</h5>
+        <div class="text-sm mb-2">
           <strong>当前文件:</strong> {{ currentFileName }}
-          <span class="text-gray-500">({{ currentFileSize }})</span>
+          <span class="text-text-secondary">({{ currentFileSize }})</span>
           <span class="float-right">{{ progressPercent }}%</span>
         </div>
 
-        <div class="w-full bg-gray-200 rounded-full h-6 mb-4 overflow-hidden">
+        <div class="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-6 mb-4 overflow-hidden">
           <div
             class="h-full bg-blue-600 transition-all duration-300"
             :style="{ width: progressPercent + '%' }"
@@ -52,7 +52,7 @@
         </div>
       </div>
 
-      <div class="mt-4 text-center text-gray-600">{{ uploadStatusText }}</div>
+      <div class="mt-4 text-center text-text-secondary">{{ uploadStatusText }}</div>
     </div>
   </main>
 </template>

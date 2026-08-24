@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     './src/**/*.{vue,js,ts,jsx,tsx}',
     './src-tauri/base/**/*.{vue,js,ts,jsx,tsx,html}'
@@ -18,7 +19,16 @@ export default {
           700: '#303f9f',
           800: '#283593',
           900: '#1a237e'
-        }
+        },
+        'nav-bg': 'var(--nav-bg)',
+        'nav-text': 'var(--nav-text)',
+        'page-bg': 'var(--page-bg)',
+        'card-bg': 'var(--card-bg)',
+        'text-primary': 'var(--text-primary)',
+        'text-secondary': 'var(--text-secondary)',
+        'footer-bg': 'var(--footer-bg)',
+        'footer-text': 'var(--footer-text)',
+        'border-color': 'var(--border-color)',
       },
       keyframes: {
         fadeIn: {

@@ -2,6 +2,101 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+@layer components {
+  .nav-bg {
+    background-color: var(--nav-bg);
+  }
+  .nav-text {
+    color: var(--nav-text);
+  }
+  .page-bg {
+    background-color: var(--page-bg);
+  }
+  .card-bg {
+    background-color: var(--card-bg);
+  }
+  .text-primary {
+    color: var(--text-primary);
+  }
+  .text-secondary {
+    color: var(--text-secondary);
+  }
+  .footer-bg {
+    background-color: var(--footer-bg);
+  }
+  .footer-text {
+    color: var(--footer-text);
+  }
+  .border-color {
+    border-color: var(--border-color);
+  }
+}
+
+@layer base {
+  :root {
+    --nav-bg: #1d4ed8;
+    --nav-text: #ffffff;
+    --page-bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --footer-bg: #1d4ed8;
+    --footer-text: #ffffff;
+    --border-color: #e2e8f0;
+  }
+
+  .theme-dark {
+    --nav-bg: #0f172a;
+    --nav-text: #f1f5f9;
+    --page-bg: #0f172a;
+    --card-bg: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --footer-bg: #0f172a;
+    --footer-text: #cbd5e1;
+    --border-color: #334155;
+  }
+
+  .theme-sunset {
+    --nav-bg: #ea580c;
+    --nav-text: #fff7ed;
+    --page-bg: #fff7ed;
+    --card-bg: #ffffff;
+    --text-primary: #431407;
+    --text-secondary: #9a3412;
+    --footer-bg: #ea580c;
+    --footer-text: #fff7ed;
+    --border-color: #fed7aa;
+  }
+
+  .theme-forest {
+    --nav-bg: #15803d;
+    --nav-text: #f0fdf4;
+    --page-bg: #f0fdf4;
+    --card-bg: #ffffff;
+    --text-primary: #14532d;
+    --text-secondary: #166534;
+    --footer-bg: #15803d;
+    --footer-text: #f0fdf4;
+    --border-color: #bbf7d0;
+  }
+
+  .theme-ocean {
+    --nav-bg: #0e7490;
+    --nav-text: #ecfeff;
+    --page-bg: #ecfeff;
+    --card-bg: #ffffff;
+    --text-primary: #083344;
+    --text-secondary: #0e7490;
+    --footer-bg: #0e7490;
+    --footer-text: #ecfeff;
+    --border-color: #a5f3fc;
+  }
+
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--page-bg);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
 }

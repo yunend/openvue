@@ -1,6 +1,6 @@
 <template>
-  <div id="file-browser" class="w-11/12 bg-slate-50 min-h-80 mx-auto mt-6 flex flex-col items-center gap-1 overflow-y-auto p-4">
-    <div class="w-full text-sm text-blue-600 font-medium mb-1">
+  <div id="file-browser" class="w-11/12 bg-card-bg min-h-80 mx-auto mt-6 flex flex-col items-center gap-1 overflow-y-auto p-4 border border-border-color rounded-lg">
+    <div class="w-full text-sm text-blue-600 dark:text-blue-400 font-medium mb-1">
       📂 /{{ currentPath.length > 0 ? currentPath.join('/') : '根目录' }}
     </div>
     
@@ -9,7 +9,7 @@
         v-model="searchKeyword"
         type="text" 
         placeholder="搜索文件名或文件夹名..."
-        class="w-full px-4 py-2 border border-gray-300 rounded outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600 transition"
+        class="w-full px-4 py-2 border border-border-color bg-page-bg text-text-primary rounded outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600 transition"
       />
     </div>
     
@@ -41,26 +41,26 @@
       </div>
     </div>
     
-    <div v-if="loading" class="text-gray-500">加载中...</div>
+    <div v-if="loading" class="text-text-secondary">加载中...</div>
     <div v-else-if="error" class="text-red-500">{{ error }}</div>
-    <div v-else-if="items.length === 0" class="text-gray-500">目录为空</div>
+    <div v-else-if="items.length === 0" class="text-text-secondary">目录为空</div>
     
     <div v-else class="w-full">
       <div 
         v-for="item in items" 
         :key="item.path" 
-        class="flex items-center justify-between p-2 hover:bg-slate-300 rounded"
+        class="flex items-center justify-between p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"
       >
         <div 
-          class="flex items-center gap-2 cursor-pointer flex-1" 
+          class="flex items-center gap-2 cursor-pointer flex-1 text-text-primary" 
           @click="handleClick(item)"
         >
           <span class="text-xl">{{ item.type === 'directory' ? '📂' : '📄' }}</span>
-          <span>{{ item.name }}</span>
+          <span class="font-medium">{{ item.name }}</span>
         </div>
         
         <div class="flex items-center gap-3">
-          <span class="text-sm text-gray-500">{{ formatDate(item.mtime) }}</span>
+          <span class="text-sm text-text-secondary">{{ formatDate(item.mtime) }}</span>
           <button 
             v-if="item.type === 'file'" 
             @click.stop="downloadFile(item)"
