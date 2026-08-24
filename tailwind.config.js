@@ -19,6 +19,25 @@ export default {
           800: '#283593',
           900: '#1a237e'
         }
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(6px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' }
+        },
+        slideDown: {
+          '0%': { opacity: '0', transform: 'translateY(-100%)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' }
+        },
+        pulseBtn: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.6' }
+        }
+      },
+      animation: {
+        fadeIn: 'fadeIn 0.22s ease',
+        slideDown: 'slideDown 0.4s ease',
+        pulseBtn: 'pulseBtn 1.5s ease-in-out infinite'
       }
     },
   },

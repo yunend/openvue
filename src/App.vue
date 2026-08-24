@@ -1,51 +1,51 @@
 <template>
-  <div class="app-layout">
+  <div class="flex h-screen p-4 gap-4">
     <!-- 左侧导航 -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h1>🎛️ Tauri 控制台</h1>
-        <p>HTTP 文件服务管理器</p>
+    <aside class="w-[220px] bg-white rounded-[14px] shadow-[0_2px_14px_rgba(26,35,126,0.10)] flex flex-col overflow-hidden shrink-0">
+      <div class="px-5 py-[22px] bg-gradient-to-br from-primary-500 to-primary-400 text-white">
+        <h1 class="text-[1.2rem] font-bold mb-[6px]">🎛️ Tauri 控制台</h1>
+        <p class="text-[0.8rem] opacity-90">HTTP 文件服务管理器</p>
       </div>
-      <ul class="nav-list">
-        <li v-for="item in navItems" :key="item.id" class="nav-item">
+      <ul class="list-none px-[10px] py-[14px] flex-1 overflow-y-auto">
+        <li v-for="item in navItems" :key="item.id" class="mb-1">
           <button
-            class="nav-btn"
-            :class="{ active: activePanel === item.id }"
+            class="w-full flex items-center gap-3 px-[14px] py-3 border-none bg-transparent rounded-[10px] text-[0.95rem] font-medium text-primary-700 cursor-pointer transition-all duration-200 text-left hover:bg-primary-50"
+            :class="{ 'bg-gradient-to-r from-primary-500 to-primary-400 text-white shadow-[0_2px_8px_rgba(63,81,181,0.35)]': activePanel === item.id }"
             @click="switchPanel(item.id)"
           >
-            <span class="nav-icon">{{ item.icon }}</span>
+            <span class="text-[1.1rem] w-[22px] text-center">{{ item.icon }}</span>
             <span>{{ item.label }}</span>
           </button>
         </li>
       </ul>
-      <div class="sidebar-footer">v{{ version }}</div>
+      <div class="px-5 py-[14px] text-[0.78rem] text-primary-300 border-t border-primary-50">v{{ version }}</div>
     </aside>
 
     <!-- 右侧内容区 -->
-    <main class="content">
-      <div class="content-header">
-        <div class="content-title">
-          <span class="icon">{{ currentPanelInfo.icon }}</span>
+    <main class="flex-1 bg-white rounded-[14px] shadow-[0_2px_14px_rgba(26,35,126,0.10)] overflow-hidden flex flex-col">
+      <div class="px-[30px] py-[22px] border-b border-primary-50 flex items-center justify-between">
+        <div class="text-[1.4rem] font-bold text-primary-900 flex items-center gap-3">
+          <span class="text-[1.5rem]">{{ currentPanelInfo.icon }}</span>
           <span>{{ currentPanelInfo.label }}</span>
         </div>
-        <button class="btn-outline" @click="restartHttpService">🔄 重启HTTP服务</button>
+        <button class="flex-none px-5 py-[10px] bg-white text-primary-500 border-2 border-primary-500 font-semibold rounded-[9px] transition-all duration-200 hover:bg-primary-500 hover:text-white" @click="restartHttpService">🔄 重启HTTP服务</button>
       </div>
 
-      <div class="content-body">
+      <div class="flex-1 px-[34px] py-7 overflow-y-auto">
         <!-- 面板 1：服务状态 -->
-        <StatusPanel :class="{ active: activePanel === 'status' }" />
+        <StatusPanel :isActive="activePanel === 'status'" />
 
         <!-- 面板 2：配置管理 -->
-        <ConfigPanel :class="{ active: activePanel === 'config' }" />
+        <ConfigPanel :isActive="activePanel === 'config'" />
 
         <!-- 面板 3：系统设置 -->
-        <SystemSettings :class="{ active: activePanel === 'system' }" />
+        <SystemSettings :isActive="activePanel === 'system'" />
 
         <!-- 面板 4：插件配置 -->
-        <PluginManager :class="{ active: activePanel === 'plugins' }" />
+        <PluginManager :isActive="activePanel === 'plugins'" />
 
         <!-- 面板 5：关于 -->
-        <AboutPanel :class="{ active: activePanel === 'about' }" :version="version" />
+        <AboutPanel :isActive="activePanel === 'about'" :version="version" />
       </div>
     </main>
 

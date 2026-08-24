@@ -1,21 +1,20 @@
 <template>
-  <div class="panel">
-    <div class="panel-section">
-      <div class="panel-section-title">🧩 扩展名与插件映射表</div>
-      <div class="form-hint" style="margin-bottom:18px;">
-        • <b>已启用</b>：点击对应插件页打开（需 plugins 目录下已放置资源）<br>
-        • <b>未启用</b>：虽安装了插件，但暂不使用，按浏览器默认行为打开<br>
-        • <b>浏览器默认支持</b>：浏览器原生能渲染的格式（图片/视频/HTML 等）<br>
-        • <b>未开发</b>：未来计划支持，当前走浏览器默认（会直接下载）
+  <div class="animate-fadeIn" :class="isActive ? 'block' : 'hidden'">
+    <div class="bg-primary-50 border border-primary-50 rounded-xl px-[26px] py-[22px] mb-[22px]">
+      <div class="text-[1.05rem] font-bold text-primary-900 mb-4 pb-[10px] border-b border-primary-50">🧩 扩展名与插件映射表</div>
+      <div class="text-[0.8rem] text-primary-300 mt-[5px] mb-[18px] leading-relaxed">
+        • <b class="text-primary-700">已启用</b>：点击对应插件页打开（需 plugins 目录下已放置资源）<br>
+        • <b class="text-primary-700">未启用</b>：虽安装了插件，但暂不使用，按浏览器默认行为打开<br>
+        • <b class="text-primary-700">浏览器默认支持</b>：浏览器原生能渲染的格式（图片/视频/HTML 等）<br>
+        • <b class="text-primary-700">未开发</b>：未来计划支持，当前走浏览器默认（会直接下载）
       </div>
 
       <!-- 筛选按钮 -->
-      <div style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+      <div class="flex gap-[10px] mb-[18px] flex-wrap">
         <button
           v-for="filter in filters"
           :key="filter.value"
-          class="btn btn-grey"
-          style="flex:0 0 auto;"
+          class="flex-none px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap"
           :style="{ background: filter.color }"
           @click="filterPlugins(filter.value)"
         >
@@ -24,10 +23,10 @@
       </div>
 
       <!-- 插件列表 -->
-      <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="flex flex-col gap-3">
         <div
           v-if="filteredPlugins.length === 0"
-          style="text-align:center; color:#7986cb; padding:40px 0;"
+          class="text-center text-primary-300 py-10"
         >
           {{ pluginsFilter !== 'all' ? '该分类下暂无条目' : '⏳ 正在加载插件配置...' }}
         </div>
@@ -35,41 +34,39 @@
         <div
           v-for="plugin in filteredPlugins"
           :key="plugin.ext"
-          class="switch-row"
-          style="padding:16px 20px; align-items:flex-start;"
+          class="flex items-start justify-between px-5 py-4 bg-white border border-primary-50 rounded-[10px]"
         >
-          <div style="flex:1;">
-            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:6px;">
-              <span style="font-size:1.5rem;">{{ fileExtIcon(plugin.ext) }}</span>
+          <div class="flex-1">
+            <div class="flex items-center gap-3 flex-wrap mb-[6px]">
+              <span class="text-[1.5rem]">{{ fileExtIcon(plugin.ext) }}</span>
               <div>
-                <div class="switch-name" style="font-size:1.05rem;">
+                <div class="text-[1.05rem] font-semibold text-primary-900">
                   .{{ plugin.ext }}
-                  <span style="color:#7986cb; font-weight:500; font-size:0.88rem; margin-left:8px;">
+                  <span class="text-primary-300 font-medium text-[0.88rem] ml-2">
                     {{ plugin.name || plugin.ext.toUpperCase() + ' 文件' }}
                   </span>
                 </div>
-                <div class="switch-desc" style="margin-top:4px;">{{ plugin.description || '' }}</div>
+                <div class="text-[0.8rem] text-primary-300 mt-[2px]">{{ plugin.description || '' }}</div>
               </div>
             </div>
-            <div style="display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap;">
+            <div class="flex items-center gap-[10px] mt-[10px] flex-wrap">
               <span :style="statusBadgeStyle(plugin.status)">
                 {{ statusLabel(plugin.status) }}
               </span>
-              <span v-if="plugin.pluginId" style="font-size:0.82rem; color:#5c6bc0;">
+              <span v-if="plugin.pluginId" class="text-[0.82rem] text-primary-400">
                 🔗 插件ID: <b>{{ plugin.pluginId }}</b>
               </span>
-              <span v-if="plugin.urlTemplate" style="font-size:0.78rem; color:#78909c; word-break:break-all;">
-                URL: <code style="background:#f3f4f8; padding:2px 6px; border-radius:4px;">{{ plugin.urlTemplate }}</code>
+              <span v-if="plugin.urlTemplate" class="text-[0.78rem] text-primary-500 break-all">
+                URL: <code class="bg-[#f3f4f8] px-[6px] py-[2px] rounded">{{ plugin.urlTemplate }}</code>
               </span>
             </div>
           </div>
           
-          <div style="flex-shrink:0; display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+          <div class="flex-none flex flex-col gap-2 items-end">
             <template v-if="canToggle(plugin.status)">
               <button
-                class="btn"
-                :class="mapStatus(plugin.status) === 'enabled' ? 'btn-red' : 'btn-green'"
-                style="flex:0 0 auto; padding:8px 16px; font-size:0.88rem;"
+                class="flex-none px-4 py-2 text-[0.88rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap"
+                :class="mapStatus(plugin.status) === 'enabled' ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-green-500 text-white hover:bg-green-600'"
                 @click="handleToggle(plugin.ext, toggleTarget(plugin.status))"
               >
                 {{ mapStatus(plugin.status) === 'enabled' ? '⏸️ 禁用' : '▶️ 启用' }}
@@ -79,11 +76,11 @@
         </div>
       </div>
 
-      <div class="control-row" style="margin-top:24px;">
-        <button class="btn btn-blue" @click="loadPluginsConfig">
+      <div class="flex gap-3 mt-6">
+        <button class="flex-1 px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap bg-blue-500 text-white hover:bg-blue-600" @click="loadPluginsConfig">
           🔄 重新加载配置
         </button>
-        <button class="btn btn-grey" @click="filterPlugins('all')">
+        <button class="flex-1 px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap bg-slate-500 text-white hover:bg-slate-600" @click="filterPlugins('all')">
           🗑️ 清除筛选
         </button>
       </div>
@@ -94,6 +91,8 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { usePluginManager, fileExtIcon } from '../../composables/usePluginManager'
+
+defineProps({ isActive: Boolean })
 
 const {
   pluginsCache,
