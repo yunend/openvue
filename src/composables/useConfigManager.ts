@@ -3,13 +3,13 @@ import { useToast } from './useToast'
 
 interface AppConfig {
   port: number
-  staticFolder: string
+  publicFolder: string
   enableUpload: boolean
 }
 
 const config = ref<AppConfig>({
   port: 8005,
-  staticFolder: 'static',
+  publicFolder: 'public',
   enableUpload: false
 })
 
@@ -22,7 +22,7 @@ export function useConfigManager() {
       const cfg = await invoke('get_config') as AppConfig
       config.value = {
         port: cfg.port || 8005,
-        staticFolder: cfg.staticFolder || 'static',
+        publicFolder: cfg.publicFolder || 'public',
         enableUpload: !!cfg.enableUpload
       }
       showToast('📥 配置已读取', 'info')
@@ -32,14 +32,14 @@ export function useConfigManager() {
   }
 
   async function saveConfig(newConfig: AppConfig): Promise<boolean> {
-    const { port, staticFolder, enableUpload } = newConfig
+    const { port, publicFolder, enableUpload } = newConfig
 
     if (!port || port < 1 || port > 65535) {
       showToast('请输入有效的端口号 (1-65535)', 'error')
       return false
     }
 
-    if (!staticFolder) {
+    if (!publicFolder) {
       showToast('请输入指定文件目录路径', 'error')
       return false
     }
@@ -48,10 +48,10 @@ export function useConfigManager() {
       const { invoke } = window.__TAURI__.core
       const msg = await invoke('save_config', {
         port: parseInt(String(port), 10),
-        staticFolder,
+        publicFolder,
         enableUpload
       }) as string
-      config.value = { port: parseInt(String(port), 10), staticFolder, enableUpload: !!enableUpload }
+      config.value = { port: parseInt(String(port), 10), publicFolder, enableUpload: !!enableUpload }
       showToast('💾 ' + msg, 'success')
       return true
     } catch (e) {

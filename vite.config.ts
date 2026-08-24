@@ -9,10 +9,10 @@ export default defineConfig(({ mode }: { mode: string }) => {
 
   return {
     plugins: [vue()],
-    root: isDesktop ? 'src' : (isWeb ? 'src-tauri/static' : '.'),
+    root: isDesktop ? 'src' : (isWeb ? 'src-tauri/base' : '.'),
     build: {
       outDir: isDesktop ? '../dist-desktop' : (isWeb ? '../dist-web' : '../dist'),
-      emptyOutDir: false
+      emptyOutDir: true
     },
     server: {
       port: 5173,
@@ -27,7 +27,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
     resolve: {
       alias: {
         '@': resolve(__dirname, 'src'),
-        '@web': resolve(__dirname, 'src-tauri/static')
+        '@web': resolve(__dirname, 'src-tauri/base')
       }
     },
     clearScreen: false,

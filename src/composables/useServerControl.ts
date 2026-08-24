@@ -4,7 +4,7 @@ import { useToast } from './useToast'
 interface ServerStatus {
   isRunning: boolean
   port: number | string
-  staticFolder: string
+  publicFolder: string
   urls: string[]
 }
 
@@ -12,7 +12,7 @@ const isRunning = ref(false)
 const status = ref<ServerStatus>({
   isRunning: false,
   port: '-',
-  staticFolder: '-',
+  publicFolder: '-',
   urls: []
 })
 

@@ -1,6 +1,6 @@
  {
     "port": 8002, 
     "enableUpload": true, 
-    "staticFolder": "public", 
+    "publicFolder": "public", 
     "enableCORS":true
 }

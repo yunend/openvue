@@ -18,7 +18,7 @@
         </div>
         <div class="status-item full">
           <div class="status-label">指定文件根目录</div>
-          <div class="status-value">{{ status.staticFolder || '-' }}</div>
+          <div class="status-value">{{ status.publicFolder || '-' }}</div>
         </div>
         <div class="status-item full">
           <div class="status-label">访问地址</div>

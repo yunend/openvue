@@ -22,8 +22,8 @@
           <input
             type="text"
             class="form-input"
-            v-model="localConfig.staticFolder"
-            placeholder="例如：static 或 D:/MyWebsite"
+            v-model="localConfig.publicFolder"
+            placeholder="例如：public 或 D:/MyWebsite"
             style="flex:1;"
           >
           <button
@@ -66,7 +66,7 @@ import { ref, onMounted } from 'vue'
 import { useConfigManager } from '../../composables/useConfigManager'
 
 const { config, loadConfig, saveConfig, browseFolder } = useConfigManager()
-const localConfig = ref({ port: 8005, staticFolder: 'static', enableUpload: false })
+const localConfig = ref({ port: 8005, publicFolder: 'public', enableUpload: false })
 
 
 onMounted(async () => {
@@ -75,9 +75,9 @@ onMounted(async () => {
 })
 
 async function handleBrowseFolder() {
-  const chosen = await browseFolder(localConfig.value.staticFolder)
+  const chosen = await browseFolder(localConfig.value.publicFolder)
   if (chosen) {
-    localConfig.value.staticFolder = chosen
+    localConfig.value.publicFolder = chosen
   }
 }
 

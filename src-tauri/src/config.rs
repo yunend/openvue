@@ -17,8 +17,8 @@ pub struct AppConfig {
     pub port: u16,
 
     /// 指定文件目录路径
-    /// config.json 中写 "staticFolder"，Rust 中读为 static_folder
-    pub static_folder: PathBuf,
+    /// config.json 中写 "publicFolder"，Rust 中读为 public_folder
+    pub public_folder: PathBuf,
 
     /// ✅ 是否启用文件上传功能
     /// config.json 中写 "enableUpload"，Rust 中读为 enable_upload
@@ -29,7 +29,7 @@ impl Default for AppConfig {
     fn default() -> Self {
         Self {
             port: 8005,
-            static_folder: PathBuf::from("static"),
+            public_folder: PathBuf::from("public"),
             enable_upload: false, // 默认关闭上传，更安全
         }
     }
@@ -64,24 +64,24 @@ pub fn load_config(config_path: Option<&str>) -> Result<AppConfig, String> {
         .map_err(|e| format!("解析 JSON 失败: {}", e))?;
 
     // ====== 解析相对路径 ======
-    if !config.static_folder.is_absolute() {
+    if !config.public_folder.is_absolute() {
         let config_dir = path.parent()
             .ok_or_else(|| "无法获取配置文件目录".to_string())?;
-        let raw = config_dir.join(&config.static_folder);
+        let raw = config_dir.join(&config.public_folder);
         // ✅ 先尝试 canonicalize（存在就取真实路径），失败就直接 normalize 软规范化
-        config.static_folder = match raw.canonicalize() {
+        config.public_folder = match raw.canonicalize() {
             Ok(p) => normalize_path(p),
             Err(_) => normalize_path(raw),
         };
     } else {
         // 绝对路径也处理一下 \\?\
-        config.static_folder = normalize_path(config.static_folder.clone());
+        config.public_folder = normalize_path(config.public_folder.clone());
     }
 
     println!("✅ 配置加载成功:");
     println!("   配置文件: {}", path.display());
     println!("   端口: {}", config.port);
-    println!("   指定文件目录: {}", config.static_folder.display());
+    println!("   指定文件目录: {}", config.public_folder.display());
     println!("   文件上传: {}", if config.enable_upload { "✅ 启用" } else { "❌ 禁用" });
 
     Ok(config)
@@ -143,10 +143,10 @@ pub fn validate_config(config: &AppConfig) -> Result<(), String> {
         return Err("端口号不能为 0".to_string());
     }
 
-    if !config.static_folder.exists() {
+    if !config.public_folder.exists() {
         return Err(format!(
             "指定文件目录不存在: {}",
-            config.static_folder.display()
+            config.public_folder.display()
         ));
     }
 
@@ -156,32 +156,32 @@ pub fn validate_config(config: &AppConfig) -> Result<(), String> {
 
 /// 保存配置到指定路径
 pub fn save_config_to_path(config: &AppConfig, path: &PathBuf) -> Result<(), String> {
-    // 获取 config 所在目录（用于处理 static_folder 相对路径写入）
-    // 写入时：如果 static_folder 恰好位于 config_dir 下，写回相对路径
+    // 获取 config 所在目录（用于处理 public_folder 相对路径写入）
+    // 写入时：如果 public_folder 恰好位于 config_dir 下，写回相对路径
     let config_dir = path.parent()
         .ok_or_else(|| "无法获取配置文件目录".to_string())?;
 
-    let static_folder_write = if config.static_folder.is_absolute() {
+    let public_folder_write = if config.public_folder.is_absolute() {
         // 尝试转为相对于 config_dir 的相对路径（更友好）
-        match config.static_folder.strip_prefix(config_dir) {
+        match config.public_folder.strip_prefix(config_dir) {
             Ok(rel) => rel.to_string_lossy().to_string(),
-            Err(_) => config.static_folder.to_string_lossy().to_string(),
+            Err(_) => config.public_folder.to_string_lossy().to_string(),
         }
     } else {
-        config.static_folder.to_string_lossy().to_string()
+        config.public_folder.to_string_lossy().to_string()
     };
 
     #[derive(Serialize)]
     #[serde(rename_all = "camelCase")]
     struct ConfigFile {
         port: u16,
-        static_folder: String,
+        public_folder: String,
         enable_upload: bool,
     }
 
     let file_data = ConfigFile {
         port: config.port,
-        static_folder: static_folder_write,
+        public_folder: public_folder_write,
         enable_upload: config.enable_upload,
     };
 

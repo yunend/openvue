@@ -2,7 +2,7 @@
 export default {
   content: [
     './src/**/*.{vue,js,ts,jsx,tsx}',
-    './src-tauri/static/**/*.{vue,js,ts,jsx,tsx,html}'
+    './src-tauri/base/**/*.{vue,js,ts,jsx,tsx,html}'
   ],
   theme: {
     extend: {

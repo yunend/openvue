@@ -23,6 +23,9 @@
     "src/**/*.vue",
     "src/**/*.d.ts",
     "src/**/*.js",
+    "src-tauri/base/**/*.ts",
+    "src-tauri/base/**/*.vue",
+    "src-tauri/base/**/*.d.ts",
     "vite.config.ts",
     "vite.config.ts"
   ],

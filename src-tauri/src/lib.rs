@@ -144,12 +144,12 @@ fn start_server(state: tauri::State<'_, Arc<Mutex<ServerState>>>) -> Result<Stri
     drop(guard); 
     
     tauri::async_runtime::spawn(async move {
-        let static_folder = app_config.static_folder.clone();
+        let public_folder = app_config.public_folder.clone();
         let enable_upload = app_config.enable_upload; // ✅ 读开关
         let plugins_for_router = plugins_config;
         // ✅ 编译期嵌入 Cargo.toml 的版本号 → 传给 /api/about 接口
         let version_str = env!("CARGO_PKG_VERSION").to_string();
-        let app = router::create_router(static_folder, enable_upload, version_str, port, plugins_for_router); // ✅ 传 plugins_config
+        let app = router::create_router(public_folder, enable_upload, version_str, port, plugins_for_router); // ✅ 传 plugins_config
         
         let addr = format!("0.0.0.0:{}", port);
         let listener = tokio::net::TcpListener::bind(&addr)
@@ -206,7 +206,7 @@ fn get_config(state: tauri::State<'_, Arc<Mutex<ServerState>>>) -> Result<serde_
     let state = state.lock().map_err(|e| e.to_string())?;
     Ok(serde_json::json!({
         "port": state.app_config.port,
-        "staticFolder": state.app_config.static_folder.to_string_lossy().to_string(),
+        "publicFolder": state.app_config.public_folder.to_string_lossy().to_string(),
         "enableUpload": state.app_config.enable_upload,
     }))
 }
@@ -216,14 +216,14 @@ fn get_config(state: tauri::State<'_, Arc<Mutex<ServerState>>>) -> Result<serde_
 fn save_config(
     state: tauri::State<'_, Arc<Mutex<ServerState>>>,
     port: u16,
-    static_folder: String,
+    public_folder: String,
     enable_upload: bool,
 ) -> Result<String, String> {
     // 1. 基础验证
     if port == 0 {
         return Err("端口号不能为 0".to_string());
     }
-    if static_folder.trim().is_empty() {
+    if public_folder.trim().is_empty() {
         return Err("指定文件目录不能为空".to_string());
     }
 
@@ -232,17 +232,17 @@ fn save_config(
         .ok_or_else(|| "无法获取配置目录".to_string())?.to_path_buf();
 
     // 2. 处理相对路径 → 转为绝对路径用于内存
-    let static_path = std::path::PathBuf::from(&static_folder);
-    let abs_static_path = if static_path.is_absolute() {
-        static_path.clone()
+    let public_path = std::path::PathBuf::from(&public_folder);
+    let abs_public_path = if public_path.is_absolute() {
+        public_path.clone()
     } else {
-        config_dir.join(&static_path)
+        config_dir.join(&public_path)
     };
 
     // 3. 构建新的 AppConfig 对象
     let new_config = config::AppConfig {
         port,
-        static_folder: abs_static_path.clone(),
+        public_folder: abs_public_path.clone(),
         enable_upload,
     };
 
@@ -252,7 +252,7 @@ fn save_config(
     // 5. 更新内存中的配置
     let mut state = state.lock().map_err(|e| e.to_string())?;
     state.app_config.port = port;
-    state.app_config.static_folder = abs_static_path;
+    state.app_config.public_folder = abs_public_path;
     state.app_config.enable_upload = enable_upload;
 
     let msg = if state.cancel_token.is_some() {
@@ -297,7 +297,7 @@ fn get_server_status(state: tauri::State<'_, Arc<Mutex<ServerState>>>) -> Result
     Ok(serde_json::json!({
         "isRunning": is_running,
         "port": state.app_config.port,
-        "staticFolder": state.app_config.static_folder.to_string_lossy().to_string(),
+        "publicFolder": state.app_config.public_folder.to_string_lossy().to_string(),
         "enableUpload": state.app_config.enable_upload,
         "urls": urls
     }))

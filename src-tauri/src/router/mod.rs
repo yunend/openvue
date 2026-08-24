@@ -32,7 +32,7 @@ pub struct RouterState {
     /// ✅ 当前配置的 HTTP 端口（/api/about 回显用）
     pub config_port: u16,
     /// ✅ 公共目录字符串（/api/about 友好展示，避免再次转 Path）
-    pub config_static_folder: String,
+    pub config_public_folder: String,
     /// ✅ 插件配置（扩展名映射表，文件浏览器 /api/plugins 直接返回）
     pub plugins_config: PluginsConfig,
 }
@@ -56,7 +56,7 @@ pub struct RouterState {
 /// 包含所有 API 路由 + 指定文件服务的完整 Router
 pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, config_port: u16, plugins_config: PluginsConfig) -> Router {
     let state = RouterState {
-        config_static_folder: root_path.to_string_lossy().replace('\\', "/"),
+        config_public_folder: root_path.to_string_lossy().replace('\\', "/"),
         root_path: root_path.clone(),
         enable_upload,
         app_version: version,
@@ -80,11 +80,11 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
     
     // ✅ 优先使用 Vite 构建产物（dist-web），如果没有则回退到源码目录
     let dist_web_dir = exe_dir.join("dist-web");
-    let static_dir = if dist_web_dir.exists() {
+    let base_dir = if dist_web_dir.exists() {
         println!("✅ 使用 Vite 构建产物: {:?}", dist_web_dir);
         dist_web_dir
     } else {
-        let fallback = exe_dir.join("static");
+        let fallback = exe_dir.join("public");
         println!("⚠️ 未找到构建产物，使用源码目录: {:?}", fallback);
         fallback
     };
@@ -94,8 +94,8 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
         .nest_service("/public", ServeDir::new(root_path))
         .nest_service(
             "/",
-            ServeDir::new(&static_dir)
-                .fallback(ServeFile::new(static_dir.join("404.html"))),
+            ServeDir::new(&base_dir)
+                .fallback(ServeFile::new(base_dir.join("404.html"))),
         )
         
 }
@@ -131,7 +131,7 @@ fn register_api_routes(enable_upload: bool) -> Router<RouterState> {
                         "buildStack": "Tauri 2.x + Axum (Rust) + Vue 3 + Tailwind CSS",
                         "config": {
                             "port": s.config_port,
-                            "staticFolder": s.config_static_folder,
+                            "publicFolder": s.config_public_folder,
                             "enableUpload": s.enable_upload,
                         },
                         "helpLinks": [
@@ -155,7 +155,7 @@ fn register_api_routes(enable_upload: bool) -> Router<RouterState> {
             axum::routing::get(upload::handle_upload_status),
         )
         // ==============================================================
-        // ✅ GET /api/plugins（供 static/index.html 的 handleClick 查表用）
+        // ✅ GET /api/plugins（供 public/index.html 的 handleClick 查表用）
         //    返回完整 extensions 映射
         // ==============================================================
         .route(
