@@ -2,15 +2,32 @@
 <template>
   <main class="flex-1 flex items-start justify-center py-12 bg-page-bg">
     <div class="w-10/12 max-w-2xl bg-card-bg text-text-primary rounded-lg shadow-lg p-8 border border-border-color">
-      <h2 class="text-2xl font-bold text-center mb-6">多文件上传</h2>
+      <h2 class="text-2xl font-bold text-center mb-6">{{ t('upload.title') }}</h2>
 
       <form @submit.prevent="handleSubmit" class="space-y-4">
-        <div>
+        <div
+          @click="fileInput?.click()"
+          @dragover.prevent="onDragOver"
+          @dragleave.prevent="onDragLeave"
+          @drop.prevent="onDrop"
+          class="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors"
+          :class="isDragging 
+            ? 'border-blue-500 bg-blue-100 dark:bg-blue-900/30 scale-[1.02]' 
+            : 'border-blue-300 dark:border-blue-500 hover:border-blue-500 dark:hover:border-blue-400 bg-blue-50 dark:bg-slate-800/50'"
+        >
+          <div class="text-4xl mb-3">{{ isDragging ? '📥' : '📁' }}</div>
+          <div class="text-blue-600 dark:text-blue-400 font-medium mb-1">
+            {{ isDragging ? t('upload.dropHere') : (selectedFiles.length > 0 ? `${t('upload.selectedFiles')}: ${selectedFiles.length}` : t('upload.selectFile')) }}
+          </div>
+          <div class="text-sm text-gray-500 dark:text-gray-400">
+            {{ selectedFiles.length > 0 ? selectedFileNames : t('upload.dragHint') }}
+          </div>
           <input
             type="file"
             ref="fileInput"
             multiple
-            class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
+            class="hidden"
+            @change="onFileChange"
           />
         </div>
         <button
@@ -18,16 +35,16 @@
           :disabled="uploading"
           class="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          上传文件
+          {{ uploading ? t('upload.uploading') : t('upload.upload') }}
         </button>
       </form>
 
-      <div class="mt-3 text-sm text-blue-600 dark:text-blue-400 text-center">每个文件不能大于1G</div>
+      <div class="mt-3 text-sm text-blue-600 dark:text-blue-400 text-center">{{ t('upload.hint') }}</div>
 
       <div v-if="showProgress" class="mt-6">
-        <h5 class="text-lg font-semibold mb-3">上传进度</h5>
+        <h5 class="text-lg font-semibold mb-3">{{ t('upload.currentFile') }}</h5>
         <div class="text-sm mb-2">
-          <strong>当前文件:</strong> {{ currentFileName }}
+          <strong>{{ t('upload.currentFile') }}:</strong> {{ currentFileName }}
           <span class="text-text-secondary">({{ currentFileSize }})</span>
           <span class="float-right">{{ progressPercent }}%</span>
         </div>
@@ -47,7 +64,7 @@
             class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
             @click="cancelUpload"
           >
-            取消上传
+            {{ t('upload.cancel') }}
           </button>
         </div>
       </div>
@@ -58,7 +75,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploading = ref(false)
@@ -70,6 +90,38 @@ const statusMessage = ref('')
 const statusClass = ref('text-gray-600')
 const uploadStatusText = ref('')
 const uploadEnabled = ref(false)
+const selectedFiles = ref<File[]>([])
+const isDragging = ref(false)
+
+const selectedFileNames = computed(() => {
+  return selectedFiles.value.map(f => f.name).join(', ')
+})
+
+interface UploadStatusData {
+  enabled: boolean
+}
+
+function onFileChange(): void {
+  const files = fileInput.value?.files
+  if (files) {
+    selectedFiles.value = Array.from(files)
+  }
+}
+
+function onDragOver(): void {
+  isDragging.value = true
+}
+
+function onDragLeave(): void {
+  isDragging.value = false
+}
+
+function onDrop(event: DragEvent): void {
+  isDragging.value = false
+  if (event.dataTransfer?.files) {
+    selectedFiles.value = Array.from(event.dataTransfer.files)
+  }
+}
 
 let currentXHR: XMLHttpRequest | null = null
 
@@ -78,7 +130,7 @@ onMounted(async () => {
     const res = await fetch('/api/upload-status')
     const data: UploadStatusData = await res.json()
     uploadEnabled.value = data.enabled
-    uploadStatusText.value = data.enabled ? '文件上传功能已启用' : '文件上传功能已禁用'
+    uploadStatusText.value = data.enabled ? t('upload.enabled') : t('upload.disabled')
   } catch {
     uploadStatusText.value = '加载状态失败'
   }
@@ -93,9 +145,10 @@ function formatFileSize(bytes: number): string {
 }
 
 async function handleSubmit(): Promise<void> {
-  const files = fileInput.value?.files
+  // 使用 selectedFiles（支持拖拽和点击选择）
+  const files = selectedFiles.value
   if (!files || files.length === 0) {
-    uploadStatusText.value = '请选择要上传的文件'
+    uploadStatusText.value = t('upload.selectFile')
     return
   }
 
@@ -107,7 +160,7 @@ async function handleSubmit(): Promise<void> {
   }
 
   if (!uploadEnabled.value) {
-    uploadStatusText.value = '文件上传功能已被禁用'
+    uploadStatusText.value = t('upload.disabled')
     return
   }
 

@@ -1,14 +1,14 @@
 <template>
   <div id="file-browser" class="w-11/12 bg-card-bg min-h-80 mx-auto mt-6 flex flex-col items-center gap-1 overflow-y-auto p-4 border border-border-color rounded-lg">
     <div class="w-full text-sm text-blue-600 dark:text-blue-400 font-medium mb-1">
-      📂 /{{ currentPath.length > 0 ? currentPath.join('/') : '根目录' }}
+      📂 /{{ currentPath.length > 0 ? currentPath.join('/') : t('home.rootDir') }}
     </div>
     
     <div class="w-full mb-2">
       <input 
         v-model="searchKeyword"
         type="text" 
-        placeholder="搜索文件名或文件夹名..."
+        :placeholder="t('home.search')"
         class="w-full px-4 py-2 border border-border-color bg-page-bg text-text-primary rounded outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600 transition"
       />
     </div>
@@ -20,7 +20,7 @@
         :class="currentPath.length === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'"
         class="px-4 py-2 text-white rounded transition-colors"
       >
-        ← 返回上一级
+        ← {{ t('home.back') }}
       </button>
       
       <div class="flex gap-2">
@@ -29,21 +29,21 @@
           :class="sortBy === 'name' ? 'bg-green-600' : 'bg-gray-600'"
           class="px-3 py-2 text-white rounded hover:opacity-80 transition-opacity text-sm"
         >
-          {{ sortBy === 'name' ? '✓ ' : '' }}按名称
+          {{ sortBy === 'name' ? '✓ ' : '' }}{{ t('home.sortByName') }}
         </button>
         <button 
           @click="sortBy = 'time'" 
           :class="sortBy === 'time' ? 'bg-green-600' : 'bg-gray-600'"
           class="px-3 py-2 text-white rounded hover:opacity-80 transition-opacity text-sm"
         >
-          {{ sortBy === 'time' ? '✓ ' : '' }}按时间
+          {{ sortBy === 'time' ? '✓ ' : '' }}{{ t('home.sortByTime') }}
         </button>
       </div>
     </div>
     
-    <div v-if="loading" class="text-text-secondary">加载中...</div>
+    <div v-if="loading" class="text-text-secondary">{{ t('home.loading') }}</div>
     <div v-else-if="error" class="text-red-500">{{ error }}</div>
-    <div v-else-if="items.length === 0" class="text-text-secondary">目录为空</div>
+    <div v-else-if="items.length === 0" class="text-text-secondary">{{ t('home.empty') }}</div>
     
     <div v-else class="w-full">
       <div 
@@ -65,10 +65,10 @@
             v-if="item.type === 'file'" 
             @click.stop="downloadFile(item)"
             class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
-            title="下载文件"
+            :title="t('home.download')"
           >
             <span>⬇️</span>
-            <span>下载</span>
+            <span>{{ t('home.download') }}</span>
           </button>
         </div>
       </div>
@@ -78,8 +78,11 @@
 
 <script setup lang="ts">
 import { onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useFileBrowser } from '../../composables/useFileBrowser'
 import { usePluginResolver } from '../../composables/usePluginResolver'
+
+const { t, locale } = useI18n()
 
 const {
   items,
@@ -100,7 +103,8 @@ const { resolvePluginUrl, loadPluginsMap } = usePluginResolver()
 function formatDate(dateString: string): string {
   if (!dateString) return ''
   const date = new Date(dateString)
-  return date.toLocaleString('zh-CN', { 
+  const localeStr = locale.value === 'en' ? 'en-US' : 'zh-CN'
+  return date.toLocaleString(localeStr, { 
     year: 'numeric', 
     month: '2-digit', 
     day: '2-digit',

@@ -11,7 +11,7 @@
 
     <footer class="w-full footer-bg footer-text py-4">
       <p class="text-center text-sm">
-        © {{ new Date().getFullYear() }} OpenVue ·
+        {{ t('footer.copyright', { year: new Date().getFullYear() }) }} ·
         <a href="https://github.com/yunend/openvue" target="_blank" class="underline hover:opacity-80">GitHub</a>
       </p>
     </footer>
@@ -25,9 +25,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import NavBar from './components/web/NavBar.vue'
 import AboutModal from './components/web/AboutModal.vue'
 import { useTheme } from './composables/useTheme'
+
+const { t } = useI18n()
 
 // 初始化主题
 useTheme()

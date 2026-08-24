@@ -5,8 +5,8 @@
       class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/20 transition duration-200"
       :class="isOpen ? 'bg-white/20' : ''"
     >
-      <span class="text-lg">{{ currentThemeOption.icon }}</span>
-      <span class="text-sm hidden sm:inline">{{ t(currentThemeOption.labelKey) }}</span>
+      <span class="text-lg">🌐</span>
+      <span class="text-sm hidden sm:inline">{{ currentLocaleLabel }}</span>
       <svg 
         class="w-4 h-4 transition-transform duration-200" 
         :class="isOpen ? 'rotate-180' : ''"
@@ -17,21 +17,19 @@
       </svg>
     </button>
 
-    <!-- 下拉菜单 -->
     <div
       v-if="isOpen"
-      class="absolute right-0 mt-2 w-40 rounded-lg shadow-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 py-1 z-50"
+      class="absolute right-0 mt-2 w-32 rounded-lg shadow-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 py-1 z-50"
     >
       <button
-        v-for="theme in themes"
-        :key="theme.name"
-        @click="selectTheme(theme.name)"
+        v-for="lang in languages"
+        :key="lang.code"
+        @click="selectLanguage(lang.code)"
         class="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-        :class="currentTheme === theme.name ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-gray-700 dark:text-gray-300'"
+        :class="currentLocale === lang.code ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-gray-700 dark:text-gray-300'"
       >
-        <span class="text-base">{{ theme.icon }}</span>
-        <span>{{ t(theme.labelKey) }}</span>
-        <span v-if="currentTheme === theme.name" class="ml-auto">✓</span>
+        <span>{{ lang.label }}</span>
+        <span v-if="currentLocale === lang.code" class="ml-auto">✓</span>
       </button>
     </div>
   </div>
@@ -40,21 +38,30 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useTheme } from '../../composables/useTheme'
+import { setLocale, getCurrentLocale, type LocaleKey } from '../../i18n'
 
-const { t } = useI18n()
-const { currentTheme, themes, setTheme, getCurrentThemeOption } = useTheme()
+const { locale } = useI18n()
 
 const isOpen = ref(false)
+const currentLocale = ref<LocaleKey>(getCurrentLocale())
 
-const currentThemeOption = computed(() => getCurrentThemeOption())
+const languages = [
+  { code: 'zh-CN' as LocaleKey, label: '中文' },
+  { code: 'en' as LocaleKey, label: 'English' },
+]
+
+const currentLocaleLabel = computed(() => {
+  return languages.find(l => l.code === currentLocale.value)?.label || '中文'
+})
 
 function toggleDropdown(): void {
   isOpen.value = !isOpen.value
 }
 
-function selectTheme(themeName: string): void {
-  setTheme(themeName as any)
+function selectLanguage(code: LocaleKey): void {
+  setLocale(code)
+  currentLocale.value = code
+  locale.value = code
   isOpen.value = false
 }
 

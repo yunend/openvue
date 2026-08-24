@@ -4,8 +4,8 @@
       <a class="text-4xl px-5 py-3 hover:translate-x-5 duration-300" href="/">OpenVue</a>
       
       <ul class="hidden md:flex gap-x-5 mx-3 items-center">
-        <li class="p-3 hover:bg-white/20 cursor-pointer"><router-link to="/">主页</router-link></li>
-        <li class="p-3 hover:bg-white/20 cursor-pointer"><router-link to="/upload">上传文件</router-link></li>
+        <li class="p-3 hover:bg-white/20 cursor-pointer"><router-link to="/">{{ t('nav.home') }}</router-link></li>
+        <li class="p-3 hover:bg-white/20 cursor-pointer"><router-link to="/upload">{{ t('nav.upload') }}</router-link></li>
       </ul>
       
       <ul class="hidden lg:flex mx-3 items-center ml-auto">
@@ -13,9 +13,14 @@
           class="p-3 hover:bg-white/20 cursor-pointer"
           @click="$emit('open-about')"
         >
-          关于
+          {{ t('nav.about') }}
         </li>
       </ul>
+
+      <!-- 语言切换 -->
+      <div class="hidden md:block">
+        <LanguageSwitcher />
+      </div>
 
       <!-- 主题切换 -->
       <div class="ml-auto lg:ml-0">
@@ -48,13 +53,16 @@
             </svg>
           </button>
         </li>
-        <li class="p-3 hover:bg-white/20 cursor-pointer duration-300"><router-link to="/">主页</router-link></li>
-        <li class="p-3 hover:bg-white/20 cursor-pointer duration-300"><router-link to="/upload">上传文件</router-link></li>
+        <li class="p-3 hover:bg-white/20 cursor-pointer duration-300"><router-link to="/">{{ t('nav.home') }}</router-link></li>
+        <li class="p-3 hover:bg-white/20 cursor-pointer duration-300"><router-link to="/upload">{{ t('nav.upload') }}</router-link></li>
         <li 
           class="p-3 hover:bg-white/20 cursor-pointer duration-300"
           @click="$emit('open-about'); $emit('close-menu')"
         >
-          关于
+          {{ t('nav.about') }}
+        </li>
+        <li class="p-3 hover:bg-white/20 cursor-pointer duration-300">
+          <LanguageSwitcher />
         </li>
         <li class="p-3 hover:bg-white/20 cursor-pointer duration-300">
           <ThemeSwitcher />
@@ -65,7 +73,11 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import ThemeSwitcher from './ThemeSwitcher.vue'
+import LanguageSwitcher from './LanguageSwitcher.vue'
+
+const { t } = useI18n()
 
 defineProps<{
   isMenuOpen: boolean

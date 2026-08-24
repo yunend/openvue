@@ -4,17 +4,17 @@ export type ThemeName = 'light' | 'dark' | 'sunset' | 'forest' | 'ocean'
 
 export interface ThemeOption {
   name: ThemeName
-  label: string
+  labelKey: string  // 国际化 key
   icon: string
   class: string
 }
 
 export const THEMES: ThemeOption[] = [
-  { name: 'light', label: '白天', icon: '☀️', class: '' },
-  { name: 'dark', label: '黑夜', icon: '🌙', class: 'theme-dark' },
-  { name: 'sunset', label: '日落', icon: '🌅', class: 'theme-sunset' },
-  { name: 'forest', label: '森林', icon: '🌲', class: 'theme-forest' },
-  { name: 'ocean', label: '海洋', icon: '🌊', class: 'theme-ocean' },
+  { name: 'light', labelKey: 'theme.light', icon: '☀️', class: '' },
+  { name: 'dark', labelKey: 'theme.dark', icon: '🌙', class: 'theme-dark' },
+  { name: 'sunset', labelKey: 'theme.sunset', icon: '🌅', class: 'theme-sunset' },
+  { name: 'forest', labelKey: 'theme.forest', icon: '🌲', class: 'theme-forest' },
+  { name: 'ocean', labelKey: 'theme.ocean', icon: '🌊', class: 'theme-ocean' },
 ]
 
 export function useTheme() {
