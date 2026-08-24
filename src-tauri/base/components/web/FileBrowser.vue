@@ -1,5 +1,5 @@
 <template>
-  <div id="file-browser" class="w-10/12 bg-slate-50 min-h-80 mx-auto mt-6 flex flex-col items-center gap-1 overflow-y-auto p-4">
+  <div id="file-browser" class="w-11/12 bg-slate-50 min-h-80 mx-auto mt-6 flex flex-col items-center gap-1 overflow-y-auto p-4">
     <div class="w-full text-sm text-blue-600 font-medium mb-1">
       📂 /{{ currentPath.length > 0 ? currentPath.join('/') : '根目录' }}
     </div>

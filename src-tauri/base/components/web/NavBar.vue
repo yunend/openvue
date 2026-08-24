@@ -13,7 +13,7 @@
           class="p-3 hover:bg-blue-900/50 cursor-pointer"
           @click="$emit('open-about')"
         >
-          <a href="#about">关于</a>
+          关于
         </li>
       </ul>
       
@@ -49,7 +49,7 @@
           class="p-3 hover:bg-blue-900/50 cursor-pointer duration-300"
           @click="$emit('open-about'); $emit('close-menu')"
         >
-          <a href="#about">关于</a>
+          关于
         </li>
       </ul>
     </div>

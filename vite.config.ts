@@ -12,7 +12,13 @@ export default defineConfig(({ mode }: { mode: string }) => {
     root: isDesktop ? 'src' : (isWeb ? 'src-tauri/base' : '.'),
     build: {
       outDir: isDesktop ? '../dist-desktop' : (isWeb ? '../dist-web' : '../dist'),
-      emptyOutDir: true
+      emptyOutDir: true,
+      rollupOptions: isWeb ? {
+        input: {
+          main: resolve(__dirname, 'src-tauri/base/index.html'),
+          '404': resolve(__dirname, 'src-tauri/base/404.html')
+        }
+      } : undefined
     },
     server: {
       port: 5173,

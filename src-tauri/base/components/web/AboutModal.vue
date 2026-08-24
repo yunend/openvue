@@ -19,41 +19,48 @@
         </div>
 
         <template v-else-if="aboutData">
-          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div class="text-sm text-gray-500 mb-1">当前软件版本</div>
-            <div class="flex items-baseline gap-3">
-              <span class="text-3xl font-bold text-blue-700 font-mono">v{{ aboutData.version }}</span>
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+            <div>
+              <div class="text-sm text-gray-500 mb-1">当前软件版本</div>
+              <div class="flex items-baseline gap-3">
+                <span class="text-3xl font-bold text-blue-700 font-mono">v{{ aboutData.version }}</span>
+              </div>
+              <div class="text-xs text-gray-400 mt-2">技术栈：{{ aboutData.buildStack }}</div>
             </div>
-            <div class="text-xs text-gray-400 mt-2">技术栈：{{ aboutData.buildStack }}</div>
+
+            <div class="border-t border-blue-200 pt-3">
+              <div class="text-sm text-gray-500 mb-2">⚙️ 当前配置</div>
+              <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm text-gray-600">文件上传：</span>
+                  <span :class="aboutData.config?.enableUpload ? 'text-green-600 font-medium' : 'text-red-600'">
+                    {{ aboutData.config?.enableUpload ? '已启用' : '已禁用' }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm text-gray-600">服务端口：</span>
+                  <span class="font-mono font-medium">{{ aboutData.config?.port }}</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <span class="text-sm text-gray-600 whitespace-nowrap">公共目录：</span>
+                  <span class="font-mono text-xs break-all">{{ aboutData.config?.publicFolder }}</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div>
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="font-bold text-gray-700">⚙️ 当前配置（config.json）</h3>
-              <button 
-                @click="copyConfigToClipboard(prettyConfigJson)"
-                class="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded transition text-gray-600"
-              >
-                {{ copiedConfig ? '✅ 已复制' : '📋 复制配置' }}
-              </button>
-            </div>
-            <pre class="bg-slate-900 text-green-400 text-sm p-4 rounded-lg overflow-x-auto leading-relaxed font-mono">{{ prettyConfigJson }}</pre>
-          </div>
-
-          <div>
-            <h3 class="font-bold text-gray-700 mb-2">🧩 当前可用扩展名</h3>
-            <div v-if="aboutPlugins && Object.keys(aboutPlugins).length > 0" class="flex flex-wrap gap-2">
+            <h3 class="font-bold text-gray-700 mb-2">🧩 当前已启用的扩展名</h3>
+            <div v-if="enabledPlugins.length > 0" class="flex flex-wrap gap-2">
               <span 
-                v-for="(entry, ext) in aboutPlugins" 
-                :key="ext"
-                :class="statusBadgeClass(entry.status)"
-                class="px-2 py-1 rounded text-xs font-mono"
+                v-for="plugin in enabledPlugins" 
+                :key="plugin.ext"
+                class="px-2 py-1 rounded text-xs font-mono bg-green-100 text-green-800 border border-green-300"
               >
-                .{{ ext }}
-                <span class="ml-1 opacity-70">({{ statusLabel(entry.status) }})</span>
+                .{{ plugin.ext }}
               </span>
             </div>
-            <div v-else class="text-sm text-gray-400">暂无扩展名配置</div>
+            <div v-else class="text-sm text-gray-400">暂无已启用的扩展名</div>
           </div>
 
           <div>
@@ -114,6 +121,13 @@ const {
 const prettyConfigJson = computed(() => {
   if (!aboutData.value) return ''
   return JSON.stringify(aboutData.value.config, null, 2)
+})
+
+const enabledPlugins = computed(() => {
+  if (!aboutPlugins.value) return []
+  return Object.entries(aboutPlugins.value)
+    .filter(([_, entry]) => entry.status === 'enabled')
+    .map(([ext, entry]) => ({ ext, ...entry }))
 })
 
 onMounted(() => {
