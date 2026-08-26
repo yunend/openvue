@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MD阅读 - 插件</title>
+    <script src="tailwind.js"></script>
+    <link rel="stylesheet" href="./katex.min.css">
+    <link rel="shortcut icon" href="./logo.ico" type="image/x-icon">
+
+    <!-- 延迟加载核心库 -->
+    <script defer src="./marked.min.js"></script>
+    <script defer src="./katex.min.js"></script>
+    
+    <!-- Mermaid 懒加载：仅在需要时加载 -->
+
+    <style>
+        /* Markdown 内容样式 */
+        .markdown-body {
+            line-height: 1.8;
+            color: #334155;
+        }
+
+        .markdown-body h1 {
+            font-size: 2em;
+            font-weight: 700;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            padding-bottom: 0.3em;
+            border-bottom: 2px solid #e2e8f0;
+            color: #1e293b;
+        }
+
+        .markdown-body h2 {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-top: 1.4em;
+            margin-bottom: 0.4em;
+            padding-bottom: 0.2em;
+            border-bottom: 1px solid #e2e8f0;
+            color: #1e293b;
+        }
+
+        .markdown-body h3 {
+            font-size: 1.25em;
+            font-weight: 600;
+            margin-top: 1.2em;
+            margin-bottom: 0.3em;
+            color: #1e293b;
+        }
+
+        .markdown-body h4,
+        .markdown-body h5,
+        .markdown-body h6 {
+            font-weight: 600;
+            margin-top: 1em;
+            margin-bottom: 0.3em;
+            color: #1e293b;
+        }
+
+        .markdown-body p {
+            margin-bottom: 1em;
+        }
+
+        .markdown-body a {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+        .markdown-body a:hover {
+            color: #1d4ed8;
+        }
+
+        .markdown-body ul,
+        .markdown-body ol {
+            margin-bottom: 1em;
+            padding-left: 2em;
+        }
+
+        .markdown-body ul {
+            list-style-type: disc;
+        }
+
+        .markdown-body ol {
+            list-style-type: decimal;
+        }
+
+        .markdown-body li {
+            margin-bottom: 0.3em;
+        }
+
+        .markdown-body blockquote {
+            margin: 1em 0;
+            padding: 0.5em 1em;
+            border-left: 4px solid #3b82f6;
+            background-color: #f1f5f9;
+            border-radius: 0 0.5rem 0.5rem 0;
+            color: #475569;
+        }
+
+        .markdown-body code {
+            background-color: #f1f5f9;
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+            font-family: 'Courier New', Courier, monospace;
+            color: #dc2626;
+        }
+
+        .markdown-body pre {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1em;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin-bottom: 1em;
+        }
+
+        .markdown-body pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+            font-size: 0.9em;
+        }
+
+        .markdown-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1em;
+        }
+
+        .markdown-body th,
+        .markdown-body td {
+            border: 1px solid #cbd5e1;
+            padding: 0.5em 0.75em;
+            text-align: left;
+        }
+
+        .markdown-body th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+        }
+
+        .markdown-body tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .markdown-body img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            margin: 1em 0;
+        }
+
+        .markdown-body hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 2em 0;
+        }
+
+        .markdown-body strong {
+            font-weight: 700;
+        }
+
+        .markdown-body em {
+            font-style: italic;
+        }
+
+        .markdown-body > :first-child {
+            margin-top: 0;
+        }
+
+        .markdown-body > :last-child {
+            margin-bottom: 0;
+        }
+
+        /* Mermaid 图表样式 */
+        .mermaid {
+            background-color: #f8fafc;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin: 1em 0;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-100 flex flex-col">
+    <!-- 导航栏 -->
+    <nav class="w-full bg-blue-700">
+        <section class="h-20 w-10/12 mx-auto font-mono text-white flex items-center gap-x-3">
+            <a class="text-4xl px-5 py-3 hover:translate-x-5 duration-300">MD</a>
+            <ul class="hidden md:flex gap-x-5 mx-3 items-center">
+                <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><a href="/">主页</a></li>
+                <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><a href="./editor.html">MD编辑</a></li>
+            </ul>
+        </section>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="flex-1 flex flex-col items-center py-8">
+        <!-- 标题显示 -->
+        <div id="current-file-title" class="text-center text-blue-600 font-bold text-2xl mb-6">
+        </div>
+
+        <!-- Markdown 内容容器 -->
+        <div class="markdown-wrapper w-[85%] max-w-[1280px] min-h-[400px] relative p-0 overflow-hidden flex flex-col justify-start items-center">
+            <div id="md-content" class="markdown-body w-full bg-white p-8 rounded-xl shadow-lg"></div>
+        </div>
+
+        <!-- 错误提示 -->
+        <div id="error-message" class="hidden text-red-500 bg-red-50 border border-red-200 rounded-lg px-6 py-4 mt-4 text-center"></div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="w-full bg-blue-700 text-white py-4">
+        <p class="text-center">问君能有几多愁？</p>
+    </footer>
+
+    <script>
+        let mermaidLoaded = false;
+
+        async function loadMermaid() {
+            if (mermaidLoaded) return;
+            
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = './mermaid.min.js';
+                script.onload = () => {
+                    mermaidLoaded = true;
+                    mermaid.initialize({
+                        startOnLoad: false,
+                        theme: 'default',
+                        securityLevel: 'loose',
+                        flowchart: {
+                            useMaxWidth: true,
+                            htmlLabels: true,
+                            curve: 'basis'
+                        }
+                    });
+                    resolve();
+                };
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        function getQueryParams() {
+            const queryString = location.search;
+            const queryParams = new URLSearchParams(queryString);
+            return queryParams;
+        }
+
+        function updateTitle(filePath) {
+            const titleElement = document.getElementById('current-file-title');
+            if (filePath) {
+                const fileName = filePath.split('/').pop().split('\\').pop();
+                titleElement.textContent = `${fileName}`;
+            } else {
+                titleElement.textContent = '未选择文件';
+            }
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('error-message');
+            errorEl.textContent = message;
+            errorEl.classList.remove('hidden');
+        }
+
+        function hideError() {
+            const errorEl = document.getElementById('error-message');
+            errorEl.classList.add('hidden');
+        }
+
+        let mathPlaceholders = [];
+
+        function protectMath(text) {
+            mathPlaceholders = [];
+            
+            text = text.replace(/\$\$([\s\S]*?)\$\$/g, function(match, formula) {
+                mathPlaceholders.push({ type: 'display', formula: formula.trim() });
+                return `%%MATH_PLACEHOLDER_${mathPlaceholders.length - 1}%%`;
+            });
+
+            text = text.replace(/\$([^$]+?)\$/g, function(match, formula) {
+                mathPlaceholders.push({ type: 'inline', formula: formula.trim() });
+                return `%%MATH_PLACEHOLDER_${mathPlaceholders.length - 1}%%`;
+            });
+
+            return text;
+        }
+
+        function restoreMath(html) {
+            for (let i = 0; i < mathPlaceholders.length; i++) {
+                const placeholder = mathPlaceholders[i];
+                try {
+                    const rendered = katex.renderToString(placeholder.formula, {
+                        displayMode: placeholder.type === 'display',
+                        throwOnError: false
+                    });
+                    
+                    if (placeholder.type === 'display') {
+                        html = html.replace(`%%MATH_PLACEHOLDER_${i}%%`, `<div class="katex-display">${rendered}</div>`);
+                    } else {
+                        html = html.replace(`%%MATH_PLACEHOLDER_${i}%%`, rendered);
+                    }
+                } catch (e) {
+                    console.error('KaTeX 渲染错误:', e);
+                }
+            }
+            return html;
+        }
+
+        async function renderMermaidDiagrams() {
+            const mermaidElements = document.querySelectorAll('.language-mermaid');
+            
+            for (let i = 0; i < mermaidElements.length; i++) {
+                const element = mermaidElements[i];
+                const code = element.textContent;
+                const parent = element.parentElement;
+                
+                try {
+                    const id = `mermaid-${i}`;
+                    const { svg } = await mermaid.render(id, code);
+                    
+                    const mermaidDiv = document.createElement('div');
+                    mermaidDiv.className = 'mermaid';
+                    mermaidDiv.innerHTML = svg;
+                    
+                    parent.replaceWith(mermaidDiv);
+                } catch (error) {
+                    console.error('Mermaid 渲染失败:', error);
+                    parent.innerHTML = `<pre class="text-red-500 text-sm">流程图语法错误: ${error.message}</pre>`;
+                }
+            }
+        }
+
+        async function loadMarkdown(filePath) {
+            const mdContent = document.getElementById('md-content');
+
+            if (!filePath) {
+                mdContent.innerHTML = '<p class="text-gray-400 text-center py-20">请在URL中通过 <code>path</code> 参数指定Markdown文件路径</p>';
+                updateTitle('');
+                return;
+            }
+
+            mdContent.innerHTML = '';
+            hideError();
+
+            try {
+                const response = await fetch(filePath);
+
+                if (!response.ok) {
+                    throw new Error(`无法加载文件 (HTTP ${response.status}: ${response.statusText})`);
+                }
+
+                const mdText = await response.text();
+
+                if (typeof marked !== 'undefined') {
+                    const protectedText = protectMath(mdText);
+                    const html = marked.parse(protectedText);
+                    mdContent.innerHTML = restoreMath(html);
+                    
+                    if (html.includes('language-mermaid')) {
+                        await loadMermaid();
+                        await renderMermaidDiagrams();
+                    }
+                } else {
+                    mdContent.innerHTML = `<pre class="text-sm">${mdText}</pre>`;
+                }
+
+                updateTitle(filePath);
+            } catch (error) {
+                console.error('加载Markdown文件失败:', error);
+                mdContent.innerHTML = '';
+                showError(`加载Markdown文件失败：${error.message}`);
+                updateTitle(filePath);
+            } finally {
+                // 加载完成
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', function () {
+            const queryParams = getQueryParams();
+            const mdFilePath = queryParams.has('path') ? queryParams.get('path') : '';
+            loadMarkdown(mdFilePath);
+        });
+    </script>
+</body>
+</html>

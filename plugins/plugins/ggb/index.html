@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GGB编辑 - 文件视界</title>
+    <title>GGB预览与编辑 - 插件</title>
     <script src="./tailwind.js"></script>
-    <script src="./GeoGebra/deployggb.js"></script>
+    <script defer src="./GeoGebra/deployggb.js"></script>
     <link rel="shortcut icon" href="./logo.ico" type="image/x-icon">
     
     <style>
@@ -45,12 +45,18 @@
     <!-- 导航栏 -->
     <nav class="w-full bg-blue-700">
         <section class="h-20 w-10/12 mx-auto font-mono text-white flex items-center gap-x-3">
-            <a class="text-4xl px-5 py-3 hover:translate-x-5 duration-300" href="/">OpenVue</a>
+            <a class="text-4xl px-5 py-3 hover:translate-x-5 duration-300">GGB</a>
             <ul class="hidden md:flex gap-x-5 mx-3 items-center">
                 <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><a href="/">主页</a></li>
-                <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><a href="../upload.html">上传文件</a></li>
-                <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><a href="./GeoGebra/HTML5/5.0/GeoGebra.html" target="_blank">GGB编辑</a></li>
+                <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><a href="./GeoGebra/HTML5/5.0/GeoGebra.html" target="_blank">GGB本地</a></li>
             </ul>
+            <button 
+                onclick="toggleToolBar()"
+                class="ml-auto px-3 py-2 bg-blue-500/40 border border-blue-400/40 rounded-lg hover:bg-blue-400/60 active:scale-95 transition-all text-white text-sm font-bold whitespace-nowrap"
+                title="显示/隐藏工具按钮"
+            >
+                ✏️ 编辑
+            </button>
         </section>
     </nav>
 
@@ -65,15 +71,6 @@
             <div id="loading" class="sk-spinner-pulse"></div>
             <div id="ggb-element"></div>
         </div>
-
-        <!-- 工具栏切换按钮 -->
-        <button 
-            onclick="toggleToolBar()"
-            class="fixed right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/30 border border-gray-300/30 rounded-full shadow-md flex items-center justify-center hover:bg-blue-600/30 hover:text-white transition-all z-50 text-xl"
-            title = "显示/隐藏工具按钮"
-        >
-            🔧
-        </button>
     </main>
 
     <!-- 页脚 -->

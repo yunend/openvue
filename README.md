@@ -1,7 +1,179 @@
-# Tauri + Vanilla
+# OpenVue
 
-This template should help get you started developing with Tauri in vanilla HTML, CSS and Javascript.
+🚀 **OpenVue** 是一款跨平台的本地文件共享与浏览工具，基于 **Tauri 2.x** 构建。它将 Rust 的高性能 HTTP 服务与 Vue 3 的现代化前端界面相结合，让你在局域网内快速分享文件、浏览目录，并支持插件扩展。
 
-## Recommended IDE Setup
+---
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+## 🏗️ 项目架构
+
+```
+┌──────────────────────────────────────────────┐
+│                  用户环境                     │
+│                                              │
+│  ┌─────────────────┐   ┌──────────────────┐  │
+│  │ 桌面端 (Server)  │   │ 浏览器 (Client)  │  │
+│  │                  │   │                 │  │
+│  │ Tauri 2.x 窗口   │   │ http://IP:8005   │  │
+│  │ Rust + Axum      │──▶│ Vue 3 + Tailwind│ │
+│  │ HTTP 静态服务    │   │ 文件浏览 & 上传   │  │
+│  └─────────────────┘   └──────────────────┘  │
+│                                              │
+└──────────────────────────────────────────────┘
+```
+
+| 层级 | 技术栈 | 职责 |
+|------|--------|------|
+| **桌面端 (Server)** | Tauri 2.x + Rust + Axum + tower-http | 启动 HTTP 服务、托盘图标、文件服务、API 路由 |
+| **客户端 (Web)** | Vue 3 + Vue Router + Vue i18n + Tailwind CSS | 文件浏览、目录导航、文件上传、插件展示 |
+| **插件系统** | JSON 配置驱动 (plugins.json) | 扩展名 → 打开方式映射，支持 GeoGebra 等第三方工具 |
+
+---
+
+## 🚀 执行项目
+
+### 方法一：开发模式（源码运行）
+
+**环境要求：**
+- Node.js >= 18
+- Rust 工具链（[rustup](https://rustup.rs/) ）
+- Windows / macOS / Linux
+
+```bash
+# 克隆项目
+git clone https://github.com/yunend/openvue.git
+cd openvue
+
+# 安装依赖
+npm install
+
+# 启动开发模式
+npm run tauri dev
+```
+
+### 方法二：下载编译好的二进制文件
+
+从 [GitHub Releases](https://github.com/yunend/openvue/releases) 下载对应操作系统的安装包：
+
+| 操作系统 | 文件格式 | 说明 |
+|----------|----------|------|
+| Windows | `.msi` / `.exe` | 双击安装或直接运行 |
+| macOS | `.dmg` | 拖入 Applications 文件夹 |
+| Linux | `.AppImage` / `.deb` | 添加执行权限后运行 |
+
+---
+
+## ⚙️ 程序配置说明
+
+### 配置文件位置
+
+解压或安装后，在程序目录下找到 `config.json`：
+
+
+```json
+{
+  "port": 8005,
+  "publicFolder": "public",
+  "enableUpload": true
+}
+```
+
+| 配置项 | 类型 | 说明 |
+|--------|------|------|
+| `port` | 数字 | HTTP 服务监听端口（默认 8005） |
+| `publicFolder` | 字符串 | 文件根目录路径（相对或绝对路径） |
+| `enableUpload` | 布尔 | 是否启用文件上传功能 |
+
+### 使用步骤
+
+1. **打开程序界面修改文件夹路径** — 在程序主界面中点击设置按钮，修改文件根目录（`publicFolder`）为你想要共享的文件夹路径
+
+   ![修改文件夹路径](screenshots/config.png)
+
+2. **修改插件配置** — 在设置界面中启用或禁用各个文件扩展名对应的插件（如 GeoGebra、MD 等），控制文件的打开方式
+
+   ![插件配置](screenshots/plugins.png)
+
+3. **浏览器访问** — 程序启动后自动打开浏览器，或手动访问 `http://localhost:8005`
+
+   ![浏览器界面](screenshots/web-ui.png)
+
+4. **局域网内其他设备访问** — 使用 `http://<本机IP>:8005`
+
+   ![目录浏览](screenshots/dir-browse.png)
+
+### 扩展名启用/禁用
+
+通过 `plugins.json` 控制不同文件扩展名的打开方式：
+
+```json
+{
+  "extensions": {
+    "ggb": {
+      "status": "Enabled",
+      "pluginId": "ggb",
+      "urlTemplate": "/plugins/ggb/index.html?file={filePath}",
+      "description": "GeoGebra 数学动态几何工具",
+      "name": "GeoGebra"
+    },
+    "pdf": {
+      "status": "BrowserDefault",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "PDF 文档",
+      "name": "PDF"
+    }
+  }
+}
+```
+
+| status 值 | 含义 |
+|-----------|------|
+| `BrowserDefault` | 由浏览器默认打开 |
+| `Enabled` | 启用插件打开 |
+| `Disabled` | 禁用（不显示在列表中） |
+| `Undeveloped` | 尚未开发（灰色显示） |
+
+---
+
+## 🔌 插件持续开发与集成
+
+OpenVue 支持通过插件系统扩展文件打开方式。插件存放在 `plugins/` 目录下，通过 `plugins.json` 注册。
+
+### GeoGebra (GGB) 插件
+
+已集成的 GeoGebra 插件支持在浏览器中直接打开 `.ggb` 数学课件文件。
+
+![GeoGebra 插件演示](screenshots/ggb-demo.gif)
+
+### 插件开发
+
+每个插件目录结构：
+
+```
+plugins/
+└── <插件名>/
+    └── index.html          # 插件入口页面
+    └── ...                 # 插件资源文件
+```
+
+在 `plugins.json` 的 `extensions` 中添加对应扩展名配置即可完成注册。
+
+### 计划中的插件
+
+- [ ] PDF 预览（`pdf`）
+- [ ] Xmind 脑图查看器（`.xmind`、`.xmap`）
+
+---
+
+## 📧 联系方式
+
+- **邮箱**：303218145@qq.com
+- **GitHub**：[https://github.com/yunend/openvue](https://github.com/yunend/openvue)
+
+欢迎提交 Issue、PR 或通过邮件反馈问题与建议！
+
+---
+
+## 📄 开源协议
+
+本项目基于 MIT License 开源，详见 [LICENSE](LICENSE) 文件。

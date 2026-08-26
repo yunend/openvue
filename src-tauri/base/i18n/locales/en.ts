@@ -66,6 +66,6 @@ export default {
     en: 'English',
   },
   footer: {
-    copyright: '© {year} OpenVue',
+    copyright: '© 2026 yunend',
   },
 }

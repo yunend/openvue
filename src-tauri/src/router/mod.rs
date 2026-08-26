@@ -9,11 +9,19 @@ pub mod dir;
 pub mod upload;
 
 use axum::Router;
+use axum::middleware::{self, Next};
+use axum::response::Response;
+use axum::extract::Request;
+use axum::http::header::{CONTENT_TYPE, CONTENT_SECURITY_POLICY, REFERRER_POLICY, X_FRAME_OPTIONS};
+use axum::http::HeaderValue;
 use std::path::PathBuf;
 use tower_http::services::ServeDir;
 use tower_http::services::ServeFile;
+use tower_http::compression::CompressionLayer;
 use axum::extract::State;
 use crate::plugins::PluginsConfig;
+
+
 
 // ==========================================
 // 🔵 共享状态（通过 Axum State 传递给每个 handler）
@@ -97,12 +105,85 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
             ServeDir::new(&base_dir)
                 .fallback(ServeFile::new(base_dir.join("404.html"))),
         )
+        // ✅ CompressionLayer 放最外层（响应时最后进入、最先离开）
+        //    charset 中间件放内层（更靠近 ServeDir），确保在压缩之前就把 charset 写进 Content-Type
+        .layer(CompressionLayer::new())
+        .layer(middleware::from_fn(add_security_headers))
+        .layer(middleware::from_fn(add_text_charset_utf8))
         
 }
 
 // ==========================================
 // 🟢 内部函数（仅本模块使用）
 // ==========================================
+
+// ----------------------------------------------------------------
+// 🛡️ 中间件：为所有响应添加安全头
+//  - Referrer-Policy: same-origin — 防止 Referer 泄露到第三方
+//  - Content-Security-Policy     — 防止 XSS / 数据注入攻击
+//  - X-Frame-Options: DENY        — 防止点击劫持（Clickjacking）
+//  - X-Content-Type-Options: nosniff — 防止 MIME 类型嗅探
+// ----------------------------------------------------------------
+async fn add_security_headers(request: Request, next: Next) -> Response {
+    let mut response = next.run(request).await;
+    let headers = response.headers_mut();
+    headers.insert(
+        REFERRER_POLICY,
+        HeaderValue::from_static("same-origin"),
+    );
+    headers.insert(
+        CONTENT_SECURITY_POLICY,
+        HeaderValue::from_static(
+            "default-src 'self'; \
+             script-src 'self' 'unsafe-inline' 'unsafe-eval'; \
+             style-src 'self' 'unsafe-inline'; \
+             img-src 'self' data: blob:; \
+             font-src 'self' data:; \
+             connect-src 'self'; \
+             frame-ancestors 'none';"
+        ),
+    );
+    headers.insert(
+        X_FRAME_OPTIONS,
+        HeaderValue::from_static("DENY"),
+    );
+    headers.insert(
+        axum::http::header::X_CONTENT_TYPE_OPTIONS,
+        HeaderValue::from_static("nosniff"),
+    );
+    response
+}
+
+// ----------------------------------------------------------------
+// 🛡️ 中间件：为文本类响应自动追加 charset=utf-8
+//   原因：tower_http::ServeDir 默认只返回 "text/plain" "application/json" 等，不带编码。
+//         中文 Windows 浏览器若未看到 charset，会默认用 GBK 解码 UTF-8 文件 → 乱码。
+// ----------------------------------------------------------------
+async fn add_text_charset_utf8(request: Request, next: Next) -> Response {
+    let mut response = next.run(request).await;
+    if let Some(content_type) = response.headers().get(CONTENT_TYPE).cloned() {
+        if let Ok(ct_str) = content_type.to_str() {
+            let lower = ct_str.to_ascii_lowercase();
+            // 尚未设置 charset 时才追加（避免重复）
+            if !lower.contains("charset") {
+                let needs_utf8 = lower.starts_with("text/")
+                    || lower.starts_with("application/json")
+                    || lower.starts_with("application/javascript")
+                    || lower.starts_with("application/ecmascript")
+                    || lower.starts_with("application/xml")
+                    || lower.starts_with("application/xhtml")
+                    || lower.starts_with("application/csv")
+                    || lower.starts_with("image/svg"); // SVG 是 XML，需要 UTF-8
+                if needs_utf8 {
+                    if let Ok(new_ct) = HeaderValue::from_str(&format!("{}; charset=utf-8", ct_str)) {
+                        response.headers_mut().insert(CONTENT_TYPE, new_ct);
+                    }
+                }
+            }
+        }
+    }
+    response
+}
 
 /// 注册所有 API 路由
 ///

@@ -1,1 +1,2 @@
-文本txt
+浏览器默认自动打开txt文件。
+The browser automatically opens txt files by default.

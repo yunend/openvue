@@ -7,12 +7,89 @@
       "description": "HTML 网页 / HTML Webpage",
       "name": "HTML 页面 / HTML Page"
     },
-    "gif": {
+    "jpg": {
       "status": "browser-default",
       "pluginId": null,
       "urlTemplate": null,
-      "description": "GIF 动图 / GIF Animation",
+      "description": "JPG 图片 / JPG Image",
       "name": "图片预览 / Image Viewer"
+    },
+    "txt": {
+      "status": "browser-default",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "纯文本文件 / Plain Text File",
+      "name": "文本编辑器 / Text Editor"
+    },
+    "docx": {
+      "status": "undeveloped",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "Word 文档 / Word Document",
+      "name": "Office 文档查看器 / Office Viewer"
+    },
+    "md": {
+      "status": "enabled",
+      "pluginId": "md",
+      "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
+      "description": "Markdown 文档 / Markdown Document",
+      "name": "Markdown 渲染器 / Markdown Renderer"
+    },
+    "ggb": {
+      "status": "enabled",
+      "pluginId": "ggb",
+      "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
+      "description": "GeoGebra 交互式数学课件 / GeoGebra Interactive Math",
+      "name": "GeoGebra 插件 / GeoGebra Plugin"
+    },
+    "doc": {
+      "status": "undeveloped",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "Word 文档 / Word Document",
+      "name": "Office 文档查看器 / Office Viewer"
+    },
+    "zip": {
+      "status": "undeveloped",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "ZIP 压缩包 / ZIP Archive",
+      "name": "ZIP 解压器 / ZIP Extractor"
+    },
+    "pdf": {
+      "status": "browser-default",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "PDF 文档 / PDF Document",
+      "name": "PDF 阅读器 / PDF Reader"
+    },
+    "xlsx": {
+      "status": "undeveloped",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "Excel 表格 / Excel Spreadsheet",
+      "name": "Office 文档查看器 / Office Viewer"
+    },
+    "svg": {
+      "status": "browser-default",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "SVG 矢量图 / SVG Vector Graphic",
+      "name": "图片预览 / Image Viewer"
+    },
+    "ppt": {
+      "status": "undeveloped",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "PPT 演示文稿 / PowerPoint Presentation",
+      "name": "Office 文档查看器 / Office Viewer"
+    },
+    "mp4": {
+      "status": "browser-default",
+      "pluginId": null,
+      "urlTemplate": null,
+      "description": "MP4 视频 / MP4 Video",
+      "name": "视频播放器 / Video Player"
     },
     "jpeg": {
       "status": "browser-default",
@@ -28,68 +105,12 @@
       "description": "PPT 演示文稿 / PowerPoint Presentation",
       "name": "Office 文档查看器 / Office Viewer"
     },
-    "zip": {
-      "status": "undeveloped",
-      "pluginId": null,
-      "urlTemplate": null,
-      "description": "ZIP 压缩包 / ZIP Archive",
-      "name": "ZIP 解压器 / ZIP Extractor"
-    },
-    "mp4": {
+    "png": {
       "status": "browser-default",
       "pluginId": null,
       "urlTemplate": null,
-      "description": "MP4 视频 / MP4 Video",
-      "name": "视频播放器 / Video Player"
-    },
-    "svg": {
-      "status": "browser-default",
-      "pluginId": null,
-      "urlTemplate": null,
-      "description": "SVG 矢量图 / SVG Vector Graphic",
+      "description": "PNG 图片 / PNG Image",
       "name": "图片预览 / Image Viewer"
-    },
-    "docx": {
-      "status": "undeveloped",
-      "pluginId": null,
-      "urlTemplate": null,
-      "description": "Word 文档 / Word Document",
-      "name": "Office 文档查看器 / Office Viewer"
-    },
-    "txt": {
-      "status": "browser-default",
-      "pluginId": null,
-      "urlTemplate": null,
-      "description": "纯文本文件 / Plain Text File",
-      "name": "文本编辑器 / Text Editor"
-    },
-    "mp3": {
-      "status": "browser-default",
-      "pluginId": null,
-      "urlTemplate": null,
-      "description": "MP3 音频 / MP3 Audio",
-      "name": "音频播放器 / Audio Player"
-    },
-    "doc": {
-      "status": "undeveloped",
-      "pluginId": null,
-      "urlTemplate": null,
-      "description": "Word 文档 / Word Document",
-      "name": "Office 文档查看器 / Office Viewer"
-    },
-    "jpg": {
-      "status": "browser-default",
-      "pluginId": null,
-      "urlTemplate": null,
-      "description": "JPG 图片 / JPG Image",
-      "name": "图片预览 / Image Viewer"
-    },
-    "xlsx": {
-      "status": "undeveloped",
-      "pluginId": null,
-      "urlTemplate": null,
-      "description": "Excel 表格 / Excel Spreadsheet",
-      "name": "Office 文档查看器 / Office Viewer"
     },
     "xls": {
       "status": "undeveloped",
@@ -98,40 +119,19 @@
       "description": "Excel 表格 / Excel Spreadsheet",
       "name": "Office 文档查看器 / Office Viewer"
     },
-    "ppt": {
-      "status": "undeveloped",
-      "pluginId": null,
-      "urlTemplate": null,
-      "description": "PPT 演示文稿 / PowerPoint Presentation",
-      "name": "Office 文档查看器 / Office Viewer"
-    },
-    "ggb": {
-      "status": "enabled",
-      "pluginId": "ggb",
-      "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
-      "description": "GeoGebra 交互式数学课件 / GeoGebra Interactive Math",
-      "name": "GeoGebra 插件 / GeoGebra Plugin"
-    },
-    "png": {
+    "gif": {
       "status": "browser-default",
       "pluginId": null,
       "urlTemplate": null,
-      "description": "PNG 图片 / PNG Image",
+      "description": "GIF 动图 / GIF Animation",
       "name": "图片预览 / Image Viewer"
     },
-    "pdf": {
+    "mp3": {
       "status": "browser-default",
       "pluginId": null,
       "urlTemplate": null,
-      "description": "PDF 文档 / PDF Document",
-      "name": "PDF 阅读器 / PDF Reader"
-    },
-    "md": {
-      "status": "undeveloped",
-      "pluginId": null,
-      "urlTemplate": null,
-      "description": "Markdown 文档 / Markdown Document",
-      "name": "Markdown 渲染器 / Markdown Renderer"
+      "description": "MP3 音频 / MP3 Audio",
+      "name": "音频播放器 / Audio Player"
     }
   }
 }

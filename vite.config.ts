@@ -25,6 +25,11 @@ export default defineConfig(({ mode }: { mode: string }) => {
     server: {
       port: 5173,
       strictPort: true,
+      headers: {
+        'X-Frame-Options': 'DENY',
+        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'",
+        'Referrer-Policy': 'same-origin',
+      },
       proxy: {
         '/api': {
           target: 'http://localhost:3000',
