@@ -14,8 +14,7 @@ use axum::{
     response::{IntoResponse, Json},
 };
 use serde::Serialize;
-use std::path::{Path, PathBuf};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::path::Path;
 
 use super::RouterState;
 
@@ -161,44 +160,9 @@ pub async fn handle_upload(
 // 🟡 内部辅助函数
 // ==========================================
 
-/// 生成不冲突的文件名：
-///   - 如果磁盘没有同名文件，直接原名
-///   - 否则：原名_时间戳毫秒.扩展名
-///
-/// 例："photo.png" → "photo_1721960000123.png"
-fn generate_unique_filename(dir: &Path, original: &str) -> String {
-    let original_path = PathBuf::from(original);
-    let stem = original_path
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .unwrap_or("file");
-    let ext = original_path
-        .extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or("");
-
-    let first_try = if ext.is_empty() {
-        stem.to_string()
-    } else {
-        format!("{}.{}", stem, ext)
-    };
-
-    // 第一次尝试：没冲突就直接用原名
-    if !dir.join(&first_try).exists() {
-        return first_try;
-    }
-
-    // 冲突 → 加时间戳
-    let ts = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_millis())
-        .unwrap_or(0);
-
-    if ext.is_empty() {
-        format!("{}_{}", stem, ts)
-    } else {
-        format!("{}_{}.{}", stem, ts, ext)
-    }
+/// 始终返回原始文件名（同名文件会被覆盖）
+fn generate_unique_filename(_dir: &Path, original: &str) -> String {
+    original.to_string()
 }
 
 // ==========================================

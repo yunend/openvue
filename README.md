@@ -6,19 +6,20 @@
 
 ## 🏗️ 项目架构
 
-```
-┌──────────────────────────────────────────────┐
-│                  用户环境                     │
-│                                              │
-│  ┌─────────────────┐   ┌──────────────────┐  │
-│  │ 桌面端 (Server)  │   │ 浏览器 (Client)  │  │
-│  │                  │   │                 │  │
-│  │ Tauri 2.x 窗口   │   │ http://IP:8005   │  │
-│  │ Rust + Axum      │──▶│ Vue 3 + Tailwind│ │
-│  │ HTTP 静态服务    │   │ 文件浏览 & 上传   │  │
-│  └─────────────────┘   └──────────────────┘  │
-│                                              │
-└──────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph User["👤 用户环境"]
+        subgraph Desktop["🖥️ 桌面端 (Server)"]
+            Tauri["Tauri 2.x 窗口"]
+            Rust["Rust + Axum"]
+            HTTP["HTTP 静态服务"]
+        end
+        subgraph Browser["🌐 浏览器 (Client)"]
+            Vue["Vue 3 + Tailwind"]
+            Feature["文件浏览 & 上传"]
+        end
+        Desktop -->|"http://IP:8005"| Browser
+    end
 ```
 
 | 层级 | 技术栈 | 职责 |
@@ -54,11 +55,11 @@ npm run tauri dev
 
 从 [GitHub Releases](https://github.com/yunend/openvue/releases) 下载对应操作系统的安装包：
 
-| 操作系统 | 文件格式 | 说明 |
-|----------|----------|------|
-| Windows | `.msi` / `.exe` | 双击安装或直接运行 |
-| macOS | `.dmg` | 拖入 Applications 文件夹 |
-| Linux | `.AppImage` / `.deb` | 添加执行权限后运行 |
+| 操作系统 | 版本要求 | 文件格式 | 说明 |
+|----------|----------|----------|------|
+| Windows | Windows 10+ | `.msi` / `.exe` | 双击安装或直接运行 |
+| macOS | macOS 10.15+ | `.dmg` | 拖入 Applications 文件夹 |
+| Linux | Ubuntu 20.04+ / Debian 11+ | `.AppImage` / `.deb` | 添加执行权限后运行 |
 
 ---
 
@@ -81,7 +82,7 @@ npm run tauri dev
 |--------|------|------|
 | `port` | 数字 | HTTP 服务监听端口（默认 8005） |
 | `publicFolder` | 字符串 | 文件根目录路径（相对或绝对路径） |
-| `enableUpload` | 布尔 | 是否启用文件上传功能 |
+| `enableUpload` | 布尔 | 是否启用文件上传功能（上传文件保存在 `{publicFolder}/upload/` 目录下） |
 
 ### 使用步骤
 
