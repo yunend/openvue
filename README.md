@@ -8,18 +8,20 @@
 
 ```mermaid
 flowchart LR
-    subgraph User["👤 用户环境"]
-        subgraph Desktop["🖥️ 桌面端 (Server)"]
-            Tauri["Tauri 2.x 窗口"]
-            Rust["Rust + Axum"]
-            HTTP["HTTP 静态服务"]
-        end
-        subgraph Browser["🌐 浏览器 (Client)"]
-            Vue["Vue 3 + Tailwind"]
-            Feature["文件浏览 & 上传"]
-        end
-        Desktop -->|"http://IP:8005"| Browser
+    subgraph Desktop["🖥️ 桌面端 (Server)"]
+        direction LR
+        Tauri["Tauri 2.x 窗口"]
+        Rust["Rust + Axum"]
+        HTTP["HTTP 静态服务"]
     end
+
+    subgraph Browser["🌐 浏览器 (Client)"]
+        direction LR
+        Vue["Vue 3 + Tailwind"]
+        Feature["文件浏览 + 上传"]
+    end
+
+    Desktop -->|"http://IP:8005"| Browser
 ```
 
 | 层级 | 技术栈 | 职责 |
