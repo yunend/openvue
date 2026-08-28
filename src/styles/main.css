@@ -55,3 +55,51 @@
   .toggle-switch input:checked + .slider { background-color: #3f51b5; }
   .toggle-switch input:checked + .slider:before { transform: translateX(24px); }
 }
+
+/* ================================================================
+   🍎 macOS Desktop Mode (Tauri WKWebView) 渲染兼容性修复
+   问题：Flexbox + gap-* 在 macOS WKWebView 下对 button 元素间隙丢失
+   原因：button 带 border:none 时 WKWebView content-box 计算错误，gap 被吞掉
+   ================================================================ */
+@supports (-webkit-touch-callout: none) and (not (-moz-appearance: none)) {
+  /* ① 强制按钮使用标准盒模型，关闭 macOS 原生按钮外观 */
+  button {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* ② 兜底：所有 [class*="gap-"] flex 容器内的 button，用相邻选择器补 margin 代替 gap
+        （如果 gap 生效了，margin 会和 gap 叠加？不会——下面另加了 ":not([class*=gap-])" 隔离） */
+  [class*="flex"]:not([class*="gap-"]) > button + button {
+    margin-left: 12px;
+  }
+
+  /* ③ 针对我们用到的几个关键尺寸做精准兜底：直接给按钮组的按钮加间隙 */
+  .flex.gap-3 > button + button,
+  .flex.gap-2 > button + button,
+  .flex.gap-1 > button + button {
+    margin-left: 8px;
+  }
+  .flex.gap-3 > button + button { margin-left: 12px; }
+  .flex.gap-2 > button + button { margin-left: 8px;  }
+  .flex.gap-1 > button + button { margin-left: 4px;  }
+
+  /* ④ 针对自定义任意值（Tailwind 方括号语法），常见的 gap-[8px] gap-[10px] gap-[14px] */
+  [class*="gap-[8px]"]  > button + button { margin-left: 8px;  }
+  [class*="gap-[10px]"] > button + button { margin-left: 10px; }
+  [class*="gap-[14px]"] > button + button { margin-left: 14px; }
+
+  /* ⑤ 对 items-stretch（ConfigPanel 的 输入框+浏览按钮）这种需要严格对齐的场景 */
+  .flex.items-stretch[class*="gap-"] > * + * {
+    margin-left: 10px;
+  }
+
+  /* ⑥ 最后防止按钮的 content 被压得太小 */
+  button {
+    min-width: min-content !important;
+  }
+}
