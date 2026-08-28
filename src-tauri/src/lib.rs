@@ -140,15 +140,27 @@ fn setup_system_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>>
 /// 显示主窗口
 fn show_main_window(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
-        window.show().unwrap();
-        window.set_focus().unwrap();
+        // ① 安全兜底：如果窗口处于最小化状态，先恢复
+        let _ = window.unminimize();
+        // ② 显示窗口
+        let _ = window.show();
+        // ③ 聚焦窗口
+        let _ = window.set_focus();
+        // ④ 🍎 macOS 专有修复：hide() 后 App 可能失去激活状态，
+        //    需要额外触发用户注意力请求来强制激活 NSApplication
+        #[cfg(target_os = "macos")]
+        {
+            let _ = window.set_focus();
+            // request_user_attention 会触发 NSApp.activate(ignoringOtherApps: true)
+            let _ = window.request_user_attention(Some(tauri::window::UserAttentionType::Informational));
+        }
     }
 }
 
 /// 隐藏到托盘
 fn hide_to_tray(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
-        window.hide().unwrap();
+        let _ = window.hide();
     }
 }
 
