@@ -85,16 +85,57 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
     }
     let exe_path = std::env::current_exe().expect("无法获取可执行文件路径");
     let exe_dir = exe_path.parent().expect("无法获取可执行文件目录");
-    
-    // ✅ 优先使用 Vite 构建产物（dist-web），如果没有则回退到源码目录
-    let dist_web_dir = exe_dir.join("dist-web");
-    let base_dir = if dist_web_dir.exists() {
-        println!("✅ 使用 Vite 构建产物: {:?}", dist_web_dir);
-        dist_web_dir
-    } else {
-        let fallback = exe_dir.join("public");
-        println!("⚠️ 未找到构建产物，使用源码目录: {:?}", fallback);
-        fallback
+
+    // ---------- 资源目录查找：支持多平台 / 多安装布局 ----------
+    // 构建候选资源目录列表，按优先级排序
+    let mut resource_candidates: Vec<PathBuf> = Vec::new();
+
+    // ① Windows / macOS / AppImage：exe 同级目录
+    resource_candidates.push(exe_dir.to_path_buf());
+
+    // ② 🐧 Linux 多发行版探测（deb/rpm/Arch/Flatpak）
+    if cfg!(target_os = "linux") {
+        let exe_name = exe_path.file_stem().map(|s| s.to_string_lossy().to_string());
+        let linux_base_dirs: [&str; 5] = [
+            "/usr/lib",      // Debian/Ubuntu deb
+            "/usr/lib64",    // Fedora/RHEL rpm (64-bit)
+            "/usr/share",    // Arch/FHS 标准（架构无关资源）
+            "/app/lib",      // Flatpak 运行时
+            "/app/share",    // Flatpak 运行时（架构无关）
+        ];
+        for base in linux_base_dirs {
+            if let Some(ref name) = exe_name {
+                resource_candidates.push(PathBuf::from(base).join(name));
+            }
+            resource_candidates.push(PathBuf::from(base).join("openvue"));
+        }
+    }
+
+    // ✅ 遍历候选目录，找到第一个存在 dist-web 或 public 的
+    let mut found_base: Option<PathBuf> = None;
+    for res_dir in &resource_candidates {
+        let dist_web_dir = res_dir.join("dist-web");
+        if dist_web_dir.exists() {
+            println!("✅ 使用 Vite 构建产物: {:?}", dist_web_dir);
+            found_base = Some(dist_web_dir);
+            break;
+        }
+    }
+    let base_dir = match found_base {
+        Some(dir) => dir,
+        None => {
+            // 回退：找 public 目录
+            let mut fallback = exe_dir.join("public");
+            for res_dir in &resource_candidates {
+                let public_dir = res_dir.join("public");
+                if public_dir.exists() {
+                    fallback = public_dir;
+                    break;
+                }
+            }
+            println!("⚠️ 未找到 dist-web 构建产物，使用目录: {:?}", fallback);
+            fallback
+        }
     };
     Router::new()
         .merge(api_routes)

@@ -17,8 +17,33 @@ struct ServerState {
     plugins_config: plugins::PluginsConfig,
 }
 
+/// 🔧 Linux WebKitGTK 渲染修复（Ubuntu/GNOME 下莫名线条、色块、边框残缺）
+/// 必须在 Tauri Builder 之前设置，WebKitGTK 初始化后就不能改了
+fn apply_linux_rendering_fixes() {
+    #[cfg(target_os = "linux")]
+    {
+        // ① 禁用 WebKit 合成模式，CPU 合成代替 GPU 合成，彻底规避 OpenGL 伪影
+        std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+        // ② 禁用 DMA-BUF 渲染器，解决 NVIDIA/AMD 驱动下的色块问题
+        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+        // ③ 使用 Cairo 2D 渲染（禁用 OpenGL ES），抗锯齿更稳定
+        std::env::set_var("GSK_RENDERER", "cairo");
+        // ④ 禁止 WebKit 把页面渲染到离屏 GL 纹理（导致半透明边框缺失）
+        std::env::set_var("WEBKIT_FORCE_DISK_CACHE", "0");
+
+        println!("🐧 [Linux 渲染修复] 已应用 WebKitGTK 渲染兼容性设置");
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        let _ = (); // 非 Linux 平台什么都不做
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // ⚠️ 务必放在所有 Tauri/WebKit 初始化之前！
+    apply_linux_rendering_fixes();
+
     let app_config = config::load_config(None).expect("加载配置失败");
     config::validate_config(&app_config).expect("配置验证失败");
     let plugins_config = plugins::load_plugins_config(None).expect("加载插件配置失败");

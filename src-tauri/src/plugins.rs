@@ -24,11 +24,14 @@ fn get_exe_dir() -> Result<PathBuf, String> {
 
 /// 获取 plugins.json 默认路径（与 config.json 同目录查找逻辑）
 /// 查找顺序：
-///   1. 可执行文件同级目录 -> plugins.json （开发: target/debug/plugins.json）
-///   2. 可执行文件上一级目录 -> plugins.json （Tauri: src-tauri/plugins.json，因为 exe 在 target/debug）
+///   1. 可执行文件同级目录 -> plugins.json （Windows/macOS/AppImage）
+///   1.5 Linux 多路径探测：/usr/lib,/usr/lib64,/usr/share,/app/lib,/app/share
+///   2. 可执行文件上一级目录 -> plugins.json （Tauri: src-tauri/plugins.json）
 ///   3. 当前工作目录 -> plugins.json （兜底）
 pub fn get_default_plugins_path() -> Result<PathBuf, String> {
     let exe_dir = get_exe_dir()?;
+    let exe_path = env::current_exe()
+        .map_err(|e| format!("无法获取当前可执行文件路径: {}", e))?;
 
     // ① 直接在 exe_dir 下找
     let in_exe_dir = exe_dir.join("plugins.json");
@@ -53,6 +56,32 @@ pub fn get_default_plugins_path() -> Result<PathBuf, String> {
             return Ok(path);
         }
         return Ok(in_exe_dir);
+    }
+
+    // ①.5 🐧 Linux 系统安装包：资源目录探测（deb/rpm/Arch/Flatpak 等）
+    if cfg!(target_os = "linux") {
+        let exe_name = exe_path.file_stem().map(|s| s.to_string_lossy().to_string());
+        let linux_base_dirs: [&str; 5] = [
+            "/usr/lib",      // Debian/Ubuntu deb
+            "/usr/lib64",    // Fedora/RHEL rpm (64-bit)
+            "/usr/share",    // Arch/FHS 标准（架构无关资源）
+            "/app/lib",      // Flatpak 运行时
+            "/app/share",    // Flatpak 运行时（架构无关）
+        ];
+        for base in linux_base_dirs {
+            if let Some(ref name) = exe_name {
+                let candidate = PathBuf::from(base).join(name).join("plugins.json");
+                if candidate.exists() {
+                    println!("🐧 [Linux {}] plugins.json 位于: {}", base, candidate.display());
+                    return Ok(candidate);
+                }
+            }
+            let hardcoded = PathBuf::from(base).join("openvue").join("plugins.json");
+            if hardcoded.exists() {
+                println!("🐧 [Linux {}] plugins.json 位于: {}", base, hardcoded.display());
+                return Ok(hardcoded);
+            }
+        }
     }
 
     // ② 上一级目录

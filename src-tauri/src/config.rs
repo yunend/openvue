@@ -106,6 +106,37 @@ pub fn get_default_config_path() -> Result<PathBuf, String> {
         return Ok(config_in_exe_dir);
     }
 
+    // ---- 1.5 Linux 系统安装包：资源目录探测（deb/rpm/Arch/Flatpak 等）----
+    //       常见布局：exe=/usr/bin/openvue  →  资源=/usr/lib,/usr/lib64,/usr/share/openvue/
+    //       Flatpak：exe=/app/bin/openvue  →  资源=/app/lib,/app/share/openvue/
+    if cfg!(target_os = "linux") {
+        let exe_name = exe_path.file_stem().map(|s| s.to_string_lossy().to_string());
+        // 候选资源「根」目录列表（按优先级）
+        let linux_base_dirs: [&str; 5] = [
+            "/usr/lib",      // Debian/Ubuntu deb
+            "/usr/lib64",    // Fedora/RHEL rpm (64-bit)
+            "/usr/share",    // Arch/FHS 标准（架构无关资源）
+            "/app/lib",      // Flatpak 运行时
+            "/app/share",    // Flatpak 运行时（架构无关）
+        ];
+        for base in linux_base_dirs {
+            // ① 基于可执行文件名动态拼接
+            if let Some(ref name) = exe_name {
+                let candidate = PathBuf::from(base).join(name).join("config.json");
+                if candidate.exists() {
+                    println!("🐧 [Linux {}] config.json 位于: {}", base, candidate.display());
+                    return Ok(candidate);
+                }
+            }
+            // ② 硬编码产品名兜底（稳定性）
+            let hardcoded = PathBuf::from(base).join("openvue").join("config.json");
+            if hardcoded.exists() {
+                println!("🐧 [Linux {}] config.json 位于: {}", base, hardcoded.display());
+                return Ok(hardcoded);
+            }
+        }
+    }
+
     // ---- 2. 开发环境：向上查找含 Cargo.toml 的目录 ----
     let mut probe_dir: Option<&std::path::Path> = Some(exe_dir);
     while let Some(dir) = probe_dir {
@@ -206,4 +237,3 @@ fn normalize_path(p: PathBuf) -> PathBuf {
     };
     PathBuf::from(cleaned)
 }
-
