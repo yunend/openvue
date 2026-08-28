@@ -73,17 +73,45 @@ html.platform-macos {
     align-items: center !important;
   }
 
-  /* ② 按钮相邻间隙：按 Tailwind gap 值精准匹配 margin-left */
-  .flex.gap-3 > button + button          { margin-left: 12px; }
-  .flex.gap-2 > button + button          { margin-left: 8px;  }
-  .flex.gap-1 > button + button          { margin-left: 4px;  }
+  /* ② 文字对齐：text-center 按钮文字居中，text-left 按钮文字左对齐
+        （flex 容器中 text-align 不生效，必须用 justify-content） */
+  button.text-center { justify-content: center !important; }
+  button.text-left   { justify-content: flex-start !important; }
 
-  /* ③ 自定义任意值（方括号语法） */
-  [class*="gap-[8px]"]  > button + button { margin-left: 8px;  }
-  [class*="gap-[10px]"] > button + button { margin-left: 10px; }
-  [class*="gap-[14px]"] > button + button { margin-left: 14px; }
+  /* ③ 相邻间隙：按 Tailwind gap 值精准匹配 margin-left
+        覆盖 button + button, a + a, button + a, a + button 四种组合 */
+  .flex.gap-3 > button + button,
+  .flex.gap-3 > a + a,
+  .flex.gap-3 > button + a,
+  .flex.gap-3 > a + button                { margin-left: 12px; }
+  .flex.gap-2 > button + button,
+  .flex.gap-2 > a + a,
+  .flex.gap-2 > button + a,
+  .flex.gap-2 > a + button                { margin-left: 8px;  }
+  .flex.gap-1 > button + button,
+  .flex.gap-1 > a + a,
+  .flex.gap-1 > button + a,
+  .flex.gap-1 > a + button                { margin-left: 4px;  }
 
-  /* ④ items-stretch 兼容（ConfigPanel 输入框+浏览按钮） */
+  /* ④ 自定义任意值（方括号语法） */
+  [class*="gap-[8px]"]  > button + button,
+  [class*="gap-[8px]"]  > a + a,
+  [class*="gap-[8px]"]  > button + a,
+  [class*="gap-[8px]"]  > a + button      { margin-left: 8px;  }
+  [class*="gap-[10px]"] > button + button,
+  [class*="gap-[10px]"] > a + a,
+  [class*="gap-[10px]"] > button + a,
+  [class*="gap-[10px]"] > a + button      { margin-left: 10px; }
+  [class*="gap-[12px]"] > button + button,
+  [class*="gap-[12px]"] > a + a,
+  [class*="gap-[12px]"] > button + a,
+  [class*="gap-[12px]"] > a + button      { margin-left: 12px; }
+  [class*="gap-[14px]"] > button + button,
+  [class*="gap-[14px]"] > a + a,
+  [class*="gap-[14px]"] > button + a,
+  [class*="gap-[14px]"] > a + button      { margin-left: 14px; }
+
+  /* ⑤ items-stretch 兼容（ConfigPanel 输入框+浏览按钮） */
   .flex.items-stretch[class*="gap-"] > * + * {
     margin-left: 10px;
   }
