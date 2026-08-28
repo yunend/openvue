@@ -64,6 +64,7 @@ pub fn run() {
             // ✅ 插件配置管理
             get_plugins_config,
             save_plugin_extension_status,
+            activate_plugin_handler,
             open_url,
         ])
         .run(tauri::generate_context!())
@@ -388,6 +389,7 @@ fn get_plugins_config(
 // ================================================================
 // ✅ 插件配置：切换 / 设置某扩展名的状态（enabled ↔ disabled）
 //    ext: 扩展名（不带点），status: "enabled" / "disabled"
+//    兼容旧版本前端：取该扩展名的第 1 个处理器操作
 // ================================================================
 #[tauri::command]
 fn save_plugin_extension_status(
@@ -397,7 +399,6 @@ fn save_plugin_extension_status(
 ) -> Result<String, String> {
     use plugins::ExtensionStatus;
 
-    // 1. 解析 status 字符串 → 枚举
     let new_status = match status.as_str() {
         "enabled" => ExtensionStatus::Enabled,
         "disabled" => ExtensionStatus::Disabled,
@@ -406,19 +407,40 @@ fn save_plugin_extension_status(
         other => return Err(format!("未知状态值: {}", other)),
     };
 
-    // 2. 更新内存
     let mut guard = state.lock().map_err(|e| e.to_string())?;
     guard
         .plugins_config
         .set_extension_status(&ext, new_status.clone())?;
-
-    // 3. 持久化到 plugins.json
     plugins::save_plugins_config(&guard.plugins_config)?;
 
     Ok(format!(
         "✅ 扩展名 .{} 状态已更新为 {:?}",
         ext.to_lowercase(),
         new_status
+    ))
+}
+
+// ================================================================
+// ✅ 插件配置：把「扩展名 + 指定 handler_id」的处理器设为当前激活
+//    - 互斥：同一扩展名其它处理器若为 Enabled → 自动 Disabled
+//    - 目标处理器若为 Disabled → 自动 Enabled
+// ================================================================
+#[tauri::command]
+fn activate_plugin_handler(
+    state: tauri::State<'_, Arc<Mutex<ServerState>>>,
+    ext: String,
+    handler_id: String,
+) -> Result<String, String> {
+    let mut guard = state.lock().map_err(|e| e.to_string())?;
+    guard
+        .plugins_config
+        .activate_handler(&ext, &handler_id)?;
+    plugins::save_plugins_config(&guard.plugins_config)?;
+
+    Ok(format!(
+        "✅ .{} 已切换到处理器 [{}]（同一扩展名下保持唯一生效）",
+        ext.to_lowercase(),
+        handler_id
     ))
 }
 

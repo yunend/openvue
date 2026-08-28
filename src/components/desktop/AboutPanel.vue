@@ -1,33 +1,58 @@
 <template>
   <div class="animate-fadeIn" :class="isActive ? 'block' : 'hidden'">
-    <div class="bg-primary-50 border border-primary-50 rounded-xl max-w-[560px] mx-5 text-center py-[30px] px-6">
-      <div class="text-[4.2rem] mb-[14px]">🎛️</div>
-      <div class="text-[1.7rem] font-bold text-primary-900 mb-[6px]">Tauri HTTP Server</div>
-      <div class="inline-block px-[14px] py-[5px] bg-primary-50 text-primary-500 rounded-full text-[0.85rem] font-semibold mb-6">v{{ version }}</div>
-      <div class="text-primary-400 text-[0.95rem] leading-loose mb-6" v-html="t('about.desc')"></div>
+    <div class="bg-primary-50 border-b border-primary-100 text-center py-[28px] px-[26px]">
+      <div class="text-[3.8rem] mb-[12px] leading-none">🎛️</div>
+      <div class="text-[1.55rem] font-bold text-primary-900 mb-[8px]">Tauri HTTP Server</div>
+
+      <!-- 版本号 + 检查更新按钮（紧挨着放一行） -->
+      <div class="flex flex-wrap items-center justify-center gap-3 mb-5">
+        <div class="inline-flex items-center px-[16px] py-[6px] bg-primary-50 text-primary-500 rounded-full text-[0.88rem] font-semibold border border-primary-100">
+          <span class="mr-1.5">🏷️</span>v{{ version }}
+        </div>
+        <button
+          class="inline-flex items-center gap-2 px-[22px] py-[9px] bg-[#2ea44f] text-white border-none rounded-md text-[0.88rem] font-semibold cursor-pointer transition-all duration-200 hover:bg-[#2c974b] hover:-translate-y-px disabled:bg-[#6e7681] disabled:cursor-not-allowed disabled:translate-y-0 shadow-[0_1px_3px_rgba(46,164,79,0.35)]"
+          :class="{ 'animate-pulseBtn': isCheckingUpdate }"
+          :disabled="isCheckingUpdate"
+          @click="checkForUpdates"
+        >
+          <span>{{ isCheckingUpdate ? '⏳' : '🔄' }}</span>
+          <span>{{ isCheckingUpdate ? t('about.checking') : t('about.checkUpdate') }}</span>
+        </button>
+      </div>
+
+      <!-- 检查更新结果提示（紧跟在版本号下方） -->
+      <div
+        v-if="updateStatus.display"
+        class="mx-auto max-w-[460px] mb-5 px-4 py-[11px] rounded-md text-[13px] leading-relaxed"
+        :class="updateStatusClass"
+        v-html="updateStatus.message"
+      ></div>
+
+      <div class="text-left px-[8px] text-primary-400 text-[0.93rem] leading-relaxed mb-5" v-html="t('about.desc')"></div>
       
-      <div class="grid grid-cols-2 gap-[14px] text-left mb-7">
-        <div class="bg-primary-50 border border-primary-50 rounded-[10px] px-4 py-[14px]">
-          <div class="text-[0.8rem] text-primary-300 mb-[4px]">{{ t('about.currentVersion') }}</div>
-          <div class="text-[0.95rem] font-semibold text-primary-900 break-all">{{ version }}</div>
+      <!-- 2x2 信息网格（宽松版） -->
+      <div class="grid grid-cols-2 gap-[12px] text-left mb-5">
+        <div class="bg-white/70 border border-primary-100 rounded-[10px] px-4 py-[13px]">
+          <div class="text-[0.78rem] text-primary-300 mb-[4px]">{{ t('about.currentVersion') }}</div>
+          <div class="text-[0.92rem] font-semibold text-primary-900 break-all">{{ version }}</div>
         </div>
-        <div class="bg-primary-50 border border-primary-50 rounded-[10px] px-4 py-[14px]">
-          <div class="text-[0.8rem] text-primary-300 mb-[4px]">{{ t('about.platform') }}</div>
-          <div class="text-[0.95rem] font-semibold text-primary-900 break-all">Tauri 2.x + Axum</div>
+        <div class="bg-white/70 border border-primary-100 rounded-[10px] px-4 py-[13px]">
+          <div class="text-[0.78rem] text-primary-300 mb-[4px]">{{ t('about.platform') }}</div>
+          <div class="text-[0.92rem] font-semibold text-primary-900 break-all">Tauri 2.x + Axum</div>
         </div>
-        <div class="bg-primary-50 border border-primary-50 rounded-[10px] px-4 py-[14px]">
-          <div class="text-[0.8rem] text-primary-300 mb-[4px]">{{ t('about.gui') }}</div>
-          <div class="text-[0.95rem] font-semibold text-primary-900 break-all">WebView2 (Windows)</div>
+        <div class="bg-white/70 border border-primary-100 rounded-[10px] px-4 py-[13px]">
+          <div class="text-[0.78rem] text-primary-300 mb-[4px]">{{ t('about.gui') }}</div>
+          <div class="text-[0.92rem] font-semibold text-primary-900 break-all">WebView2 (Windows)</div>
         </div>
-        <div class="bg-primary-50 border border-primary-50 rounded-[10px] px-4 py-[14px]">
-          <div class="text-[0.8rem] text-primary-300 mb-[4px]">{{ t('about.backend') }}</div>
-          <div class="text-[0.95rem] font-semibold text-primary-900 break-all">Rust (tokio)</div>
+        <div class="bg-white/70 border border-primary-100 rounded-[10px] px-4 py-[13px]">
+          <div class="text-[0.78rem] text-primary-300 mb-[4px]">{{ t('about.backend') }}</div>
+          <div class="text-[0.92rem] font-semibold text-primary-900 break-all">Rust (tokio)</div>
         </div>
       </div>
       
-      <div class="flex gap-[14px] justify-center">
+      <div class="flex flex-wrap gap-[12px] justify-center mt-2">
         <a
-          class="inline-flex items-center gap-2 px-[22px] py-[11px] bg-primary-500 text-white rounded-[10px] no-underline font-semibold text-[0.9rem] transition-all duration-200 hover:bg-primary-900 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(26,35,126,0.3)]"
+          class="inline-flex items-center gap-2 px-[22px] py-[10px] bg-primary-500 text-white rounded-[9px] no-underline font-semibold text-[0.88rem] transition-all duration-200 hover:bg-primary-900 hover:-translate-y-0.5 hover:shadow-[0_3px_10px_rgba(26,35,126,0.3)]"
           href="https://github.com/yunend/openvue/"
           target="_blank"
           @click.prevent="openExternal('https://github.com/yunend/openvue/')"
@@ -36,32 +61,14 @@
           <span>{{ t('about.github') }}</span>
         </a>
         <a
-          class="inline-flex items-center gap-2 px-[22px] py-[11px] bg-primary-500 text-white rounded-[10px] no-underline font-semibold text-[0.9rem] transition-all duration-200 hover:bg-primary-900 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(26,35,126,0.3)]"
+          class="inline-flex items-center gap-2 px-[22px] py-[10px] bg-primary-500 text-white rounded-[9px] no-underline font-semibold text-[0.88rem] transition-all duration-200 hover:bg-primary-900 hover:-translate-y-0.5 hover:shadow-[0_3px_10px_rgba(26,35,126,0.3)]"
           href="https://tauri.app/"
           target="_blank"
           @click.prevent="openExternal('https://tauri.app/')"
         >
+          <span>📚</span>
           <span>{{ t('about.tauriDocs') }}</span>
         </a>
-      </div>
-      
-      <!-- 版本更新检查 -->
-      <div class="mt-5 text-center">
-        <button
-          class="inline-flex items-center gap-2 px-6 py-[10px] bg-[#2ea44f] text-white border-none rounded-md text-sm font-semibold cursor-pointer transition-all duration-200 hover:bg-[#2c974b] hover:-translate-y-px disabled:bg-[#6e7681] disabled:cursor-not-allowed disabled:translate-y-0"
-          :class="{ 'animate-pulseBtn': isCheckingUpdate }"
-          :disabled="isCheckingUpdate"
-          @click="checkForUpdates"
-        >
-          <span>{{ isCheckingUpdate ? '⏳' : '🔄' }}</span>
-          <span>{{ isCheckingUpdate ? t('about.checking') : t('about.checkUpdate') }}</span>
-        </button>
-        <div
-          v-if="updateStatus.display"
-          class="mt-3 px-4 py-[10px] rounded-md text-[13px] leading-relaxed"
-          :class="updateStatusClass"
-          v-html="updateStatus.message"
-        ></div>
       </div>
     </div>
   </div>

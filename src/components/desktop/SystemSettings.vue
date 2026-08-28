@@ -1,6 +1,6 @@
 <template>
   <div class="animate-fadeIn" :class="isActive ? 'block' : 'hidden'">
-    <div class="bg-primary-50 border border-primary-50 rounded-xl px-[26px] py-[22px] mb-[22px]">
+    <div class="bg-primary-50 border-b border-primary-100 px-[26px] py-[22px]">
       <div class="text-[1.05rem] font-bold text-primary-900 mb-4 pb-[10px] border-b border-primary-50">{{ t('system.title') }}</div>
       
       <div class="flex items-center justify-between px-5 py-4 bg-white border border-primary-50 rounded-[10px] mb-[14px]">
@@ -26,35 +26,7 @@
         </div>
       </div>
       
-      <div class="flex items-center justify-between px-5 py-4 bg-white border border-primary-50 rounded-[10px] mb-[14px]">
-        <div class="flex-1">
-          <div class="text-base font-semibold text-primary-900 mb-[3px]">{{ t('system.minimizeLabel') }}</div>
-          <div class="text-[0.82rem] text-primary-300">{{ t('system.minimizeHint') }}</div>
-        </div>
-        <div class="flex items-center gap-[14px]">
-          <button
-            class="flex-none w-[150px] px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap bg-blue-500 text-white hover:bg-blue-600"
-            @click="hideToTray"
-          >
-            {{ t('system.hideToTray') }}
-          </button>
-        </div>
-      </div>
-      
-      <div class="flex items-center justify-between px-5 py-4 bg-white border border-primary-50 rounded-[10px] mb-[14px]">
-        <div class="flex-1">
-          <div class="text-base font-semibold text-primary-900 mb-[3px]">{{ t('system.quitLabel') }}</div>
-          <div class="text-[0.82rem] text-primary-300">{{ t('system.quitHint') }}</div>
-        </div>
-        <div class="flex items-center gap-[14px]">
-          <button
-            class="flex-none w-[150px] px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap bg-red-500 text-white hover:bg-red-600"
-            @click="quitApp"
-          >
-            {{ t('system.quit') }}
-          </button>
-        </div>
-      </div>
+      <!-- 最小化到托盘 / 退出应用 两个按钮已移至窗口顶部头部栏，全局常驻 -->
     </div>
   </div>
 </template>
@@ -72,8 +44,6 @@ const {
   autoStartEnabled,
   initAutostartStatus,
   toggleAutostart,
-  hideToTray,
-  quitApp
 } = useSystemSettings()
 
 onMounted(async () => {

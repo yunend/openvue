@@ -1,6 +1,6 @@
 <template>
   <div class="animate-fadeIn" :class="isActive ? 'block' : 'hidden'">
-    <div class="bg-primary-50 border border-primary-50 rounded-xl px-[26px] py-[22px] mb-[22px]">
+    <div class="bg-primary-50 border-b border-primary-100 px-[26px] py-[22px]">
       <div class="text-[1.05rem] font-bold text-primary-900 mb-4 pb-[10px] border-b border-primary-50">{{ t('status.overview') }}</div>
       <div class="grid grid-cols-2 gap-[14px]">
         <div class="bg-white border border-primary-50 rounded-[10px] px-[18px] py-4">

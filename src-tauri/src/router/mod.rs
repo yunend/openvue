@@ -139,7 +139,7 @@ async fn add_security_headers(request: Request, next: Next) -> Response {
              style-src 'self' 'unsafe-inline'; \
              img-src 'self' data: blob:; \
              font-src 'self' data:; \
-             connect-src 'self'; \
+             connect-src 'self' ipc.localhost https://api.github.com; \
              frame-ancestors 'none';"
         ),
     );

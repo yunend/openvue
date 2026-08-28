@@ -4,7 +4,9 @@ import { i18n } from '../i18n'
 
 type PluginStatus = 'browser-default' | 'enabled' | 'disabled' | 'undeveloped'
 
-interface PluginEntry {
+/** 单个处理器（一个扩展名可以有多个） */
+export interface PluginHandler {
+  handlerId: string
   status: string
   name?: string
   description?: string
@@ -12,19 +14,25 @@ interface PluginEntry {
   urlTemplate?: string
 }
 
+/** 一个扩展名的配置：多个处理器 + 激活项 id */
+export interface ExtensionConfig {
+  handlers: PluginHandler[]
+  activeHandlerId?: string | null
+}
+
 interface PluginsData {
-  extensions: Record<string, PluginEntry>
+  extensions: Record<string, ExtensionConfig>
 }
 
 export type PluginFilter = 'all' | 'enabled' | 'disabled' | 'browser-default' | 'undeveloped'
 
-interface PluginItem {
+/** 前端列表渲染用：一个扩展 + 该扩展所有处理器 + 激活 id */
+export interface PluginItem {
   ext: string
-  status: string
-  name?: string
-  description?: string
-  pluginId?: string
-  urlTemplate?: string
+  handlers: PluginHandler[]
+  activeHandlerId?: string | null
+  /** 兼容字段：默认返回【激活处理器】的状态（供筛选、旧 UI 逻辑复用） */
+  activeStatus: string
 }
 
 const pluginsCache = ref<PluginsData>({ extensions: {} })
@@ -64,13 +72,29 @@ export function usePluginManager() {
     const exts = Object.keys(pluginsCache.value.extensions || {}).sort()
 
     return exts
-      .filter(ext => {
-        const entry = pluginsCache.value.extensions[ext]
-        if (!entry) return false
-        const statusKey = mapStatus(entry.status)
+      .map(ext => {
+        const cfg = pluginsCache.value.extensions[ext] as ExtensionConfig | undefined
+        if (!cfg || !cfg.handlers?.length) return null
+
+        // 兼容旧格式：若后端因缓存仍返回老数据结构，自动包一层
+        const handlers: PluginHandler[] = Array.isArray(cfg.handlers)
+          ? cfg.handlers
+          : [{ ...(cfg as unknown as Record<string, unknown>), handlerId: 'default' } as unknown as PluginHandler]
+
+        const activeId = cfg.activeHandlerId ?? handlers.find(h => mapStatus(h.status) === 'enabled')?.handlerId
+        const active = handlers.find(h => h.handlerId === activeId) ?? handlers[0]
+        return {
+          ext,
+          handlers,
+          activeHandlerId: activeId ?? null,
+          activeStatus: active ? active.status : 'browser-default'
+        } as PluginItem
+      })
+      .filter((item): item is PluginItem => !!item)
+      .filter(item => {
+        const statusKey = mapStatus(item.activeStatus)
         return pluginsFilter.value === 'all' || statusKey === pluginsFilter.value
       })
-      .map(ext => ({ ext, ...pluginsCache.value.extensions[ext]! }))
   })
 
   async function loadPluginsConfig(): Promise<void> {
@@ -84,6 +108,7 @@ export function usePluginManager() {
     }
   }
 
+  /** 兼容旧调用：切换某个扩展的【激活处理器】的 enabled/disabled 状态 */
   async function togglePlugin(ext: string, newStatus: string): Promise<void> {
     if (!newStatus || newStatus === '__') return
 
@@ -99,6 +124,21 @@ export function usePluginManager() {
     }
   }
 
+  /** 核心新方法：把某扩展的指定处理器设为激活（自动互斥，其它处理器从 Enabled→Disabled） */
+  async function activateHandler(ext: string, handlerId: string): Promise<void> {
+    if (!ext || !handlerId) return
+    try {
+      const { invoke } = window.__TAURI__.core
+      showToast(i18n.global.t('toast.handlerActivating', { ext, handlerId }), 'info')
+      const msg = await invoke('activate_plugin_handler', { ext, handlerId }) as string
+      await loadPluginsConfig()
+      showToast(msg, 'success')
+    } catch (e) {
+      console.error(e)
+      showToast(i18n.global.t('toast.handlerActivateFailed', { err: String(e) }), 'error')
+    }
+  }
+
   function filterPlugins(type: PluginFilter): void {
     pluginsFilter.value = type
   }
@@ -109,6 +149,7 @@ export function usePluginManager() {
     filteredPlugins,
     loadPluginsConfig,
     togglePlugin,
+    activateHandler,
     filterPlugins
   }
 }

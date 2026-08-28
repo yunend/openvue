@@ -27,7 +27,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
       strictPort: true,
       headers: {
         'X-Frame-Options': 'DENY',
-        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'",
+        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' ipc.localhost https://api.github.com; frame-ancestors 'none'",
         'Referrer-Policy': 'same-origin',
       },
       proxy: {

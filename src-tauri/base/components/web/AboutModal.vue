@@ -55,7 +55,8 @@
               <span 
                 v-for="plugin in enabledPlugins" 
                 :key="plugin.ext"
-                class="px-2 py-1 rounded text-xs font-mono bg-green-100 text-green-800 border border-green-300"
+                class="px-2 py-1 rounded text-xs font-mono bg-green-100 text-green-800 border border-green-300 cursor-help"
+                :title="plugin.activeHandler?.name || plugin.activeHandler?.description || ''"
               >
                 .{{ plugin.ext }}
               </span>
@@ -128,9 +129,14 @@ const prettyConfigJson = computed(() => {
 
 const enabledPlugins = computed(() => {
   if (!aboutPlugins.value) return []
-  return Object.entries(aboutPlugins.value)
-    .filter(([_, entry]) => entry.status === 'enabled')
-    .map(([ext, entry]) => ({ ext, ...entry }))
+  return Object.values(aboutPlugins.value)
+    .filter(p => p.activeStatus === 'enabled')
+    .map(p => ({
+      ext: p.ext,
+      activeHandlerId: p.activeHandlerId,
+      activeStatus: p.activeStatus,
+      activeHandler: p.activeHandler,
+    }))
 })
 
 onMounted(() => {
