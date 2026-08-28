@@ -152,7 +152,7 @@ fn show_main_window(app: &AppHandle) {
         {
             let _ = window.set_focus();
             // request_user_attention 会触发 NSApp.activate(ignoringOtherApps: true)
-            let _ = window.request_user_attention(Some(tauri::window::UserAttentionType::Informational));
+            let _ = window.request_user_attention(Some(tauri::UserAttentionType::Informational));
         }
     }
 }
