@@ -137,6 +137,21 @@ pub fn get_default_config_path() -> Result<PathBuf, String> {
         }
     }
 
+    // ---- 1.6 macOS App Bundle：资源在 Contents/Resources（exe 位于 Contents/MacOS）----
+    //       典型布局：MyApp.app/Contents/MacOS/openvue
+    //                         Contents/Resources/config.json
+    if cfg!(target_os = "macos") {
+        // 从 exe_dir (MacOS/) 往上一级到 Contents/，再进入 Resources/
+        if let Some(contents_dir) = exe_dir.parent() {
+            let resources_dir = contents_dir.join("Resources");
+            let candidate = resources_dir.join("config.json");
+            if candidate.exists() {
+                println!("🍎 [macOS App] config.json 位于: {}", candidate.display());
+                return Ok(candidate);
+            }
+        }
+    }
+
     // ---- 2. 开发环境：向上查找含 Cargo.toml 的目录 ----
     let mut probe_dir: Option<&std::path::Path> = Some(exe_dir);
     while let Some(dir) = probe_dir {

@@ -111,6 +111,15 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
         }
     }
 
+    // ③ 🍎 macOS App Bundle：Contents/Resources（exe 位于 Contents/MacOS）
+    if cfg!(target_os = "macos") {
+        if let Some(contents_dir) = exe_dir.parent() {
+            let resources_dir = contents_dir.join("Resources");
+            println!("🍎 [macOS App] 尝试资源目录: {}", resources_dir.display());
+            resource_candidates.push(resources_dir);
+        }
+    }
+
     // ✅ 遍历候选目录，找到第一个存在 dist-web 或 public 的
     let mut found_base: Option<PathBuf> = None;
     for res_dir in &resource_candidates {

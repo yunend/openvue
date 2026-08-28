@@ -84,6 +84,18 @@ pub fn get_default_plugins_path() -> Result<PathBuf, String> {
         }
     }
 
+    // ①.6 🍎 macOS App Bundle：资源在 Contents/Resources（exe 位于 Contents/MacOS）
+    if cfg!(target_os = "macos") {
+        if let Some(contents_dir) = exe_dir.parent() {
+            let resources_dir = contents_dir.join("Resources");
+            let candidate = resources_dir.join("plugins.json");
+            if candidate.exists() {
+                println!("🍎 [macOS App] plugins.json 位于: {}", candidate.display());
+                return Ok(candidate);
+            }
+        }
+    }
+
     // ② 上一级目录
     if let Some(parent) = exe_dir.parent() {
         let in_parent = parent.join("plugins.json");
