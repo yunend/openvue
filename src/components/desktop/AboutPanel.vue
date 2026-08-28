@@ -25,8 +25,18 @@
         v-if="updateStatus.display"
         class="mx-auto max-w-[460px] mb-5 px-4 py-[11px] rounded-md text-[13px] leading-relaxed"
         :class="updateStatusClass"
-        v-html="updateStatus.message"
-      ></div>
+      >
+        <div v-html="updateStatus.message"></div>
+        <a
+          v-if="updateStatus.url"
+          class="inline-flex items-center gap-1 mt-2 text-[#0969da] font-semibold hover:underline"
+          :href="updateStatus.url"
+          target="_blank"
+          @click.prevent="openExternal(updateStatus.url)"
+        >
+          {{ t('about.download') }}
+        </a>
+      </div>
 
       <div class="text-left px-[8px] text-primary-400 text-[0.93rem] leading-relaxed mb-5" v-html="t('about.desc')"></div>
       
@@ -89,7 +99,7 @@ const props = defineProps({
 })
 
 const isCheckingUpdate = ref(false)
-const updateStatus = ref({ display: false, type: '', message: '' })
+const updateStatus = ref({ display: false, type: '', message: '', url: '' })
 
 const updateStatusClass = computed(() => {
   const map: Record<string, string> = {
@@ -111,7 +121,7 @@ async function openExternal(url: string) {
 
 async function checkForUpdates() {
   isCheckingUpdate.value = true
-  updateStatus.value = { display: false, type: '', message: '' }
+  updateStatus.value = { display: false, type: '', message: '', url: '' }
   
   try {
     const res = await fetch('https://api.github.com/repos/yunend/openvue/releases/latest', {
@@ -134,13 +144,15 @@ async function checkForUpdates() {
       type: comparison >= 0 ? 'up-to-date' : 'available',
       message: comparison >= 0 
         ? t('about.latest', { version: props.version })
-        : t('about.available', { latest: latestVersion, current: props.version, url: data.html_url })
+        : t('about.available', { latest: latestVersion, current: props.version }),
+      url: comparison >= 0 ? '' : data.html_url
     }
   } catch (e) {
     updateStatus.value = {
       display: true,
       type: 'error',
-      message: t('about.updateError', { msg: (e as Error).message })
+      message: t('about.updateError', { msg: (e as Error).message }),
+      url: ''
     }
     console.error('check update failed:', e)
   } finally {

@@ -119,7 +119,8 @@ const en = {
     github: 'GitHub Repo',
     tauriDocs: 'Tauri Docs',
     latest: '✅ Already latest ({version})',
-    available: '🎉 New version <strong>{latest}</strong> (current {current})<br><a href="{url}" target="_blank" onclick="event.preventDefault(); window.open(\'{url}\')">Download →</a>',
+    available: '🎉 New version <strong>{latest}</strong> (current {current})',
+    download: 'Download →',
     noVersion: 'Version info not found',
     apiError: 'GitHub API returned {status}',
     updateError: '❌ Update check failed: {msg}<br>Please check your network and retry.'

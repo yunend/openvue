@@ -119,7 +119,8 @@ const zh = {
     github: 'GitHub 仓库',
     tauriDocs: 'Tauri 官方文档',
     latest: '✅ 已是最新版本（{version}）',
-    available: '🎉 发现新版本 <strong>{latest}</strong>（当前 {current}）<br><a href="{url}" target="_blank" onclick="event.preventDefault(); window.open(\'{url}\')">前往下载 →</a>',
+    available: '🎉 发现新版本 <strong>{latest}</strong>（当前 {current}）',
+    download: '前往下载 →',
     noVersion: '未找到版本信息',
     apiError: 'GitHub API 返回 {status}',
     updateError: '❌ 检查更新失败：{msg}<br>请检查网络连接后重试。'
