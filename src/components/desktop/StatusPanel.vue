@@ -50,20 +50,20 @@
       </div>
       <div class="flex gap-3 mt-5">
         <button
-          class="flex-1 px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap bg-green-500 text-white hover:bg-green-600 disabled:opacity-55 disabled:cursor-not-allowed"
+          class="flex-1 px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap text-center bg-green-500 text-white hover:bg-green-600 disabled:opacity-55 disabled:cursor-not-allowed"
           :disabled="isRunning"
           @click="startServer"
         >
           {{ t('status.start') }}
         </button>
         <button
-          class="flex-1 px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap bg-red-500 text-white hover:bg-red-600 disabled:opacity-55 disabled:cursor-not-allowed"
+          class="flex-1 px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap text-center bg-red-500 text-white hover:bg-red-600 disabled:opacity-55 disabled:cursor-not-allowed"
           :disabled="!isRunning"
           @click="stopServer"
         >
           {{ t('status.stop') }}
         </button>
-        <button class="flex-1 px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap bg-slate-500 text-white hover:bg-slate-600" @click="refreshStatus">
+        <button class="flex-1 px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap text-center bg-slate-500 text-white hover:bg-slate-600" @click="refreshStatus">
           {{ t('status.refresh') }}
         </button>
       </div>

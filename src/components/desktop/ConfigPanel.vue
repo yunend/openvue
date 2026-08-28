@@ -48,10 +48,10 @@
       </div>
       
       <div class="flex gap-3 mt-6">
-        <button class="flex-1 px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap bg-violet-500 text-white hover:bg-violet-600" @click="loadConfig">
+        <button class="flex-1 px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap text-center bg-violet-500 text-white hover:bg-violet-600" @click="loadConfig">
           {{ t('config.load') }}
         </button>
-        <button class="flex-1 px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap bg-orange-500 text-white hover:bg-orange-600" @click="handleSaveConfig">
+        <button class="flex-1 px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap text-center bg-orange-500 text-white hover:bg-orange-600" @click="handleSaveConfig">
           {{ t('config.save') }}
         </button>
       </div>
