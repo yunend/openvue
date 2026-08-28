@@ -122,6 +122,13 @@ function toggleLocale() {
 }
 
 onMounted(async () => {
+  // 🍎 macOS 平台检测：注入 CSS class 供样式修复使用
+  //    @supports (-webkit-touch-callout: none) 在 macOS WKWebView 中不生效
+  //    （它是 iOS 触屏专用属性），必须用 JS 检测
+  if (navigator.platform.toUpperCase().includes('MAC')) {
+    document.documentElement.classList.add('platform-macos')
+  }
+
   try {
     const { invoke } = window.__TAURI__.core
     version.value = await invoke('get_version')

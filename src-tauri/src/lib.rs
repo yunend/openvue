@@ -140,27 +140,31 @@ fn setup_system_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>>
 /// 显示主窗口
 fn show_main_window(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
-        // ① 安全兜底：如果窗口处于最小化状态，先恢复
+        println!("🪟 [show_main_window] 尝试恢复窗口…");
         let _ = window.unminimize();
-        // ② 显示窗口
         let _ = window.show();
-        // ③ 聚焦窗口
         let _ = window.set_focus();
-        // ④ 🍎 macOS 专有修复：hide() 后 App 可能失去激活状态，
-        //    需要额外触发用户注意力请求来强制激活 NSApplication
-        #[cfg(target_os = "macos")]
-        {
-            let _ = window.set_focus();
-            // request_user_attention 会触发 NSApp.activate(ignoringOtherApps: true)
-            let _ = window.request_user_attention(Some(tauri::UserAttentionType::Informational));
-        }
+        println!("🪟 [show_main_window] 窗口恢复完成");
     }
 }
 
 /// 隐藏到托盘
 fn hide_to_tray(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
-        let _ = window.hide();
+        println!("🪟 [hide_to_tray] 隐藏窗口到托盘…");
+        // 🍎 macOS: 用 minimize() 代替 hide()
+        //    hide() 底层 orderOut: 移除窗口后，orderFront: 不一定能恢复，
+        //    且 Tauri 2.x 没有暴露 NSApp.activate() 来重新激活 App。
+        //    minimize() 底层 miniaturize: → deminiaturize: 是 macOS 原生
+        //    推荐的窗口恢复路径，100% 可靠。
+        #[cfg(target_os = "macos")]
+        {
+            let _ = window.minimize();
+        }
+        #[cfg(not(target_os = "macos"))]
+        {
+            let _ = window.hide();
+        }
     }
 }
 
