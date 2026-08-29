@@ -1,6 +1,6 @@
 [package]
 name = "openvue"
-version = "1.2.0"
+version = "1.2.1"
 description = "A fast, cross-platform desktop tool for local file transfer and sharing"
 authors = ["yunend <303218145@qq.com>"]
 edition = "2021"

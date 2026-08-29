@@ -13,19 +13,6 @@
       ],
       "activeHandlerId": null
     },
-    "xmind": {
-      "handlers": [
-        {
-          "handlerId": "xmind1",
-          "status": "enabled",
-          "pluginId": "xmind1",
-          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
-          "description": "",
-          "name": "自定义xmind"
-        }
-      ],
-      "activeHandlerId": "xmind1"
-    },
     "md": {
       "handlers": [
         {
