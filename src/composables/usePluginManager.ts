@@ -143,6 +143,27 @@ export function usePluginManager() {
     pluginsFilter.value = type
   }
 
+  async function getPluginsDir(): Promise<string> {
+    const { invoke } = window.__TAURI__.core
+    return await invoke('get_plugins_dir') as string
+  }
+
+  async function addCustomPlugin(ext: string, folderPath: string): Promise<void> {
+    if (!ext || !folderPath) {
+      showToast(i18n.global.t('toast.customPluginEmpty'), 'error')
+      return
+    }
+    try {
+      const { invoke } = window.__TAURI__.core
+      showToast(i18n.global.t('toast.customPluginAdding', { ext }), 'info')
+      const msg = await invoke('add_custom_plugin', { ext, folderPath }) as string
+      await loadPluginsConfig()
+      showToast(msg, 'success')
+    } catch (e) {
+      showToast(i18n.global.t('toast.customPluginFailed', { err: String(e) }), 'error')
+    }
+  }
+
   return {
     pluginsCache,
     pluginsFilter,
@@ -150,6 +171,8 @@ export function usePluginManager() {
     loadPluginsConfig,
     togglePlugin,
     activateHandler,
-    filterPlugins
+    filterPlugins,
+    getPluginsDir,
+    addCustomPlugin
   }
 }

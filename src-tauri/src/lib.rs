@@ -90,6 +90,8 @@ pub fn run() {
             get_plugins_config,
             save_plugin_extension_status,
             activate_plugin_handler,
+            add_custom_plugin,
+            get_plugins_dir,
             open_url,
         ])
         .run(tauri::generate_context!())
@@ -482,6 +484,73 @@ fn activate_plugin_handler(
         "✅ .{} 已切换到处理器 [{}]（同一扩展名下保持唯一生效）",
         ext.to_lowercase(),
         handler_id
+    ))
+}
+
+// ================================================================
+// ✅ 插件配置：获取 dist-web/plugins 目录绝对路径（供前端浏览文件夹用）
+// ================================================================
+#[tauri::command]
+fn get_plugins_dir() -> Result<String, String> {
+    let dir = plugins::get_plugins_dir()?;
+    Ok(dir.to_string_lossy().replace('\\', "/"))
+}
+
+// ================================================================
+// ✅ 插件配置：添加自定义插件
+//    ext: 扩展名（不带点），folder_path: 用户选择的文件夹绝对路径
+//    后端校验该路径必须在 dist-web/plugins 下，并提取文件夹名作为 handlerId/pluginId
+// ================================================================
+#[tauri::command]
+fn add_custom_plugin(
+    state: tauri::State<'_, Arc<Mutex<ServerState>>>,
+    ext: String,
+    folder_path: String,
+) -> Result<String, String> {
+    let plugins_dir = plugins::get_plugins_dir()?;
+    let plugins_dir_canonical = plugins_dir
+        .canonicalize()
+        .unwrap_or_else(|_| plugins_dir.clone());
+
+    let user_path = std::path::PathBuf::from(&folder_path);
+    let user_path_canonical = user_path
+        .canonicalize()
+        .map_err(|_| format!("目录不存在: {}", folder_path))?;
+
+    // 校验：用户选的目录必须在 plugins 目录下
+    if !user_path_canonical.starts_with(&plugins_dir_canonical) {
+        return Err(format!(
+            "插件目录必须在 dist-web/plugins 下，当前: {}",
+            folder_path
+        ));
+    }
+
+    // 提取文件夹名（相对于 plugins 目录）
+    let folder_name = user_path_canonical
+        .file_name()
+        .ok_or_else(|| "无法提取目录名".to_string())?
+        .to_string_lossy()
+        .to_string();
+
+    // 校验 index.html 存在
+    let index_html = user_path_canonical.join("index.html");
+    if !index_html.exists() {
+        return Err(format!(
+            "插件目录缺少 index.html: {}",
+            index_html.display()
+        ));
+    }
+
+    let mut guard = state.lock().map_err(|e| e.to_string())?;
+    guard
+        .plugins_config
+        .add_custom_handler(&ext, &folder_name)?;
+    plugins::save_plugins_config(&guard.plugins_config)?;
+
+    Ok(format!(
+        "✅ 自定义插件 .{} → [{}] 已添加并设为激活",
+        ext.to_lowercase(),
+        folder_name
     ))
 }
 

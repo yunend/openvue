@@ -91,7 +91,13 @@ const en = {
     disable: '⏸️ Disable',
     enable: '▶️ Enable',
     reload: '🔄 Reload Config',
-    clear: '🗑️ Clear Filter'
+    clear: '🗑️ Clear Filter',
+    customExtLabel: 'File Extension (without dot)',
+    customExtPlaceholder: 'e.g. xmind',
+    customFolderLabel: 'Plugin Dir (under dist-web/plugins)',
+    customFolderPlaceholder: 'Click browse to select',
+    customBrowse: 'Browse',
+    customAdd: 'Add Plugin'
   },
   about: {
     title: 'About OpenVue',
@@ -154,7 +160,10 @@ const en = {
     operationFailed: 'Operation failed: {err}',
     minimized: '📦 Minimized to tray',
     hideFailed: 'Hide failed: {err}',
-    quitConfirm: '⚠️ HTTP service is running, are you sure you want to quit?'
+    quitConfirm: '⚠️ HTTP service is running, are you sure you want to quit?',
+    customPluginEmpty: 'Please fill in extension and select plugin folder',
+    customPluginAdding: '➕ Adding custom plugin .{ext} ...',
+    customPluginFailed: '❌ Failed to add custom plugin: {err}'
   },
   language: {
     switchTo: '中文',

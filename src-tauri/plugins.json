@@ -1,87 +1,9 @@
 {
   "extensions": {
-    "pdf": {
+    "xls": {
       "handlers": [
         {
-          "handlerId": "pdf-native",
-          "status": "undeveloped",
-          "pluginId": null,
-          "urlTemplate": null,
-          "description": "PDF.js 浏览器原生渲染 / PDF.js Native Renderer",
-          "name": "PDF.js 内置阅读器 / PDF.js Viewer"
-        }
-      ],
-      "activeHandlerId": null
-    },
-    "md": {
-      "handlers": [
-        {
-          "handlerId": "md-builtin",
-          "status": "enabled",
-          "pluginId": "md",
-          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
-          "description": "内置 Markdown 渲染器 / Built-in Markdown Renderer",
-          "name": "Markdown 渲染器（内置）/ Markdown Renderer (Built-in)"
-        }
-      ],
-      "activeHandlerId": "md-builtin"
-    },
-    "txt": {
-      "handlers": [
-        {
-          "handlerId": "text-default",
-          "status": "browser-default",
-          "pluginId": null,
-          "urlTemplate": null,
-          "description": "纯文本文件 / Plain Text File",
-          "name": "文本编辑器 / Text Editor"
-        }
-      ],
-      "activeHandlerId": null
-    },
-    "doc": {
-      "handlers": [
-        {
-          "handlerId": "doc-office",
-          "status": "undeveloped",
-          "pluginId": null,
-          "urlTemplate": null,
-          "description": "Word 文档 / Word Document",
-          "name": "Office 文档查看器 / Office Viewer"
-        }
-      ],
-      "activeHandlerId": null
-    },
-    "html": {
-      "handlers": [
-        {
-          "handlerId": "html-default",
-          "status": "browser-default",
-          "pluginId": null,
-          "urlTemplate": null,
-          "description": "HTML 网页 / HTML Webpage",
-          "name": "HTML 页面 / HTML Page"
-        }
-      ],
-      "activeHandlerId": null
-    },
-    "jpg": {
-      "handlers": [
-        {
-          "handlerId": "image-default",
-          "status": "browser-default",
-          "pluginId": null,
-          "urlTemplate": null,
-          "description": "JPG 图片 / JPG Image",
-          "name": "图片预览 / Image Viewer"
-        }
-      ],
-      "activeHandlerId": null
-    },
-    "xlsx": {
-      "handlers": [
-        {
-          "handlerId": "xlsx-office",
+          "handlerId": "xls-office",
           "status": "undeveloped",
           "pluginId": null,
           "urlTemplate": null,
@@ -91,28 +13,28 @@
       ],
       "activeHandlerId": null
     },
-    "jpeg": {
+    "xmind": {
       "handlers": [
         {
-          "handlerId": "image-default-2",
-          "status": "browser-default",
-          "pluginId": null,
-          "urlTemplate": null,
-          "description": "JPEG 图片 / JPEG Image",
-          "name": "图片预览 / Image Viewer"
+          "handlerId": "xmind1",
+          "status": "enabled",
+          "pluginId": "xmind1",
+          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
+          "description": "",
+          "name": "自定义xmind"
         }
       ],
-      "activeHandlerId": null
+      "activeHandlerId": "xmind1"
     },
-    "docx": {
+    "md": {
       "handlers": [
         {
-          "handlerId": "docx-office",
-          "status": "undeveloped",
-          "pluginId": null,
-          "urlTemplate": null,
-          "description": "Word 文档 / Word Document",
-          "name": "Office 文档查看器 / Office Viewer"
+          "handlerId": "md-builtin",
+          "status": "disabled",
+          "pluginId": "md",
+          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
+          "description": "内置 Markdown 渲染器 / Built-in Markdown Renderer",
+          "name": "Markdown 渲染器（内置）/ Markdown Renderer (Built-in)"
         }
       ],
       "activeHandlerId": null
@@ -130,6 +52,19 @@
       ],
       "activeHandlerId": "ggb-official"
     },
+    "jpg": {
+      "handlers": [
+        {
+          "handlerId": "image-default",
+          "status": "browser-default",
+          "pluginId": null,
+          "urlTemplate": null,
+          "description": "JPG 图片 / JPG Image",
+          "name": "图片预览 / Image Viewer"
+        }
+      ],
+      "activeHandlerId": null
+    },
     "svg": {
       "handlers": [
         {
@@ -138,6 +73,19 @@
           "pluginId": null,
           "urlTemplate": null,
           "description": "SVG 矢量图 / SVG Vector Graphic",
+          "name": "图片预览 / Image Viewer"
+        }
+      ],
+      "activeHandlerId": null
+    },
+    "png": {
+      "handlers": [
+        {
+          "handlerId": "image-default-3",
+          "status": "browser-default",
+          "pluginId": null,
+          "urlTemplate": null,
+          "description": "PNG 图片 / PNG Image",
           "name": "图片预览 / Image Viewer"
         }
       ],
@@ -156,15 +104,15 @@
       ],
       "activeHandlerId": null
     },
-    "xls": {
+    "html": {
       "handlers": [
         {
-          "handlerId": "xls-office",
-          "status": "undeveloped",
+          "handlerId": "html-default",
+          "status": "browser-default",
           "pluginId": null,
           "urlTemplate": null,
-          "description": "Excel 表格 / Excel Spreadsheet",
-          "name": "Office 文档查看器 / Office Viewer"
+          "description": "HTML 网页 / HTML Webpage",
+          "name": "HTML 页面 / HTML Page"
         }
       ],
       "activeHandlerId": null
@@ -182,28 +130,15 @@
       ],
       "activeHandlerId": null
     },
-    "pptx": {
+    "txt": {
       "handlers": [
         {
-          "handlerId": "pptx-office",
-          "status": "undeveloped",
-          "pluginId": null,
-          "urlTemplate": null,
-          "description": "PPT 演示文稿 / PowerPoint Presentation",
-          "name": "Office 文档查看器 / Office Viewer"
-        }
-      ],
-      "activeHandlerId": null
-    },
-    "png": {
-      "handlers": [
-        {
-          "handlerId": "image-default-3",
+          "handlerId": "text-default",
           "status": "browser-default",
           "pluginId": null,
           "urlTemplate": null,
-          "description": "PNG 图片 / PNG Image",
-          "name": "图片预览 / Image Viewer"
+          "description": "纯文本文件 / Plain Text File",
+          "name": "文本编辑器 / Text Editor"
         }
       ],
       "activeHandlerId": null
@@ -217,6 +152,45 @@
           "urlTemplate": null,
           "description": "GIF 动图 / GIF Animation",
           "name": "图片预览 / Image Viewer"
+        }
+      ],
+      "activeHandlerId": null
+    },
+    "doc": {
+      "handlers": [
+        {
+          "handlerId": "doc-office",
+          "status": "undeveloped",
+          "pluginId": null,
+          "urlTemplate": null,
+          "description": "Word 文档 / Word Document",
+          "name": "Office 文档查看器 / Office Viewer"
+        }
+      ],
+      "activeHandlerId": null
+    },
+    "jpeg": {
+      "handlers": [
+        {
+          "handlerId": "image-default-2",
+          "status": "browser-default",
+          "pluginId": null,
+          "urlTemplate": null,
+          "description": "JPEG 图片 / JPEG Image",
+          "name": "图片预览 / Image Viewer"
+        }
+      ],
+      "activeHandlerId": null
+    },
+    "xlsx": {
+      "handlers": [
+        {
+          "handlerId": "xlsx-office",
+          "status": "undeveloped",
+          "pluginId": null,
+          "urlTemplate": null,
+          "description": "Excel 表格 / Excel Spreadsheet",
+          "name": "Office 文档查看器 / Office Viewer"
         }
       ],
       "activeHandlerId": null
@@ -242,6 +216,45 @@
           "pluginId": null,
           "urlTemplate": null,
           "description": "PPT 演示文稿 / PowerPoint Presentation",
+          "name": "Office 文档查看器 / Office Viewer"
+        }
+      ],
+      "activeHandlerId": null
+    },
+    "pptx": {
+      "handlers": [
+        {
+          "handlerId": "pptx-office",
+          "status": "undeveloped",
+          "pluginId": null,
+          "urlTemplate": null,
+          "description": "PPT 演示文稿 / PowerPoint Presentation",
+          "name": "Office 文档查看器 / Office Viewer"
+        }
+      ],
+      "activeHandlerId": null
+    },
+    "pdf": {
+      "handlers": [
+        {
+          "handlerId": "pdf-native",
+          "status": "undeveloped",
+          "pluginId": null,
+          "urlTemplate": null,
+          "description": "PDF.js 浏览器原生渲染 / PDF.js Native Renderer",
+          "name": "PDF.js 内置阅读器 / PDF.js Viewer"
+        }
+      ],
+      "activeHandlerId": null
+    },
+    "docx": {
+      "handlers": [
+        {
+          "handlerId": "docx-office",
+          "status": "undeveloped",
+          "pluginId": null,
+          "urlTemplate": null,
+          "description": "Word 文档 / Word Document",
           "name": "Office 文档查看器 / Office Viewer"
         }
       ],

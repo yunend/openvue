@@ -91,7 +91,13 @@ const zh = {
     disable: '⏸️ 禁用',
     enable: '▶️ 启用',
     reload: '🔄 重新加载配置',
-    clear: '🗑️ 清除筛选'
+    clear: '🗑️ 清除筛选',
+    customExtLabel: '文件后缀名（不含点）',
+    customExtPlaceholder: '例如：xmind',
+    customFolderLabel: '插件目录（dist-web/plugins 下）',
+    customFolderPlaceholder: '点击右侧按钮选择目录',
+    customBrowse: '浏览',
+    customAdd: '添加插件'
   },
   about: {
     title: '关于 OpenVue / About',
@@ -154,7 +160,10 @@ const zh = {
     operationFailed: '操作失败: {err}',
     minimized: '📦 已最小化到系统托盘',
     hideFailed: '隐藏失败: {err}',
-    quitConfirm: '⚠️ HTTP 服务正在运行，确定要退出吗？'
+    quitConfirm: '⚠️ HTTP 服务正在运行，确定要退出吗？',
+    customPluginEmpty: '请填写后缀名并选择插件目录',
+    customPluginAdding: '➕ 正在添加自定义插件 .{ext} ...',
+    customPluginFailed: '❌ 添加自定义插件失败: {err}'
   },
   language: {
     switchTo: 'English',

@@ -207,9 +207,33 @@ pub fn save_plugins_config_to_path(cfg: &PluginsConfig, path: &PathBuf) -> Resul
 
 /// 保存到默认路径
 pub fn save_plugins_config(cfg: &PluginsConfig) -> Result<(), String> {
-    // ✅ 同样改为调用本文件自己的 get_default_plugins_path()
     let path = get_default_plugins_path()?;
     save_plugins_config_to_path(cfg, &path)
+}
+
+/// 获取 dist-web/plugins 目录的绝对路径
+/// 查找策略与 router 中资源目录解析一致
+pub fn get_plugins_dir() -> Result<PathBuf, String> {
+    let exe_dir = get_exe_dir()?;
+
+    // 开发模式：target/debug 或 target/release 下 → 向上走到 src-tauri/dist-web/plugins
+    if exe_dir
+        .components()
+        .any(|c| matches!(c, std::path::Component::Normal(p) if p == "target"))
+    {
+        let src_tauri_root = exe_dir
+            .parent()
+            .and_then(|p| p.parent())
+            .ok_or_else(|| "无法找到 src-tauri 目录".to_string())?;
+        let path = src_tauri_root.join("dist-web").join("plugins");
+        println!("📁 [dev 模式] plugins 目录: {}", path.display());
+        return Ok(path);
+    }
+
+    // 生产模式：exe 同级目录下的 dist-web/plugins
+    let path = exe_dir.join("dist-web").join("plugins");
+    println!("📁 [生产模式] plugins 目录: {}", path.display());
+    Ok(path)
 }
 
 // ==========================================
@@ -326,6 +350,47 @@ impl PluginsConfig {
             .iter()
             .find(|h| matches!(h.status, ExtensionStatus::Enabled))
             .map(|h| h.handler_id.clone());
+
+        Ok(())
+    }
+
+        /// 添加一个自定义插件处理器（新增扩展名或向已有扩展名追加处理器）
+    /// - ext: 扩展名（不带点）
+    /// - folder_name: 插件目录名（即 handlerId / pluginId）
+    pub fn add_custom_handler(
+        &mut self,
+        ext: &str,
+        folder_name: &str,
+    ) -> Result<(), String> {
+        let ext_key = ext.to_lowercase();
+        let handler_id = folder_name.to_string();
+        let plugin_id = folder_name.to_string();
+        let url_template = "/plugins/{pluginId}/?path={publicPath}".to_string();
+        let name = format!("自定义{}", ext_key);
+
+        let new_handler = ExtensionHandler {
+            handler_id: handler_id.clone(),
+            status: ExtensionStatus::Enabled,
+            plugin_id: Some(plugin_id),
+            url_template: Some(url_template),
+            description: String::new(),
+            name,
+        };
+
+        let config = self.extensions.entry(ext_key.clone()).or_insert_with(|| ExtensionConfig {
+            handlers: vec![],
+            active_handler_id: None,
+        });
+
+        // 同扩展名下其他 Enabled 处理器 → Disabled（互斥）
+        for handler in config.handlers.iter_mut() {
+            if matches!(handler.status, ExtensionStatus::Enabled) {
+                handler.status = ExtensionStatus::Disabled;
+            }
+        }
+
+        config.handlers.push(new_handler);
+        config.active_handler_id = Some(handler_id);
 
         Ok(())
     }
