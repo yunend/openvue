@@ -65,6 +65,7 @@ const { config, loadConfig, autoSaveConfig, browseFolder } = useConfigManager()
 const localConfig = ref({ port: 8005, publicFolder: 'public', enableUpload: false })
 const initialized = ref(false)
 let pathDebounceTimer: ReturnType<typeof setTimeout> | null = null
+let portDebounceTimer: ReturnType<typeof setTimeout> | null = null
 
 onMounted(async () => {
   await loadConfig()
@@ -74,7 +75,11 @@ onMounted(async () => {
 })
 
 watch(() => localConfig.value.port, () => {
-  if (initialized.value) autoSaveConfig(localConfig.value)
+  if (!initialized.value) return
+  if (portDebounceTimer) clearTimeout(portDebounceTimer)
+  portDebounceTimer = setTimeout(() => {
+    autoSaveConfig(localConfig.value)
+  }, 500)
 })
 
 watch(() => localConfig.value.enableUpload, () => {
