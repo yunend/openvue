@@ -66,8 +66,13 @@ pub fn run() {
         .manage(server_state.clone())
         .setup(|app| {
             setup_system_tray(app)?;
+
+            // ✅ 在 Rust 后端直接自动启动 HTTP 服务
+            //    开机自启（--minimized）时，不依赖前端 WebView 的 JS 执行，100% 可靠
+            let state = app.state::<Arc<Mutex<ServerState>>>();
+            auto_start_server_if_needed(&state);
+
             let args: Vec<String> = std::env::args().collect();
-    
             if args.contains(&"--minimized".to_string()) {
                 if let Some(window) = app.get_webview_window("main") {
                     window.hide()?;
@@ -170,6 +175,54 @@ fn hide_to_tray(app: &AppHandle) {
     }
 }
 
+/// 自动启动 HTTP 服务（setup 阶段调用，不依赖前端 WebView）
+///
+/// 开机自启 + 手动运行都走这里，确保 HTTP 服务在 Rust 后端启动，
+/// 不受窗口隐藏、WebView 初始化时机、JS 异常等任何前端因素影响。
+fn auto_start_server_if_needed(state: &Arc<Mutex<ServerState>>) {
+    let mut guard = match state.lock() {
+        Ok(g) => g,
+        Err(e) => {
+            eprintln!("❌ [auto_start] 无法获取状态锁: {}", e);
+            return;
+        }
+    };
+    // 已在运行就跳过（前端按钮点 start_server 时也会走同样的判断）
+    if guard.cancel_token.is_some() {
+        println!("ℹ️  [auto_start] HTTP 服务已在运行，跳过启动");
+        return;
+    }
+    let app_config = guard.app_config.clone();
+    let plugins_config = guard.plugins_config.clone();
+    let port = app_config.port;
+    let cancel_token = CancellationToken::new();
+    let token_clone = cancel_token.clone();
+    guard.cancel_token = Some(cancel_token);
+    drop(guard);
+    tauri::async_runtime::spawn(async move {
+        let public_folder = app_config.public_folder.clone();
+        let enable_upload = app_config.enable_upload;
+        let plugins_for_router = plugins_config;
+        let version_str = env!("CARGO_PKG_VERSION").to_string();
+        let app = router::create_router(public_folder, enable_upload, version_str, port, plugins_for_router);
+        let addr = format!("0.0.0.0:{}", port);
+        let listener = match tokio::net::TcpListener::bind(&addr).await {
+            Ok(l) => l,
+            Err(e) => {
+                eprintln!("❌ [auto_start] 无法绑定端口 {}: {}", port, e);
+                return;
+            }
+        };
+        println!("🚀 [auto_start] HTTP 服务器启动成功: http://{}", addr);
+        axum::serve(listener, app)
+            .with_graceful_shutdown(async move {
+                token_clone.cancelled().await;
+            })
+            .await
+            .ok();
+        println!("🛑 [auto_start] HTTP 服务器已停止");
+    });
+}
 #[tauri::command]
 fn start_server(state: tauri::State<'_, Arc<Mutex<ServerState>>>) -> Result<String, String> {  
     let mut guard = state.lock().map_err(|e| e.to_string())?;

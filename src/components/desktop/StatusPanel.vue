@@ -111,17 +111,5 @@ async function copyUrl(url: string) {
 
 onMounted(async () => {
   await refreshStatus()
-  
-  if (!isRunning.value) {
-    showToast(t('status.autoStarting'), 'info')
-    setTimeout(async () => {
-      try {
-        await startServer()
-        await refreshStatus()
-      } catch (e) {
-        console.error('auto start failed:', e)
-      }
-    }, 300)
-  }
 })
 </script>
