@@ -61,6 +61,14 @@ export function useConfigManager() {
     }
   }
 
+  async function autoSaveConfig(newConfig: AppConfig): Promise<boolean> {
+    const success = await saveConfig(newConfig)
+    if (success) {
+      showToast(i18n.global.t('toast.configSavedNeedRestart'), 'success')
+    }
+    return success
+  }
+
   async function browseFolder(initialDir?: string | null): Promise<string | null> {
     try {
       const { invoke } = window.__TAURI__.core
@@ -79,6 +87,7 @@ export function useConfigManager() {
     config,
     loadConfig,
     saveConfig,
+    autoSaveConfig,
     browseFolder
   }
 }

@@ -144,6 +144,7 @@ const en = {
     invalidPort: 'Please enter a valid port (1-65535)',
     emptyFolder: 'Please enter a public folder path',
     saved: '💾 Config saved',
+    configSavedNeedRestart: '💾 Config auto-saved, please restart HTTP service to apply',
     saveFailed: 'Save failed: {err}',
     pluginUpdated: '✅ Plugin status updated',
     folderSelected: '📁 Folder selected: {path}',

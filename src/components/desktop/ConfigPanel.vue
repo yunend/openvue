@@ -47,20 +47,13 @@
         </label>
       </div>
       
-      <div class="flex gap-3 mt-6">
-        <button class="flex-1 px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap text-center bg-violet-500 text-white hover:bg-violet-600" @click="loadConfig">
-          {{ t('config.load') }}
-        </button>
-        <button class="flex-1 px-[18px] py-3 text-[0.95rem] font-semibold border-none rounded-[9px] cursor-pointer transition-all duration-200 whitespace-nowrap text-center bg-orange-500 text-white hover:bg-orange-600" @click="handleSaveConfig">
-          {{ t('config.save') }}
-        </button>
-      </div>
+
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useConfigManager } from '../../composables/useConfigManager'
 
@@ -68,26 +61,38 @@ defineProps({ isActive: Boolean })
 
 const { t } = useI18n()
 
-const { config, loadConfig, saveConfig, browseFolder } = useConfigManager()
+const { config, loadConfig, autoSaveConfig, browseFolder } = useConfigManager()
 const localConfig = ref({ port: 8005, publicFolder: 'public', enableUpload: false })
-
+const initialized = ref(false)
+let pathDebounceTimer: ReturnType<typeof setTimeout> | null = null
 
 onMounted(async () => {
   await loadConfig()
   localConfig.value = { ...config.value }
+  await nextTick()
+  initialized.value = true
+})
+
+watch(() => localConfig.value.port, () => {
+  if (initialized.value) autoSaveConfig(localConfig.value)
+})
+
+watch(() => localConfig.value.enableUpload, () => {
+  if (initialized.value) autoSaveConfig(localConfig.value)
+})
+
+watch(() => localConfig.value.publicFolder, () => {
+  if (!initialized.value) return
+  if (pathDebounceTimer) clearTimeout(pathDebounceTimer)
+  pathDebounceTimer = setTimeout(() => {
+    autoSaveConfig(localConfig.value)
+  }, 500)
 })
 
 async function handleBrowseFolder() {
   const chosen = await browseFolder(localConfig.value.publicFolder)
   if (chosen) {
     localConfig.value.publicFolder = chosen
-  }
-}
-
-async function handleSaveConfig() {
-  const success = await saveConfig(localConfig.value)
-  if (success) {
-    localConfig.value = { ...config.value }
   }
 }
 </script>

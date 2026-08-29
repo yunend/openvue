@@ -144,6 +144,7 @@ const zh = {
     invalidPort: '请输入有效的端口号 (1-65535)',
     emptyFolder: '请输入指定文件目录路径',
     saved: '💾 配置已保存',
+    configSavedNeedRestart: '💾 配置已自动保存，请重启 HTTP 服务生效',
     saveFailed: '保存失败: {err}',
     pluginUpdated: '✅ 插件状态已更新',
     folderSelected: '📁 已选择目录: {path}',
