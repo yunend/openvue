@@ -13,28 +13,28 @@
       />
     </div>
     
-    <div class="w-full flex justify-between items-center mb-2">
+    <div class="w-full flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2 sm:gap-0 mb-2">
       <button 
         @click="goBack"
         :disabled="currentPath.length === 0"
         :class="currentPath.length === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'"
-        class="px-4 py-2 text-white rounded transition-colors"
+        class="px-4 py-2 text-white rounded transition-colors w-full sm:w-auto"
       >
         ← {{ t('home.back') }}
       </button>
       
-      <div class="flex gap-2">
+      <div class="flex gap-2 w-full sm:w-auto">
         <button 
           @click="sortBy = 'name'" 
           :class="sortBy === 'name' ? 'bg-green-600' : 'bg-gray-600'"
-          class="px-3 py-2 text-white rounded hover:opacity-80 transition-opacity text-sm"
+          class="px-3 py-2 text-white rounded hover:opacity-80 transition-opacity text-sm flex-1 sm:flex-none"
         >
           {{ sortBy === 'name' ? '✓ ' : '' }}{{ t('home.sortByName') }}
         </button>
         <button 
           @click="sortBy = 'time'" 
           :class="sortBy === 'time' ? 'bg-green-600' : 'bg-gray-600'"
-          class="px-3 py-2 text-white rounded hover:opacity-80 transition-opacity text-sm"
+          class="px-3 py-2 text-white rounded hover:opacity-80 transition-opacity text-sm flex-1 sm:flex-none"
         >
           {{ sortBy === 'time' ? '✓ ' : '' }}{{ t('home.sortByTime') }}
         </button>
@@ -60,7 +60,7 @@
         </div>
         
         <div class="flex items-center gap-3">
-          <span class="text-sm text-text-secondary">{{ formatDate(item.mtime) }}</span>
+          <span class="text-sm text-text-secondary hidden sm:inline">{{ formatDate(item.mtime) }}</span>
           <button 
             v-if="item.type === 'file'" 
             @click.stop="downloadFile(item)"
@@ -68,7 +68,7 @@
             :title="t('home.download')"
           >
             <span>⬇️</span>
-            <span>{{ t('home.download') }}</span>
+            <span class="hidden sm:inline">{{ t('home.download') }}</span>
           </button>
         </div>
       </div>
