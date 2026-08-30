@@ -193,6 +193,13 @@ plugins/
 |--------|--------|------|
 | `ggb` | GeoGebra | 数学动态几何课件预览（已内置） |
 | `md` | Markdown | Markdown 文档预览（已内置） |
+| `xls` `xlsx` | Office Viewer | Excel 表格预览（微软在线查看器，⚠️ 需 HTTPS 公网） |
+| `doc` `docx` | Office Viewer | Word 文档预览（微软在线查看器，⚠️ 需 HTTPS 公网） |
+| `ppt` `pptx` | Office Viewer | PowerPoint 演示文稿预览（微软在线查看器，⚠️ 需 HTTPS 公网） |
+
+> **⚠️ Office Viewer 注意事项**：Office 插件通过 `https://view.officeapps.live.com` 微软在线查看器渲染文件，因此要求文件 URL 必须满足：
+> 1. **公网可访问**：微软服务器需要能从外网拉取到你的文件，纯局域网 IP（`192.168.x.x` / `10.x.x.x`）无法使用
+> 2. **HTTPS 协议**：建议使用 HTTPS（若为 HTTP 微软可能拒绝加载），请配合内网穿透或公网服务器托管使用
 
 ---
 

@@ -4,14 +4,14 @@
       "handlers": [
         {
           "handlerId": "xls-office",
-          "status": "undeveloped",
-          "pluginId": null,
-          "urlTemplate": null,
+          "status": "enabled",
+          "pluginId": "office",
+          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "Excel 表格 / Excel Spreadsheet",
           "name": "Office 文档查看器 / Office Viewer"
         }
       ],
-      "activeHandlerId": null
+      "activeHandlerId": "xls-office"
     },
     "md": {
       "handlers": [
@@ -147,14 +147,14 @@
       "handlers": [
         {
           "handlerId": "doc-office",
-          "status": "undeveloped",
-          "pluginId": null,
-          "urlTemplate": null,
+          "status": "enabled",
+          "pluginId": "office",
+          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "Word 文档 / Word Document",
           "name": "Office 文档查看器 / Office Viewer"
         }
       ],
-      "activeHandlerId": null
+      "activeHandlerId": "doc-office"
     },
     "jpeg": {
       "handlers": [
@@ -173,14 +173,14 @@
       "handlers": [
         {
           "handlerId": "xlsx-office",
-          "status": "undeveloped",
-          "pluginId": null,
-          "urlTemplate": null,
+          "status": "enabled",
+          "pluginId": "office",
+          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "Excel 表格 / Excel Spreadsheet",
           "name": "Office 文档查看器 / Office Viewer"
         }
       ],
-      "activeHandlerId": null
+      "activeHandlerId": "xlsx-office"
     },
     "mp4": {
       "handlers": [
@@ -199,27 +199,27 @@
       "handlers": [
         {
           "handlerId": "ppt-office",
-          "status": "undeveloped",
-          "pluginId": null,
-          "urlTemplate": null,
+          "status": "enabled",
+          "pluginId": "office",
+          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "PPT 演示文稿 / PowerPoint Presentation",
           "name": "Office 文档查看器 / Office Viewer"
         }
       ],
-      "activeHandlerId": null
+      "activeHandlerId": "ppt-office"
     },
     "pptx": {
       "handlers": [
         {
           "handlerId": "pptx-office",
-          "status": "undeveloped",
-          "pluginId": null,
-          "urlTemplate": null,
+          "status": "enabled",
+          "pluginId": "office",
+          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "PPT 演示文稿 / PowerPoint Presentation",
           "name": "Office 文档查看器 / Office Viewer"
         }
       ],
-      "activeHandlerId": null
+      "activeHandlerId": "pptx-office"
     },
     "pdf": {
       "handlers": [
@@ -238,14 +238,14 @@
       "handlers": [
         {
           "handlerId": "docx-office",
-          "status": "undeveloped",
-          "pluginId": null,
-          "urlTemplate": null,
+          "status": "enabled",
+          "pluginId": "office",
+          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "Word 文档 / Word Document",
           "name": "Office 文档查看器 / Office Viewer"
         }
       ],
-      "activeHandlerId": null
+      "activeHandlerId": "docx-office"
     }
   }
 }

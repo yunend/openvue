@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office 查看器</title>
+</head>
+<body>
+    <script>
+        function getQueryParams() {
+            const queryString = location.search;
+            const queryParams = new URLSearchParams(queryString);
+            return queryParams;
+        }
+
+        window.addEventListener('DOMContentLoaded', function () {
+            const queryParams = getQueryParams();
+            const filePath = queryParams.has('path') ? queryParams.get('path') : '';
+
+            if (filePath) {
+                // 拼接完整 URL：域名 + 文件路径（如 http://192.168.1.100:8005/upload/xxx.docx）
+                const fullUrl = window.location.origin + filePath;
+                // 构建微软 Office 在线查看器链接
+                const officeViewerUrl = 'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(fullUrl);
+                // 跳转到微软查看器
+                window.location.href = officeViewerUrl;
+            } else {
+                document.body.innerHTML = '<p>请通过 path 参数指定 Office 文件路径</p>';
+            }
+        });
+    </script>
+</body>
+</html>
