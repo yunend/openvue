@@ -1,5 +1,5 @@
 {
   "port": 8005,
   "publicFolder": "public",
-  "enableUpload": true
+  "enableUpload": false
 }
