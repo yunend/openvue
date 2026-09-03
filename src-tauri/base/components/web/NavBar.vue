@@ -23,7 +23,7 @@
       </div>
 
       <!-- 主题切换 -->
-      <div class="ml-auto lg:ml-0">
+      <div class="hidden md:block">
         <ThemeSwitcher />
       </div>
       

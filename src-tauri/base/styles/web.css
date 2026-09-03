@@ -44,6 +44,9 @@
     --footer-bg: #1d4ed8;
     --footer-text: #ffffff;
     --border-color: #e2e8f0;
+    --card-alt: #eff6ff;
+    --card-alt-border: #bfdbfe;
+    --link-text: #2563eb;
   }
 
   .theme-dark {
@@ -56,6 +59,9 @@
     --footer-bg: #0f172a;
     --footer-text: #cbd5e1;
     --border-color: #334155;
+    --card-alt: #1e3a5f;
+    --card-alt-border: #1e40af;
+    --link-text: #60a5fa;
   }
 
   .theme-sunset {
@@ -68,6 +74,9 @@
     --footer-bg: #ea580c;
     --footer-text: #fff7ed;
     --border-color: #fed7aa;
+    --card-alt: #ffedd5;
+    --card-alt-border: #fdba74;
+    --link-text: #ea580c;
   }
 
   .theme-forest {
@@ -80,6 +89,9 @@
     --footer-bg: #15803d;
     --footer-text: #f0fdf4;
     --border-color: #bbf7d0;
+    --card-alt: #dcfce7;
+    --card-alt-border: #86efac;
+    --link-text: #15803d;
   }
 
   .theme-ocean {
@@ -92,6 +104,9 @@
     --footer-bg: #0e7490;
     --footer-text: #ecfeff;
     --border-color: #a5f3fc;
+    --card-alt: #cffafe;
+    --card-alt-border: #67e8f9;
+    --link-text: #0e7490;
   }
 
   body {

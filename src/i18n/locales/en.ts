@@ -132,11 +132,8 @@ const en = {
     updateError: '❌ Update check failed: {msg}<br>Please check your network and retry.'
   },
   toast: {
-    pluginsLoaded: '🧩 Plugin config loaded',
     pluginsLoadFailed: 'Failed to load plugin config: {err}',
-    pluginUpdating: '💾 Updating .{ext} status...',
     pluginToggleFailed: '❌ Toggle failed: {err}',
-    handlerActivating: '⭐ Switching .{ext} to handler [{handlerId}] ...',
     handlerActivateFailed: '❌ Failed to switch active handler: {err}',
     refreshFailed: 'Refresh failed: {err}',
     started: '✅ HTTP service started',
@@ -150,7 +147,6 @@ const en = {
     invalidPort: 'Please enter a valid port (1-65535)',
     emptyFolder: 'Please enter a public folder path',
     saved: '💾 Config saved',
-    configSavedNeedRestart: '💾 Config auto-saved, please restart HTTP service to apply',
     saveFailed: 'Save failed: {err}',
     pluginUpdated: '✅ Plugin status updated',
     folderSelected: '📁 Folder selected: {path}',
@@ -162,7 +158,6 @@ const en = {
     hideFailed: 'Hide failed: {err}',
     quitConfirm: '⚠️ HTTP service is running, are you sure you want to quit?',
     customPluginEmpty: 'Please fill in extension and select plugin folder',
-    customPluginAdding: '➕ Adding custom plugin .{ext} ...',
     customPluginFailed: '❌ Failed to add custom plugin: {err}'
   },
   language: {

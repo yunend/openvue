@@ -47,13 +47,16 @@ export function useConfigManager() {
 
     try {
       const { invoke } = window.__TAURI__.core
-      await invoke('save_config', {
+      const msg = await invoke('save_config', {
         port: parseInt(String(port), 10),
         publicFolder,
         enableUpload
-      })
+      }) as string
+      if (msg.startsWith('__RESTART_FAILED__')) {
+        const err = msg.slice('__RESTART_FAILED__'.length)
+        showToast(i18n.global.t('toast.restartFailed', { err }), 'error')
+      }
       config.value = { port: parseInt(String(port), 10), publicFolder, enableUpload: !!enableUpload }
-      showToast(i18n.global.t('toast.saved'), 'success')
       return true
     } catch (e) {
       showToast(i18n.global.t('toast.saveFailed', { err: String(e) }), 'error')
@@ -62,11 +65,7 @@ export function useConfigManager() {
   }
 
   async function autoSaveConfig(newConfig: AppConfig): Promise<boolean> {
-    const success = await saveConfig(newConfig)
-    if (success) {
-      showToast(i18n.global.t('toast.configSavedNeedRestart'), 'success')
-    }
-    return success
+    return await saveConfig(newConfig)
   }
 
   async function browseFolder(initialDir?: string | null): Promise<string | null> {

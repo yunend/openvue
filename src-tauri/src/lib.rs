@@ -9,6 +9,23 @@ use tokio_util::sync::CancellationToken;
 use tauri_plugin_autostart::MacosLauncher;
 use tauri::{tray::TrayIconBuilder, menu::Menu, AppHandle, Manager};
 
+/// 🔁 重启 HTTP 服务（停止后再启动，配置变更后自动调用）
+fn restart_server(state: &Arc<Mutex<ServerState>>) -> Result<u16, String> {
+    // 先停止
+    {
+        let mut guard = state.lock().map_err(|e| e.to_string())?;
+        if let Some(token) = &guard.cancel_token {
+            token.cancel();
+            guard.cancel_token = None;
+            println!("🛑 [restart] HTTP 服务已停止");
+        }
+    }
+    // 短暂等待确保端口释放
+    std::thread::sleep(std::time::Duration::from_millis(200));
+    // 再启动
+    do_spawn_server(state, "[reload] ")
+}
+
 
 struct ServerState {
     cancel_token: Option<CancellationToken>,
@@ -308,6 +325,7 @@ fn save_config(
     public_folder: String,
     enable_upload: bool,
 ) -> Result<String, String> {
+    let arc_state = Arc::clone(state.inner());
     // 1. 基础验证
     if port == 0 {
         return Err("端口号不能为 0".to_string());
@@ -344,13 +362,17 @@ fn save_config(
     state.app_config.public_folder = abs_public_path;
     state.app_config.enable_upload = enable_upload;
 
-    let msg = if state.cancel_token.is_some() {
-        "配置已保存，重启 HTTP 服务后生效"
-    } else {
-        "配置已保存"
-    };
+    // 6. 如果服务正在运行，自动重启使其生效
+    let was_running = state.cancel_token.is_some();
+    drop(state);
 
-    Ok(msg.to_string())
+    if was_running {
+        if let Err(e) = restart_server(&arc_state) {
+            return Ok(format!("__RESTART_FAILED__{}", e));
+        }
+    }
+
+    Ok("__OK__".to_string())
 }
 
 /// 获取本机所有 IPv4 地址（排除回环地址）
@@ -486,6 +508,7 @@ fn save_plugin_extension_status(
     status: String,
 ) -> Result<String, String> {
     use plugins::ExtensionStatus;
+    let arc_state = Arc::clone(state.inner());
 
     let new_status = match status.as_str() {
         "enabled" => ExtensionStatus::Enabled,
@@ -500,12 +523,16 @@ fn save_plugin_extension_status(
         .plugins_config
         .set_extension_status(&ext, new_status.clone())?;
     plugins::save_plugins_config(&guard.plugins_config)?;
+    let was_running = guard.cancel_token.is_some();
+    drop(guard);
 
-    Ok(format!(
-        "✅ 扩展名 .{} 状态已更新为 {:?}",
-        ext.to_lowercase(),
-        new_status
-    ))
+    if was_running {
+        if let Err(e) = restart_server(&arc_state) {
+            return Ok(format!("__RESTART_FAILED__{}", e));
+        }
+    }
+
+    Ok("__OK__".to_string())
 }
 
 // ================================================================
@@ -519,17 +546,22 @@ fn activate_plugin_handler(
     ext: String,
     handler_id: String,
 ) -> Result<String, String> {
+    let arc_state = Arc::clone(state.inner());
     let mut guard = state.lock().map_err(|e| e.to_string())?;
     guard
         .plugins_config
         .activate_handler(&ext, &handler_id)?;
     plugins::save_plugins_config(&guard.plugins_config)?;
+    let was_running = guard.cancel_token.is_some();
+    drop(guard);
 
-    Ok(format!(
-        "✅ .{} 已切换到处理器 [{}]（同一扩展名下保持唯一生效）",
-        ext.to_lowercase(),
-        handler_id
-    ))
+    if was_running {
+        if let Err(e) = restart_server(&arc_state) {
+            return Ok(format!("__RESTART_FAILED__{}", e));
+        }
+    }
+
+    Ok("__OK__".to_string())
 }
 
 // ================================================================
@@ -552,6 +584,7 @@ fn add_custom_plugin(
     ext: String,
     folder_path: String,
 ) -> Result<String, String> {
+    let arc_state = Arc::clone(state.inner());
     let plugins_dir = plugins::get_plugins_dir()?;
     let plugins_dir_canonical = plugins_dir
         .canonicalize()
@@ -591,12 +624,16 @@ fn add_custom_plugin(
         .plugins_config
         .add_custom_handler(&ext, &folder_name)?;
     plugins::save_plugins_config(&guard.plugins_config)?;
+    let was_running = guard.cancel_token.is_some();
+    drop(guard);
 
-    Ok(format!(
-        "✅ 自定义插件 .{} → [{}] 已添加并设为激活",
-        ext.to_lowercase(),
-        folder_name
-    ))
+    if was_running {
+        if let Err(e) = restart_server(&arc_state) {
+            return Ok(format!("__RESTART_FAILED__{}", e));
+        }
+    }
+
+    Ok("__OK__".to_string())
 }
 
 #[tauri::command]

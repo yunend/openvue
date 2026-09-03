@@ -101,7 +101,6 @@ export function usePluginManager() {
     try {
       const { invoke } = window.__TAURI__.core
       pluginsCache.value = await invoke('get_plugins_config') as PluginsData
-      showToast(i18n.global.t('toast.pluginsLoaded'), 'info')
     } catch (e) {
       console.error('load plugins failed:', e)
       showToast(i18n.global.t('toast.pluginsLoadFailed', { err: String(e) }), 'error')
@@ -114,10 +113,8 @@ export function usePluginManager() {
 
     try {
       const { invoke } = window.__TAURI__.core
-      showToast(i18n.global.t('toast.pluginUpdating', { ext }), 'info')
-      const msg = await invoke('save_plugin_extension_status', { ext, status: newStatus }) as string
+      await invoke('save_plugin_extension_status', { ext, status: newStatus }) as string
       await loadPluginsConfig()
-      showToast(msg, 'success')
     } catch (e) {
       console.error(e)
       showToast(i18n.global.t('toast.pluginToggleFailed', { err: String(e) }), 'error')
@@ -129,10 +126,8 @@ export function usePluginManager() {
     if (!ext || !handlerId) return
     try {
       const { invoke } = window.__TAURI__.core
-      showToast(i18n.global.t('toast.handlerActivating', { ext, handlerId }), 'info')
-      const msg = await invoke('activate_plugin_handler', { ext, handlerId }) as string
+      await invoke('activate_plugin_handler', { ext, handlerId }) as string
       await loadPluginsConfig()
-      showToast(msg, 'success')
     } catch (e) {
       console.error(e)
       showToast(i18n.global.t('toast.handlerActivateFailed', { err: String(e) }), 'error')
@@ -155,10 +150,8 @@ export function usePluginManager() {
     }
     try {
       const { invoke } = window.__TAURI__.core
-      showToast(i18n.global.t('toast.customPluginAdding', { ext }), 'info')
-      const msg = await invoke('add_custom_plugin', { ext, folderPath }) as string
+      await invoke('add_custom_plugin', { ext, folderPath }) as string
       await loadPluginsConfig()
-      showToast(msg, 'success')
     } catch (e) {
       showToast(i18n.global.t('toast.customPluginFailed', { err: String(e) }), 'error')
     }

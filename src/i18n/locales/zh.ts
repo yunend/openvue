@@ -132,11 +132,8 @@ const zh = {
     updateError: '❌ 检查更新失败：{msg}<br>请检查网络连接后重试。'
   },
   toast: {
-    pluginsLoaded: '🧩 插件配置已加载',
     pluginsLoadFailed: '加载插件配置失败: {err}',
-    pluginUpdating: '💾 正在更新 .{ext} 状态...',
     pluginToggleFailed: '❌ 切换失败: {err}',
-    handlerActivating: '⭐ 正在将 .{ext} 切换到处理器 [{handlerId}] ...',
     handlerActivateFailed: '❌ 切换激活处理器失败: {err}',
     refreshFailed: '刷新状态失败: {err}',
     started: '✅ HTTP 服务已启动',
@@ -150,7 +147,6 @@ const zh = {
     invalidPort: '请输入有效的端口号 (1-65535)',
     emptyFolder: '请输入指定文件目录路径',
     saved: '💾 配置已保存',
-    configSavedNeedRestart: '💾 配置已自动保存，请重启 HTTP 服务生效',
     saveFailed: '保存失败: {err}',
     pluginUpdated: '✅ 插件状态已更新',
     folderSelected: '📁 已选择目录: {path}',
@@ -162,7 +158,6 @@ const zh = {
     hideFailed: '隐藏失败: {err}',
     quitConfirm: '⚠️ HTTP 服务正在运行，确定要退出吗？',
     customPluginEmpty: '请填写后缀名并选择插件目录',
-    customPluginAdding: '➕ 正在添加自定义插件 .{ext} ...',
     customPluginFailed: '❌ 添加自定义插件失败: {err}'
   },
   language: {

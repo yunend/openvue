@@ -1,43 +1,95 @@
 {
   "extensions": {
-    "xls": {
+    "jpeg": {
       "handlers": [
         {
-          "handlerId": "xls-office",
-          "status": "enabled",
-          "pluginId": "office",
-          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
-          "description": "Excel 表格 / Excel Spreadsheet",
-          "name": "Office 文档查看器 / Office Viewer"
+          "handlerId": "image-default-2",
+          "status": "browser-default",
+          "pluginId": null,
+          "urlTemplate": null,
+          "description": "JPEG 图片 / JPEG Image",
+          "name": "图片预览 / Image Viewer"
         }
       ],
-      "activeHandlerId": "xls-office"
+      "activeHandlerId": null
+    },
+    "pdf": {
+      "handlers": [
+        {
+          "handlerId": "pdf-native",
+          "status": "undeveloped",
+          "pluginId": null,
+          "urlTemplate": null,
+          "description": "PDF.js 浏览器原生渲染 / PDF.js Native Renderer",
+          "name": "PDF.js 内置阅读器 / PDF.js Viewer"
+        }
+      ],
+      "activeHandlerId": null
     },
     "md": {
       "handlers": [
         {
           "handlerId": "md-builtin",
-          "status": "disabled",
+          "status": "enabled",
           "pluginId": "md",
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "内置 Markdown 渲染器 / Built-in Markdown Renderer",
           "name": "Markdown 渲染器（内置）/ Markdown Renderer (Built-in)"
         }
       ],
-      "activeHandlerId": null
+      "activeHandlerId": "md-builtin"
     },
-    "ggb": {
+    "doc": {
       "handlers": [
         {
-          "handlerId": "ggb-official",
+          "handlerId": "doc-office",
           "status": "enabled",
-          "pluginId": "ggb",
+          "pluginId": "office",
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
-          "description": "GeoGebra 官方 HTML5 播放器 / Official GeoGebra Player",
-          "name": "GeoGebra 官方插件 / Official GeoGebra Plugin"
+          "description": "Word 文档 / Word Document",
+          "name": "Office 文档查看器 / Office Viewer"
         }
       ],
-      "activeHandlerId": "ggb-official"
+      "activeHandlerId": "doc-office"
+    },
+    "png": {
+      "handlers": [
+        {
+          "handlerId": "image-default-3",
+          "status": "browser-default",
+          "pluginId": null,
+          "urlTemplate": null,
+          "description": "PNG 图片 / PNG Image",
+          "name": "图片预览 / Image Viewer"
+        }
+      ],
+      "activeHandlerId": null
+    },
+    "ppt": {
+      "handlers": [
+        {
+          "handlerId": "ppt-office",
+          "status": "enabled",
+          "pluginId": "office",
+          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
+          "description": "PPT 演示文稿 / PowerPoint Presentation",
+          "name": "Office 文档查看器 / Office Viewer"
+        }
+      ],
+      "activeHandlerId": "ppt-office"
+    },
+    "txt": {
+      "handlers": [
+        {
+          "handlerId": "text-default",
+          "status": "browser-default",
+          "pluginId": null,
+          "urlTemplate": null,
+          "description": "纯文本文件 / Plain Text File",
+          "name": "文本编辑器 / Text Editor"
+        }
+      ],
+      "activeHandlerId": null
     },
     "jpg": {
       "handlers": [
@@ -52,6 +104,32 @@
       ],
       "activeHandlerId": null
     },
+    "xls": {
+      "handlers": [
+        {
+          "handlerId": "xls-office",
+          "status": "enabled",
+          "pluginId": "office",
+          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
+          "description": "Excel 表格 / Excel Spreadsheet",
+          "name": "Office 文档查看器 / Office Viewer"
+        }
+      ],
+      "activeHandlerId": "xls-office"
+    },
+    "pptx": {
+      "handlers": [
+        {
+          "handlerId": "pptx-office",
+          "status": "enabled",
+          "pluginId": "office",
+          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
+          "description": "PPT 演示文稿 / PowerPoint Presentation",
+          "name": "Office 文档查看器 / Office Viewer"
+        }
+      ],
+      "activeHandlerId": "pptx-office"
+    },
     "svg": {
       "handlers": [
         {
@@ -60,19 +138,6 @@
           "pluginId": null,
           "urlTemplate": null,
           "description": "SVG 矢量图 / SVG Vector Graphic",
-          "name": "图片预览 / Image Viewer"
-        }
-      ],
-      "activeHandlerId": null
-    },
-    "png": {
-      "handlers": [
-        {
-          "handlerId": "image-default-3",
-          "status": "browser-default",
-          "pluginId": null,
-          "urlTemplate": null,
-          "description": "PNG 图片 / PNG Image",
           "name": "图片预览 / Image Viewer"
         }
       ],
@@ -91,18 +156,18 @@
       ],
       "activeHandlerId": null
     },
-    "html": {
+    "docx": {
       "handlers": [
         {
-          "handlerId": "html-default",
-          "status": "browser-default",
-          "pluginId": null,
-          "urlTemplate": null,
-          "description": "HTML 网页 / HTML Webpage",
-          "name": "HTML 页面 / HTML Page"
+          "handlerId": "docx-office",
+          "status": "enabled",
+          "pluginId": "office",
+          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
+          "description": "Word 文档 / Word Document",
+          "name": "Office 文档查看器 / Office Viewer"
         }
       ],
-      "activeHandlerId": null
+      "activeHandlerId": "docx-office"
     },
     "zip": {
       "handlers": [
@@ -117,15 +182,28 @@
       ],
       "activeHandlerId": null
     },
-    "txt": {
+    "mp4": {
       "handlers": [
         {
-          "handlerId": "text-default",
+          "handlerId": "video-default",
           "status": "browser-default",
           "pluginId": null,
           "urlTemplate": null,
-          "description": "纯文本文件 / Plain Text File",
-          "name": "文本编辑器 / Text Editor"
+          "description": "MP4 视频 / MP4 Video",
+          "name": "视频播放器 / Video Player"
+        }
+      ],
+      "activeHandlerId": null
+    },
+    "html": {
+      "handlers": [
+        {
+          "handlerId": "html-default",
+          "status": "browser-default",
+          "pluginId": null,
+          "urlTemplate": null,
+          "description": "HTML 网页 / HTML Webpage",
+          "name": "HTML 页面 / HTML Page"
         }
       ],
       "activeHandlerId": null
@@ -138,32 +216,6 @@
           "pluginId": null,
           "urlTemplate": null,
           "description": "GIF 动图 / GIF Animation",
-          "name": "图片预览 / Image Viewer"
-        }
-      ],
-      "activeHandlerId": null
-    },
-    "doc": {
-      "handlers": [
-        {
-          "handlerId": "doc-office",
-          "status": "enabled",
-          "pluginId": "office",
-          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
-          "description": "Word 文档 / Word Document",
-          "name": "Office 文档查看器 / Office Viewer"
-        }
-      ],
-      "activeHandlerId": "doc-office"
-    },
-    "jpeg": {
-      "handlers": [
-        {
-          "handlerId": "image-default-2",
-          "status": "browser-default",
-          "pluginId": null,
-          "urlTemplate": null,
-          "description": "JPEG 图片 / JPEG Image",
           "name": "图片预览 / Image Viewer"
         }
       ],
@@ -182,70 +234,18 @@
       ],
       "activeHandlerId": "xlsx-office"
     },
-    "mp4": {
+    "ggb": {
       "handlers": [
         {
-          "handlerId": "video-default",
-          "status": "browser-default",
-          "pluginId": null,
-          "urlTemplate": null,
-          "description": "MP4 视频 / MP4 Video",
-          "name": "视频播放器 / Video Player"
-        }
-      ],
-      "activeHandlerId": null
-    },
-    "ppt": {
-      "handlers": [
-        {
-          "handlerId": "ppt-office",
+          "handlerId": "ggb-official",
           "status": "enabled",
-          "pluginId": "office",
+          "pluginId": "ggb",
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
-          "description": "PPT 演示文稿 / PowerPoint Presentation",
-          "name": "Office 文档查看器 / Office Viewer"
+          "description": "GeoGebra 官方 HTML5 播放器 / Official GeoGebra Player",
+          "name": "GeoGebra 官方插件 / Official GeoGebra Plugin"
         }
       ],
-      "activeHandlerId": "ppt-office"
-    },
-    "pptx": {
-      "handlers": [
-        {
-          "handlerId": "pptx-office",
-          "status": "enabled",
-          "pluginId": "office",
-          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
-          "description": "PPT 演示文稿 / PowerPoint Presentation",
-          "name": "Office 文档查看器 / Office Viewer"
-        }
-      ],
-      "activeHandlerId": "pptx-office"
-    },
-    "pdf": {
-      "handlers": [
-        {
-          "handlerId": "pdf-native",
-          "status": "undeveloped",
-          "pluginId": null,
-          "urlTemplate": null,
-          "description": "PDF.js 浏览器原生渲染 / PDF.js Native Renderer",
-          "name": "PDF.js 内置阅读器 / PDF.js Viewer"
-        }
-      ],
-      "activeHandlerId": null
-    },
-    "docx": {
-      "handlers": [
-        {
-          "handlerId": "docx-office",
-          "status": "enabled",
-          "pluginId": "office",
-          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
-          "description": "Word 文档 / Word Document",
-          "name": "Office 文档查看器 / Office Viewer"
-        }
-      ],
-      "activeHandlerId": "docx-office"
+      "activeHandlerId": "ggb-official"
     }
   }
 }

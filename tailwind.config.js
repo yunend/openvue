@@ -29,6 +29,9 @@ export default {
         'footer-bg': 'var(--footer-bg)',
         'footer-text': 'var(--footer-text)',
         'border-color': 'var(--border-color)',
+        'card-alt': 'var(--card-alt)',
+        'card-alt-border': 'var(--card-alt-border)',
+        'link-text': 'var(--link-text)',
       },
       keyframes: {
         fadeIn: {
