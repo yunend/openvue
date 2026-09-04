@@ -1,4 +1,3 @@
-<!-- src-tauri/static/views/MainView.vue -->
 <template>
   <main class="flex-1 page-bg">
     <FileBrowser />

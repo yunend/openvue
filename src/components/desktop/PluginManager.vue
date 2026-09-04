@@ -3,7 +3,6 @@
     <div class="bg-primary-50 border-b border-primary-100 px-[26px] py-[22px]">
       <div class="text-[1.05rem] font-bold text-primary-900 mb-4 pb-[10px] border-b border-primary-50">{{ t('plugins.title') }}</div>
 
-      <!-- 🔧 自定义插件 -->
       <div class="mb-[18px] px-5 py-4 bg-white border border-dashed border-blue-200 rounded-[10px]">
         <div class="text-[0.95rem] font-semibold text-primary-900 mb-3">{{ t('plugins.customSection') }}</div>
         <div class="flex flex-wrap items-end gap-3">
@@ -45,7 +44,6 @@
         </div>
       </div>
 
-      <!-- 插件列表：每行 = 图标 + 扩展名 + 下拉列表 -->
       <div class="flex flex-col gap-2">
         <div
           v-if="filteredPlugins.length === 0"
@@ -59,22 +57,21 @@
           :key="plugin.ext"
           class="flex items-center gap-4 px-4 py-3 bg-white border border-primary-50 rounded-[10px]"
         >
-          <!-- 图标 + 扩展名标题 -->
           <span class="text-[1.4rem] flex-none">{{ fileExtIcon(plugin.ext) }}</span>
           <div class="flex-none w-[100px]">
             <span class="text-[0.95rem] font-semibold text-primary-900">
               .{{ plugin.ext }}
             </span>
           </div>
-          <!-- 下拉列表：强制充满剩余空间（select 是替换元素，需 min-w-0 + w-full 覆盖原生宽度行为） -->
+          <!-- select 需 min-w-0 + w-full 充满剩余空间 -->
           <select
             class="flex-1 min-w-0 w-full px-3 py-1.5 text-[0.88rem] bg-white border border-primary-100 rounded-[7px] text-primary-800 cursor-pointer focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition"
             :value="getCurrentSelectValue(plugin)"
             @change="(e) => handleSelectChange(plugin.ext, (e.target as HTMLSelectElement).value)"
           >
-            <!-- 浏览器默认选项（始终显示） -->
+            <!-- 浏览器默认 -->
             <option value="__browser_default__">{{ t('plugins.status.browserDefault') }}</option>
-            <!-- 仅显示有 pluginId 的真正插件 handler（排除浏览器默认/未开发等无 pluginId 的） -->
+            <!-- 仅显示有 pluginId 的 handler -->
             <option
               v-for="h in plugin.handlers.filter(h => h.pluginId)"
               :key="h.handlerId"

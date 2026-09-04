@@ -1,4 +1,3 @@
-<!-- src-tauri/static/views/UploadView.vue -->
 <template>
   <main class="flex-1 flex items-start justify-center py-12 bg-page-bg">
     <div class="w-10/12 max-w-2xl bg-card-bg text-text-primary rounded-lg shadow-lg p-8 border border-border-color">

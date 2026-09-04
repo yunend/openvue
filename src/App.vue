@@ -27,12 +27,10 @@
       </div>
     </aside>
 
-    <!-- 右侧内容区（面板占据整个空间，无圆角，无外边距，无内边距） -->
+    <!-- 右侧内容区 -->
     <main class="flex-1 overflow-hidden flex flex-col">
 
-      <!-- ════════════════════════════════════════════ -->
-      <!-- 上方独立工具条：全局动作按钮（占满宽度一行） -->
-      <!-- ════════════════════════════════════════════ -->
+      <!-- 工具条 -->
       <div class="px-[24px] py-[11px] bg-primary-50/60 border-b border-primary-100 flex items-center justify-end gap-[8px] flex-wrap">
         <button
           class="flex-none w-[108px] px-2 py-[7px] bg-white text-[0.82rem] font-semibold rounded-[7px] transition-all duration-200 border whitespace-nowrap overflow-hidden text-ellipsis text-center text-primary-500 border-primary-500 hover:bg-primary-500 hover:text-white hover:border-primary-500"
@@ -118,9 +116,7 @@ function toggleLocale() {
 }
 
 onMounted(async () => {
-  // 🍎 macOS 平台检测：注入 CSS class 供样式修复使用
-  //    @supports (-webkit-touch-callout: none) 在 macOS WKWebView 中不生效
-  //    （它是 iOS 触屏专用属性），必须用 JS 检测
+  // macOS 检测：WKWebView 不支持 @supports，需 JS 注入 platform-macos
   if (navigator.platform.toUpperCase().includes('MAC')) {
     document.documentElement.classList.add('platform-macos')
   }

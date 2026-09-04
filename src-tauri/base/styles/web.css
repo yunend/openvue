@@ -105,21 +105,16 @@
   }
 }
 
-/* ================================================================
-   🐧 WebKitGTK (Linux / Ubuntu) 渲染兼容性修复
-   - 解决：莫名线条、色块、按钮边框显示不全、文字毛刺
-   ================================================================ */
+/* WebKitGTK 渲染兼容修复 */
 @supports (-webkit-backdrop-filter: none) {
-  /* 1. 全局强制关闭亚像素抗锯齿，改为灰度抗锯齿
-        WebKitGTK 对 subpixel AA 实现有 bug，会在半透明边缘留下彩色伪影 */
+  /* 1. 灰度抗锯齿 */
   html, body, * {
     -webkit-font-smoothing: antialiased !important;
     -moz-osx-font-smoothing: grayscale !important;
     text-rendering: optimizeLegibility !important;
   }
 
-  /* 2. 所有使用 transform/transition 的元素：强制分配独立合成层
-        防止边框、阴影在重绘时被裁掉（表现为按钮缺角、边框不全） */
+  /* 2. 独立合成层防重绘裁剪 */
   *,
   *::before,
   *::after {
@@ -128,8 +123,7 @@
     -webkit-perspective: 1000;
   }
 
-  /* 3. 明确按钮、输入框边框绘制方式：使用 outline + inset box-shadow
-        代替纯 border，避免 WebKitGTK 在 1px border 上的丢失问题 */
+  /* 3. 重置 form 元素外观与盒模型 */
   button,
   input[type="text"],
   input[type="search"],
@@ -142,18 +136,14 @@
     box-sizing: border-box !important;
   }
 
-  /* 4. 半透明背景 hover（nav 大量用 hover:bg-white/20 等）：
-        WebKitGTK 下有时不清除旧色，强制明确合成层隔离
-        注意：Tailwind 的 hover:xxx/yyy 类名含冒号和斜杠，
-        必须用属性选择器 [class*="..."] 匹配，不能直接写 .hover\:bg-white\/20 */
+  /* 4. 半透明背景合成层隔离 */
   [class*="hover:"][class*="bg-"][class*="/"],
   [class*="bg-white/"] {
     isolation: isolate;
     -webkit-isolation: isolate;
   }
 
-  /* 5. 禁止「仅重绘脏区」策略导致的色块残留
-        强制整个页面在过渡/变换时整体重绘 */
+  /* 5. 强制整体重绘，避免色块残留 */
   body {
     -webkit-box-shadow: 0 0 0 0 transparent;
     background-clip: padding-box;

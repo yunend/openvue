@@ -4,7 +4,7 @@
       <div class="text-[3.8rem] mb-[12px] leading-none">🎛️</div>
       <div class="text-[1.55rem] font-bold text-primary-900 mb-[8px]">Tauri HTTP Server</div>
 
-      <!-- 版本号 + 检查更新按钮（紧挨着放一行） -->
+      <!-- 版本 + 检查更新 -->
       <div class="flex flex-wrap items-center justify-center gap-3 mb-5">
         <div class="inline-flex items-center px-[16px] py-[6px] bg-primary-50 text-primary-500 rounded-full text-[0.88rem] font-semibold border border-primary-100">
           <span class="mr-1.5">🏷️</span>v{{ version }}
@@ -20,7 +20,6 @@
         </button>
       </div>
 
-      <!-- 检查更新结果提示（紧跟在版本号下方） -->
       <div
         v-if="updateStatus.display"
         class="mx-auto max-w-[460px] mb-5 px-4 py-[11px] rounded-md text-[13px] leading-relaxed"
@@ -40,7 +39,7 @@
 
       <div class="text-left px-[8px] text-primary-400 text-[0.93rem] leading-relaxed mb-5" v-html="t('about.desc')"></div>
       
-      <!-- 2x2 信息网格（宽松版） -->
+      <!-- 信息网格 -->
       <div class="grid grid-cols-2 gap-[12px] text-left mb-5">
         <div class="bg-white/70 border border-primary-100 rounded-[10px] px-4 py-[13px]">
           <div class="text-[0.78rem] text-primary-300 mb-[4px]">{{ t('about.currentVersion') }}</div>

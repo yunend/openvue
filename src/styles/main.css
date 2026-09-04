@@ -23,7 +23,7 @@
 }
 
 @layer components {
-  /* Toggle Switch - 无法用纯 Tailwind 实现的组件 */
+  /* Toggle Switch 开关组件 */
   .toggle-switch {
     position: relative;
     width: 54px;
@@ -56,15 +56,9 @@
   .toggle-switch input:checked + .slider:before { transform: translateX(24px); }
 }
 
-/* ================================================================
-   🍎 macOS Desktop Mode (Tauri WKWebView) 渲染兼容性修复
-   问题：Flexbox + gap-* 在 macOS WKWebView 下对 button 元素间隙丢失
-   原因：button 带 border:none 时 WKWebView content-box 计算错误，gap 被吞掉
-   方案：用 JS 注入 html.platform-macos class（见 App.vue onMounted），
-        避免 @supports (-webkit-touch-callout) 在 macOS 不生效的坑
-   ================================================================ */
+/* macOS WKWebView 兼容：button + flex gap 失效，用 margin-left 模拟 */
 html.platform-macos {
-  /* ① 关闭 macOS 原生 Aqua 按钮外观，强制标准盒模型 */
+  /* ① 重置 button 外观与盒模型 */
   button {
     -webkit-appearance: none !important;
     appearance: none !important;
@@ -73,13 +67,11 @@ html.platform-macos {
     align-items: center !important;
   }
 
-  /* ② 文字对齐：text-center 按钮文字居中，text-left 按钮文字左对齐
-        （flex 容器中 text-align 不生效，必须用 justify-content） */
+  /* ② flex 容器中 text-* 用 justify-content 覆盖 */
   button.text-center { justify-content: center !important; }
   button.text-left   { justify-content: flex-start !important; }
 
-  /* ③ 相邻间隙：按 Tailwind gap 值精准匹配 margin-left
-        覆盖 button + button, a + a, button + a, a + button 四种组合 */
+  /* ③ 相邻 button/a 用 margin-left 模拟 gap */
   .flex.gap-3 > button + button,
   .flex.gap-3 > a + a,
   .flex.gap-3 > button + a,
@@ -93,7 +85,7 @@ html.platform-macos {
   .flex.gap-1 > button + a,
   .flex.gap-1 > a + button                { margin-left: 4px;  }
 
-  /* ④ 自定义任意值（方括号语法） */
+  /* ④ 任意值 gap（gap-[Xpx]） */
   [class*="gap-[8px]"]  > button + button,
   [class*="gap-[8px]"]  > a + a,
   [class*="gap-[8px]"]  > button + a,
@@ -111,7 +103,7 @@ html.platform-macos {
   [class*="gap-[14px]"] > button + a,
   [class*="gap-[14px]"] > a + button      { margin-left: 14px; }
 
-  /* ⑤ items-stretch 兼容（ConfigPanel 输入框+浏览按钮） */
+  /* ⑤ items-stretch 兼容 */
   .flex.items-stretch[class*="gap-"] > * + * {
     margin-left: 10px;
   }
