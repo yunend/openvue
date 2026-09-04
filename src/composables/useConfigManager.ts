@@ -26,7 +26,6 @@ export function useConfigManager() {
         publicFolder: cfg.publicFolder || 'public',
         enableUpload: !!cfg.enableUpload
       }
-      showToast(i18n.global.t('toast.configLoaded'), 'info')
     } catch (e) {
       showToast(i18n.global.t('toast.configLoadFailed', { err: String(e) }), 'error')
     }

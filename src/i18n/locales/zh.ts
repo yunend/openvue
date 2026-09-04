@@ -2,7 +2,6 @@ const zh = {
   app: {
     title: '🎛️ Tauri 控制台',
     subtitle: 'HTTP 文件服务管理器',
-    version: '版本',
     restartService: '重启HTTP服务',
     copy: '复制',
     copied: '已复制'
@@ -26,7 +25,6 @@ const zh = {
     start: '▶ 启动服务',
     stop: '■ 停止服务',
     refresh: '🔄 刷新',
-    autoStarting: '🔌 正在自动启动 HTTP 服务...',
     openLinkFailed: '打开链接失败',
     copyFailed: '复制失败'
   },
@@ -40,9 +38,7 @@ const zh = {
     folderHint: '支持相对路径或绝对路径；点击右侧按钮可直接选择文件夹',
     browse: '📁 浏览...',
     enableUpload: '启用文件上传功能',
-    enableUploadHint: '开启后，前端用户可通过 /api/upload 上传文件',
-    load: '📥 读取当前配置',
-    save: '💾 保存到 config.json'
+    enableUploadHint: '开启后，前端用户可通过 /api/upload 上传文件'
   },
   system: {
     title: '🖥️ 操作系统行为',
@@ -50,10 +46,8 @@ const zh = {
     autoStartHint: 'Windows 用户登录后自动启动本应用',
     enabled: '已启用',
     disabled: '已禁用',
-    minimizeLabel: '最小化到系统托盘',
     minimizeHint: '隐藏主窗口，HTTP 服务继续在后台运行',
     hideToTray: '隐藏到托盘',
-    quitLabel: '退出应用程序',
     quitHint: '停止 HTTP 服务并完全关闭本程序',
     quit: '退出应用'
   },
@@ -78,10 +72,8 @@ const zh = {
     currentActive: '当前激活处理器',
     activeMarker: '已激活 / ACTIVE',
     setActive: '⭐ 设为激活',
-    currentlyActive: '当前生效中',
     activePickerLabel: '🎯 切换激活处理器',
     chooseActivePlaceholder: '请选择激活的处理器...',
-    handlersBelow: '该后缀的全部处理器（切换请使用上方下拉菜单）',
     status: {
       enabled: '✅ 已启用',
       disabled: '⏸️ 未启用',
@@ -97,29 +89,17 @@ const zh = {
     customFolderLabel: '插件目录（dist-web/plugins 下）',
     customFolderPlaceholder: '点击右侧按钮选择目录',
     customBrowse: '浏览',
-    customAdd: '添加插件'
+    customAdd: '添加插件',
+    customSection: '🔧 自定义插件'
   },
   about: {
     title: '关于 OpenVue / About',
     desc: '基于 Tauri 2 + Axum 构建的轻量级本地 HTTP 文件服务工具。<br>一键启动、开机自启、托盘常驻、目录浏览、文件上传，配置灵活，开箱即用。',
     loading: '⏳ 正在加载关于信息...',
-    loadError: '加载失败：{error}',
-    close: '关闭',
     currentVersion: '当前版本',
-    version: '版本号',
-    techStack: '技术栈：{stack}',
     platform: '构建平台',
     gui: 'GUI 框架',
     backend: '后端语言',
-    config: '运行配置',
-    fileUpload: '文件上传',
-    port: '监听端口',
-    publicFolder: '公共文件目录',
-    enabled: '✅ 已开启',
-    disabled: '❌ 已关闭',
-    extensions: '当前已启用的扩展名',
-    noExtensions: '当前没有启用任何插件扩展名，全部走浏览器默认。',
-    help: '帮助 & 文档',
     checkUpdate: '检查更新',
     checking: '检查中...',
     github: 'GitHub 仓库',
@@ -142,13 +122,10 @@ const zh = {
     stopFailed: '❌ {err}',
     restarting: '🔄 正在重启 HTTP 服务...',
     restartFailed: '❌ 重启 HTTP 服务失败: {err}',
-    configLoaded: '📥 配置已读取',
     configLoadFailed: '读取配置失败: {err}',
     invalidPort: '请输入有效的端口号 (1-65535)',
     emptyFolder: '请输入指定文件目录路径',
-    saved: '💾 配置已保存',
     saveFailed: '保存失败: {err}',
-    pluginUpdated: '✅ 插件状态已更新',
     folderSelected: '📁 已选择目录: {path}',
     browseFailed: '打开文件夹选择失败: {err}',
     autoStartEnabled: '✅ 已开启开机自启动',
@@ -161,8 +138,7 @@ const zh = {
     customPluginFailed: '❌ 添加自定义插件失败: {err}'
   },
   language: {
-    switchTo: 'English',
-    label: '语言'
+    switchTo: 'English'
   }
 }
 

@@ -185,11 +185,12 @@ async fn add_security_headers(request: Request, next: Next) -> Response {
         CONTENT_SECURITY_POLICY,
         HeaderValue::from_static(
             "default-src 'self'; \
-             script-src 'self' 'unsafe-inline' 'unsafe-eval'; \
+             script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; \
              style-src 'self' 'unsafe-inline'; \
              img-src 'self' data: blob:; \
              font-src 'self' data:; \
              connect-src 'self' ipc.localhost https://api.github.com; \
+             worker-src 'self' data: blob:; \
              frame-ancestors 'none';"
         ),
     );

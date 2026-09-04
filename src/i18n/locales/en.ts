@@ -2,7 +2,6 @@ const en = {
   app: {
     title: '🎛️ Tauri Console',
     subtitle: 'HTTP File Server Manager',
-    version: 'Version',
     restartService: '🔄 Restart HTTP Service',
     copy: 'Copy',
     copied: 'Copied'
@@ -26,7 +25,6 @@ const en = {
     start: '▶ Start',
     stop: '■ Stop',
     refresh: '🔄 Refresh',
-    autoStarting: '🔌 Auto-starting HTTP service...',
     openLinkFailed: 'Failed to open link',
     copyFailed: 'Failed to copy'
   },
@@ -40,9 +38,7 @@ const en = {
     folderHint: 'Supports relative or absolute paths; click the button to browse',
     browse: '📁 Browse...',
     enableUpload: 'Enable File Upload',
-    enableUploadHint: 'Allow users to upload files via /api/upload',
-    load: '📥 Load Config',
-    save: '💾 Save to config.json'
+    enableUploadHint: 'Allow users to upload files via /api/upload'
   },
   system: {
     title: '🖥️ OS Behavior',
@@ -50,10 +46,8 @@ const en = {
     autoStartHint: 'Auto start this app when Windows user logs in',
     enabled: 'Enabled',
     disabled: 'Disabled',
-    minimizeLabel: 'Minimize to Tray',
     minimizeHint: 'Hide main window, HTTP service keeps running',
     hideToTray: '📦 Hide to Tray',
-    quitLabel: 'Quit App',
     quitHint: 'Stop HTTP service and completely close the app',
     quit: '🚪 Quit'
   },
@@ -78,10 +72,8 @@ const en = {
     currentActive: 'Currently Active Handler',
     activeMarker: 'ACTIVE',
     setActive: '⭐ Set Active',
-    currentlyActive: 'Active Now',
     activePickerLabel: '🎯 Switch active handler',
     chooseActivePlaceholder: 'Select active handler...',
-    handlersBelow: 'All handlers for this extension (switch via the dropdown above)',
     status: {
       enabled: '✅ Enabled',
       disabled: '⏸️ Disabled',
@@ -97,29 +89,17 @@ const en = {
     customFolderLabel: 'Plugin Dir (under dist-web/plugins)',
     customFolderPlaceholder: 'Click browse to select',
     customBrowse: 'Browse',
-    customAdd: 'Add Plugin'
+    customAdd: 'Add Plugin',
+    customSection: '🔧 Custom Plugin'
   },
   about: {
     title: 'About OpenVue',
     desc: 'A lightweight local HTTP file server built with Tauri 2 + Axum.<br>One-click start, auto-start on boot, tray, directory browse, file upload,flexible config, ready to use.',
     loading: '⏳ Loading about info...',
-    loadError: 'Failed to load: {error}',
-    close: 'Close',
     currentVersion: 'Current Version',
-    version: 'Version',
-    techStack: 'Tech Stack: {stack}',
     platform: 'Platform',
     gui: 'GUI Framework',
     backend: 'Backend Language',
-    config: 'Runtime Config',
-    fileUpload: 'File Upload',
-    port: 'Port',
-    publicFolder: 'Public Folder',
-    enabled: '✅ Enabled',
-    disabled: '❌ Disabled',
-    extensions: 'Currently Enabled Extensions',
-    noExtensions: 'No enabled plugin extensions found — all files use browser default behavior.',
-    help: 'Help & Docs',
     checkUpdate: 'Check for Updates',
     checking: 'Checking...',
     github: 'GitHub Repo',
@@ -142,13 +122,10 @@ const en = {
     stopFailed: '❌ {err}',
     restarting: '🔄 Restarting HTTP service...',
     restartFailed: '❌ Failed to restart HTTP service: {err}',
-    configLoaded: '📥 Config loaded',
     configLoadFailed: 'Failed to load config: {err}',
     invalidPort: 'Please enter a valid port (1-65535)',
     emptyFolder: 'Please enter a public folder path',
-    saved: '💾 Config saved',
     saveFailed: 'Save failed: {err}',
-    pluginUpdated: '✅ Plugin status updated',
     folderSelected: '📁 Folder selected: {path}',
     browseFailed: 'Failed to open folder picker: {err}',
     autoStartEnabled: '✅ Auto-start enabled',
@@ -161,8 +138,7 @@ const en = {
     customPluginFailed: '❌ Failed to add custom plugin: {err}'
   },
   language: {
-    switchTo: '中文',
-    label: 'Language'
+    switchTo: '中文'
   }
 }
 
