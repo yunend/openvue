@@ -100,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAboutModal } from '../../composables/useAboutModal'
 
@@ -116,16 +116,7 @@ const {
   aboutError,
   aboutPlugins,
   loadAboutInfo,
-  copiedConfig,
-  copyConfigToClipboard,
-  statusLabel,
-  statusBadgeClass
 } = useAboutModal()
-
-const prettyConfigJson = computed(() => {
-  if (!aboutData.value) return ''
-  return JSON.stringify(aboutData.value.config, null, 2)
-})
 
 const enabledPlugins = computed(() => {
   if (!aboutPlugins.value) return []

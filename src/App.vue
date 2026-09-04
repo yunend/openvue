@@ -81,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import StatusPanel from './components/desktop/StatusPanel.vue'
 import ConfigPanel from './components/desktop/ConfigPanel.vue'
@@ -107,10 +107,6 @@ const navItems = computed(() => [
   { id: 'plugins', icon: '🧩', label: t('nav.plugins') },
   { id: 'about', icon: 'ℹ️', label: t('nav.about') }
 ])
-
-const currentPanelInfo = computed(() => {
-  return navItems.value.find(item => item.id === activePanel.value) || navItems.value[0]
-})
 
 function switchPanel(panelId:string) {
   activePanel.value = panelId

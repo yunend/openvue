@@ -47,12 +47,6 @@ export function useTheme() {
     return THEMES.find(t => t.name === currentTheme.value) || THEMES[0]
   }
 
-  function nextTheme(): void {
-    const currentIndex = THEMES.findIndex(t => t.name === currentTheme.value)
-    const nextIndex = (currentIndex + 1) % THEMES.length
-    setTheme(THEMES[nextIndex].name)
-  }
-
   onMounted(() => {
     const savedTheme = localStorage.getItem('app-theme') as ThemeName | null
     if (savedTheme && THEMES.find(t => t.name === savedTheme)) {
@@ -69,6 +63,5 @@ export function useTheme() {
     themes: THEMES,
     setTheme,
     getCurrentThemeOption,
-    nextTheme,
   }
 }

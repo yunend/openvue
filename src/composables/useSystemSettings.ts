@@ -1,5 +1,6 @@
 import { ref, type Ref } from 'vue'
 import { useToast } from './useToast'
+import { useServerControl } from './useServerControl'
 import { i18n } from '../i18n'
 
 interface UseSystemSettingsReturn {
@@ -8,10 +9,6 @@ interface UseSystemSettingsReturn {
   toggleAutostart: (shouldEnable: boolean) => Promise<void>
   hideToTray: () => Promise<void>
   quitApp: () => Promise<boolean>
-}
-
-interface UseLocalServerControlReturn {
-  isRunning: Ref<boolean>
 }
 
 const autoStartEnabled = ref(false)
@@ -78,8 +75,4 @@ export function useSystemSettings(): UseSystemSettingsReturn {
     hideToTray,
     quitApp
   }
-}
-
-function useServerControl(): UseLocalServerControlReturn {
-  return { isRunning: ref(false) }
 }

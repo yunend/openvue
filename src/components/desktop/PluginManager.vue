@@ -112,11 +112,6 @@ const customFolderPath = ref('')
 
 const BROWSER_DEFAULT = '__browser_default__'
 
-/** 过滤出真正有 pluginId 的 handler（下拉选项来源） */
-function getSelectableHandlers(plugin: PluginItem) {
-  return plugin.handlers.filter(h => h.pluginId)
-}
-
 /** 根据插件当前激活状态，计算下拉框应该显示的值 */
 function getCurrentSelectValue(plugin: PluginItem): string {
   if (plugin.activeHandlerId) {

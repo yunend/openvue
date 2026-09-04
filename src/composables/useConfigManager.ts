@@ -63,10 +63,6 @@ export function useConfigManager() {
     }
   }
 
-  async function autoSaveConfig(newConfig: AppConfig): Promise<boolean> {
-    return await saveConfig(newConfig)
-  }
-
   async function browseFolder(initialDir?: string | null): Promise<string | null> {
     try {
       const { invoke } = window.__TAURI__.core
@@ -85,7 +81,6 @@ export function useConfigManager() {
     config,
     loadConfig,
     saveConfig,
-    autoSaveConfig,
     browseFolder
   }
 }

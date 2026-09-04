@@ -24,19 +24,14 @@ interface PluginsData {
   extensions: Record<string, ExtensionConfig>
 }
 
-export type PluginFilter = 'all' | 'enabled' | 'disabled' | 'browser-default' | 'undeveloped'
-
 /** 前端列表渲染用：一个扩展 + 该扩展所有处理器 + 激活 id */
 export interface PluginItem {
   ext: string
   handlers: PluginHandler[]
   activeHandlerId?: string | null
-  /** 兼容字段：默认返回【激活处理器】的状态（供筛选、旧 UI 逻辑复用） */
-  activeStatus: string
 }
 
 const pluginsCache = ref<PluginsData>({ extensions: {} })
-const pluginsFilter = ref<PluginFilter>('all')
 
 function mapStatus(status: string): PluginStatus {
   const map: Record<string, PluginStatus> = {
@@ -82,19 +77,13 @@ export function usePluginManager() {
           : [{ ...(cfg as unknown as Record<string, unknown>), handlerId: 'default' } as unknown as PluginHandler]
 
         const activeId = cfg.activeHandlerId ?? handlers.find(h => mapStatus(h.status) === 'enabled')?.handlerId
-        const active = handlers.find(h => h.handlerId === activeId) ?? handlers[0]
         return {
           ext,
           handlers,
-          activeHandlerId: activeId ?? null,
-          activeStatus: active ? active.status : 'browser-default'
+          activeHandlerId: activeId ?? null
         } as PluginItem
       })
       .filter((item): item is PluginItem => !!item)
-      .filter(item => {
-        const statusKey = mapStatus(item.activeStatus)
-        return pluginsFilter.value === 'all' || statusKey === pluginsFilter.value
-      })
   })
 
   async function loadPluginsConfig(): Promise<void> {
@@ -134,10 +123,6 @@ export function usePluginManager() {
     }
   }
 
-  function filterPlugins(type: PluginFilter): void {
-    pluginsFilter.value = type
-  }
-
   async function getPluginsDir(): Promise<string> {
     const { invoke } = window.__TAURI__.core
     return await invoke('get_plugins_dir') as string
@@ -158,13 +143,10 @@ export function usePluginManager() {
   }
 
   return {
-    pluginsCache,
-    pluginsFilter,
     filteredPlugins,
     loadPluginsConfig,
     togglePlugin,
     activateHandler,
-    filterPlugins,
     getPluginsDir,
     addCustomPlugin
   }

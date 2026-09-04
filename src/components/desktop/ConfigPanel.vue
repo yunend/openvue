@@ -61,7 +61,7 @@ defineProps({ isActive: Boolean })
 
 const { t } = useI18n()
 
-const { config, loadConfig, autoSaveConfig, browseFolder } = useConfigManager()
+const { config, loadConfig, saveConfig, browseFolder } = useConfigManager()
 const localConfig = ref({ port: 8005, publicFolder: 'public', enableUpload: false })
 const initialized = ref(false)
 let pathDebounceTimer: ReturnType<typeof setTimeout> | null = null
@@ -78,19 +78,19 @@ watch(() => localConfig.value.port, () => {
   if (!initialized.value) return
   if (portDebounceTimer) clearTimeout(portDebounceTimer)
   portDebounceTimer = setTimeout(() => {
-    autoSaveConfig(localConfig.value)
+    saveConfig(localConfig.value)
   }, 500)
 })
 
 watch(() => localConfig.value.enableUpload, () => {
-  if (initialized.value) autoSaveConfig(localConfig.value)
+  if (initialized.value) saveConfig(localConfig.value)
 })
 
 watch(() => localConfig.value.publicFolder, () => {
   if (!initialized.value) return
   if (pathDebounceTimer) clearTimeout(pathDebounceTimer)
   pathDebounceTimer = setTimeout(() => {
-    autoSaveConfig(localConfig.value)
+    saveConfig(localConfig.value)
   }, 500)
 })
 
