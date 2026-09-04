@@ -67,9 +67,6 @@ export function useConfigManager() {
     try {
       const { invoke } = window.__TAURI__.core
       const chosen = await invoke('choose_folder', { initialDir: initialDir || null }) as string | null
-      if (chosen) {
-        showToast(i18n.global.t('toast.folderSelected', { path: chosen }), 'info')
-      }
       return chosen
     } catch (e) {
       showToast(i18n.global.t('toast.browseFailed', { err: String(e) }), 'error')

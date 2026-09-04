@@ -1,5 +1,3 @@
-// e:\dev\test-tauri\tauri-app\src-tauri\src\lib.rs
-
 mod config;
 mod plugins;
 mod router;
@@ -30,7 +28,7 @@ fn restart_server(state: &Arc<Mutex<ServerState>>) -> Result<u16, String> {
 struct ServerState {
     cancel_token: Option<CancellationToken>,
     app_config: config::AppConfig,
-    /// ✅ 插件配置（运行时可变内存副本，保存后直接更新这里）
+    /// 插件配置（运行时内存副本）
     plugins_config: plugins::PluginsConfig,
 }
 
@@ -76,23 +74,18 @@ pub fn run() {
             MacosLauncher::LaunchAgent,
             Some(vec!["--hide-to-tray"]),
         ))
-        // ================================================================
-        // ✅ 初始化 dialog 插件（和 autostart 一样是独立插件 init）
-        // ================================================================
         .plugin(tauri_plugin_dialog::init())
         .manage(server_state.clone())
         .setup(|app| {
             setup_system_tray(app)?;
 
-            // ✅ 在 Rust 后端直接自动启动 HTTP 服务
-            //    开机自启（--minimized）时，不依赖前端 WebView 的 JS 执行，100% 可靠
+            // Rust 后端自动启动 HTTP 服务（不依赖前端 WebView，开机自启时可靠）
             let state = app.state::<Arc<Mutex<ServerState>>>();
             auto_start_server_if_needed(&state);
 
             let args: Vec<String> = std::env::args().collect();
             if args.contains(&"--hide-to-tray".to_string()) {
-                // 🍎 macOS: 禁止直接调用 window.hide()（底层 orderOut 后无法再 show 回来）
-                //    统一走 hide_to_tray()：macOS 用 minimize()，其他平台用 hide()，100% 可恢复
+                // macOS 用 minimize() 代替 hide()，确保窗口可恢复
                 hide_to_tray(app.handle());
             }
             Ok(())
@@ -132,7 +125,7 @@ fn setup_system_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>>
     let _tray = TrayIconBuilder::new()
         .icon(app.default_window_icon().unwrap().clone())
         .menu(&menu)
-        .tooltip("Tauri HTTP 服务")
+        .tooltip("Tauri HTTP Server")
         .on_menu_event(|app, event| match event.id.as_ref() {
             "show" => {
                 show_main_window(app);
@@ -176,11 +169,7 @@ fn show_main_window(app: &AppHandle) {
 fn hide_to_tray(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
         println!("🪟 [hide_to_tray] 隐藏窗口到托盘…");
-        // 🍎 macOS: 用 minimize() 代替 hide()
-        //    hide() 底层 orderOut: 移除窗口后，orderFront: 不一定能恢复，
-        //    且 Tauri 2.x 没有暴露 NSApp.activate() 来重新激活 App。
-        //    minimize() 底层 miniaturize: → deminiaturize: 是 macOS 原生
-        //    推荐的窗口恢复路径，100% 可靠。
+        // macOS 用 minimize()，其他平台用 hide()（hide() 在 macOS 下可能无法恢复）
         #[cfg(target_os = "macos")]
         {
             let _ = window.minimize();
@@ -192,13 +181,8 @@ fn hide_to_tray(app: &AppHandle) {
     }
 }
 
-/// 🔧 【核心】真正启动 HTTP 服务的内部函数，被所有调用方复用。
-///
-/// 入参 `log_prefix` 用于日志标记：
-///   - `"[auto_start] "`  → setup 阶段自动启动
-///   - `""`              → 前端按钮手动触发（start_server 命令）
-///
-/// 返回：成功 → Ok(port)；失败 → Err(错误信息字符串)
+/// 启动 HTTP 服务（被自动启动 / 手动启动复用）
+/// log_prefix: 日志前缀，如 "[auto_start] " 或 ""
 fn do_spawn_server(
     state: &Arc<Mutex<ServerState>>,
     log_prefix: &'static str,
@@ -221,6 +205,9 @@ fn do_spawn_server(
     guard.cancel_token = Some(cancel_token);
     drop(guard);
 
+    let addr = format!("0.0.0.0:{}", port);
+    let (bind_tx, bind_rx) = std::sync::mpsc::channel::<Result<(), String>>();
+
     // 启动异步 HTTP 服务
     tauri::async_runtime::spawn(async move {
         let public_folder = app_config.public_folder.clone();
@@ -229,15 +216,17 @@ fn do_spawn_server(
         let version_str = env!("CARGO_PKG_VERSION").to_string();
         let app = router::create_router(public_folder, enable_upload, version_str, port, plugins_for_router);
 
-        let addr = format!("0.0.0.0:{}", port);
         let listener = match tokio::net::TcpListener::bind(&addr).await {
             Ok(l) => l,
             Err(e) => {
-                eprintln!("❌ {log_prefix}无法绑定端口 {}: {}", port, e);
+                let msg = format!("无法绑定端口 {}: {}", port, e);
+                eprintln!("❌ {log_prefix}{}", msg);
+                let _ = bind_tx.send(Err(msg));
                 return;
             }
         };
         println!("🚀 {log_prefix}HTTP 服务器启动成功: http://{}", addr);
+        let _ = bind_tx.send(Ok(()));
 
         axum::serve(listener, app)
             .with_graceful_shutdown(async move {
@@ -248,13 +237,15 @@ fn do_spawn_server(
         println!("🛑 {log_prefix}HTTP 服务器已停止");
     });
 
-    Ok(port)
+    // 等待绑定结果（阻塞当前线程），把错误传递给调用方
+    match bind_rx.recv() {
+        Ok(Ok(())) => Ok(port),
+        Ok(Err(msg)) => Err(msg),
+        Err(_) => Err("HTTP 服务启动任务异常退出".to_string()),
+    }
 }
 
-/// 自动启动 HTTP 服务（setup 阶段调用，不依赖前端 WebView）
-///
-/// 开机自启 + 手动运行都走这里，确保 HTTP 服务在 Rust 后端启动，
-/// 不受窗口隐藏、WebView 初始化时机、JS 异常等任何前端因素影响。
+/// setup 阶段自动启动 HTTP 服务（不依赖前端 WebView）
 fn auto_start_server_if_needed(state: &Arc<Mutex<ServerState>>) {
     match do_spawn_server(state, "[auto_start] ") {
         Ok(_port) => { /* 已在 do_spawn_server 中打日志，这里不用处理 */ }
@@ -326,7 +317,6 @@ fn save_config(
     enable_upload: bool,
 ) -> Result<String, String> {
     let arc_state = Arc::clone(state.inner());
-    // 1. 基础验证
     if port == 0 {
         return Err("端口号不能为 0".to_string());
     }
@@ -338,7 +328,7 @@ fn save_config(
     let config_dir = path.parent()
         .ok_or_else(|| "无法获取配置目录".to_string())?.to_path_buf();
 
-    // 2. 处理相对路径 → 转为绝对路径用于内存
+    // 相对路径转绝对路径
     let public_path = std::path::PathBuf::from(&public_folder);
     let abs_public_path = if public_path.is_absolute() {
         public_path.clone()
@@ -346,23 +336,21 @@ fn save_config(
         config_dir.join(&public_path)
     };
 
-    // 3. 构建新的 AppConfig 对象
     let new_config = config::AppConfig {
         port,
         public_folder: abs_public_path.clone(),
         enable_upload,
     };
 
-    // 4. 写入文件（使用 config.rs 的标准函数，自动写相对路径）
     config::save_config_to_path(&new_config, &path).map_err(|e| e.to_string())?;
 
-    // 5. 更新内存中的配置
+    // 更新内存配置
     let mut state = state.lock().map_err(|e| e.to_string())?;
     state.app_config.port = port;
     state.app_config.public_folder = abs_public_path;
     state.app_config.enable_upload = enable_upload;
 
-    // 6. 如果服务正在运行，自动重启使其生效
+    // 服务运行中则重启使配置生效
     let was_running = state.cancel_token.is_some();
     drop(state);
 
@@ -417,18 +405,14 @@ fn get_server_status(state: tauri::State<'_, Arc<Mutex<ServerState>>>) -> Result
 /// 获取应用版本号（从 Cargo.toml 的 version 字段读取）
 #[tauri::command]
 fn get_version() -> String {
-    // env! 是编译期宏，编译时直接把 Cargo.toml 里的 version 值嵌入进来
-    // 不需要读文件，零运行时开销，打包后也准确
     let version = env!("CARGO_PKG_VERSION");
     let tauri_version = tauri::VERSION;
     println!("🔖 版本查询: app={}, tauri={}", version, tauri_version);
-    format!("{}", version)
+    version.to_string()
 }
 
-/// 弹出「选择文件夹」对话框 - Tauri 2.x (tauri-plugin-dialog 2)
-///
-/// 前端调用示例：await invoke('choose_folder', { initialDir: 'E:/dev' })
-/// 返回：选中的绝对路径字符串（正斜杠分隔）；用户点取消 → 返回 null
+/// 弹出「选择文件夹」对话框
+/// 返回：选中的绝对路径（正斜杠分隔）；取消 → None
 #[tauri::command]
 async fn choose_folder(
     app: tauri::AppHandle,
@@ -438,13 +422,11 @@ async fn choose_folder(
     use std::path::{Path, PathBuf};
     use std::cell::RefCell;
 
-    // ── 用 oneshot channel 把回调 API 桥接成 async Future ──
+    // oneshot channel 把回调 API 桥接成 async Future
     let (tx, rx) = tokio::sync::oneshot::channel::<Option<PathBuf>>();
-    // 用 RefCell 包 Sender，避免闭包只能 FnOnce 的限制
-    // （dialog 插件回调签名要求 FnMut，move 进闭包的 tx 只能用一次，需要内部可变性）
+    // RefCell 包装 Sender：dialog 回调要求 FnMut，tx 只能用一次
     let tx_cell = RefCell::new(Some(tx));
 
-    // ── 第 1 步：构建对话框 ──
     let mut builder = app.dialog().file();
     builder = builder.set_title("选择指定文件根目录");
 
@@ -455,12 +437,9 @@ async fn choose_folder(
         }
     }
 
-    // ── 第 2 步：pick_folder + 回调里 as_path() 取路径 ──
+    // pick_folder 回调中 as_path() 取本地路径
     builder.pick_folder(move |fp_opt| {
         let path_opt: Option<PathBuf> = fp_opt.and_then(|fp| {
-            // ✅ 用编译器提示的 as_path() 方法：
-            //    enum FilePath { Path(PathBuf), Url(Url) }
-            //    as_path() → 本地路径变体返回 Some(&Path)，URL 返回 None
             fp.as_path().map(|p: &Path| p.to_path_buf())
         });
 
@@ -469,7 +448,6 @@ async fn choose_folder(
         }
     });
 
-    // ── 第 3 步：await 结果 ──
     let result = rx.await.map_err(|e| format!("等待对话框失败: {}", e))?;
 
     match result {
@@ -485,9 +463,7 @@ async fn choose_folder(
     }
 }
 
-// ================================================================
-// ✅ 插件配置：获取完整 plugins.json 内容
-// ================================================================
+// 获取完整 plugins.json 内容
 #[tauri::command]
 fn get_plugins_config(
     state: tauri::State<'_, Arc<Mutex<ServerState>>>,
@@ -496,11 +472,7 @@ fn get_plugins_config(
     Ok(guard.plugins_config.clone())
 }
 
-// ================================================================
-// ✅ 插件配置：切换 / 设置某扩展名的状态（enabled ↔ disabled）
-//    ext: 扩展名（不带点），status: "enabled" / "disabled"
-//    兼容旧版本前端：取该扩展名的第 1 个处理器操作
-// ================================================================
+// 切换某扩展名的状态（enabled/disabled/browser-default/undeveloped）
 #[tauri::command]
 fn save_plugin_extension_status(
     state: tauri::State<'_, Arc<Mutex<ServerState>>>,
@@ -535,11 +507,7 @@ fn save_plugin_extension_status(
     Ok("__OK__".to_string())
 }
 
-// ================================================================
-// ✅ 插件配置：把「扩展名 + 指定 handler_id」的处理器设为当前激活
-//    - 互斥：同一扩展名其它处理器若为 Enabled → 自动 Disabled
-//    - 目标处理器若为 Disabled → 自动 Enabled
-// ================================================================
+// 激活指定扩展名的 handler（互斥：同扩展名其它 handler 自动 Disabled）
 #[tauri::command]
 fn activate_plugin_handler(
     state: tauri::State<'_, Arc<Mutex<ServerState>>>,
@@ -564,20 +532,14 @@ fn activate_plugin_handler(
     Ok("__OK__".to_string())
 }
 
-// ================================================================
-// ✅ 插件配置：获取 dist-web/plugins 目录绝对路径（供前端浏览文件夹用）
-// ================================================================
+// 获取 dist-web/plugins 目录绝对路径
 #[tauri::command]
 fn get_plugins_dir() -> Result<String, String> {
     let dir = plugins::get_plugins_dir()?;
     Ok(dir.to_string_lossy().replace('\\', "/"))
 }
 
-// ================================================================
-// ✅ 插件配置：添加自定义插件
-//    ext: 扩展名（不带点），folder_path: 用户选择的文件夹绝对路径
-//    后端校验该路径必须在 dist-web/plugins 下，并提取文件夹名作为 handlerId/pluginId
-// ================================================================
+// 添加自定义插件：校验路径在 plugins 目录下，提取文件夹名作 handlerId
 #[tauri::command]
 fn add_custom_plugin(
     state: tauri::State<'_, Arc<Mutex<ServerState>>>,
@@ -595,7 +557,7 @@ fn add_custom_plugin(
         .canonicalize()
         .map_err(|_| format!("目录不存在: {}", folder_path))?;
 
-    // 校验：用户选的目录必须在 plugins 目录下
+    // 校验：目录必须在 plugins 目录下
     if !user_path_canonical.starts_with(&plugins_dir_canonical) {
         return Err(format!(
             "插件目录必须在 dist-web/plugins 下，当前: {}",
@@ -603,7 +565,7 @@ fn add_custom_plugin(
         ));
     }
 
-    // 提取文件夹名（相对于 plugins 目录）
+    // 提取文件夹名
     let folder_name = user_path_canonical
         .file_name()
         .ok_or_else(|| "无法提取目录名".to_string())?

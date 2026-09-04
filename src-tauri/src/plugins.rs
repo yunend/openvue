@@ -1,18 +1,11 @@
-//! 插件配置管理模块
-//!
-//! 负责 plugins.json 的加载 / 保存，以及「扩展名 → 打开方式」的映射查询。
-//! 🔧 注：get_default_plugins_path() 直接内置在本文件中，不依赖 config.rs
+//! 插件配置管理模块（plugins.json 加载 / 保存 + 扩展名映射查询）
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::env;
 use std::path::PathBuf;
 
-// ==========================================
-// 🔵 路径查找（从 config.rs 迁移而来，保持同样的 3 层回退策略）
-// ==========================================
-
-/// 查找可执行文件所在目录（开发环境 = target/debug，发布环境 = 打包后的 exe 目录）
+/// 查找可执行文件所在目录
 fn get_exe_dir() -> Result<PathBuf, String> {
     let exe_path = env::current_exe()
         .map_err(|e| format!("无法获取当前可执行文件路径: {}", e))?;
@@ -22,12 +15,7 @@ fn get_exe_dir() -> Result<PathBuf, String> {
         .ok_or_else(|| "可执行文件没有父目录".to_string())
 }
 
-/// 获取 plugins.json 默认路径（与 config.json 同目录查找逻辑）
-/// 查找顺序：
-///   1. 可执行文件同级目录 -> plugins.json （Windows/macOS/AppImage）
-///   1.5 Linux 多路径探测：/usr/lib,/usr/lib64,/usr/share,/app/lib,/app/share
-///   2. 可执行文件上一级目录 -> plugins.json （Tauri: src-tauri/plugins.json）
-///   3. 当前工作目录 -> plugins.json （兜底）
+/// plugins.json 默认路径（与 config.json 同目录查找逻辑）
 pub fn get_default_plugins_path() -> Result<PathBuf, String> {
     let exe_dir = get_exe_dir()?;
     let exe_path = env::current_exe()
@@ -41,8 +29,7 @@ pub fn get_default_plugins_path() -> Result<PathBuf, String> {
             .components()
             .any(|c| matches!(c, std::path::Component::Normal(p) if p == "target"))
     {
-        // 🔁 特别处理：Tauri/Rust dev 模式（target/debug 或 target/release）
-        // 尝试把 plugins.json 放在 src-tauri 根目录下（即 exe_dir 的 ../../plugins.json）
+        // Tauri/Rust dev 模式（target/debug 或 release）→ src-tauri/plugins.json
         if exe_dir
             .components()
             .any(|c| matches!(c, std::path::Component::Normal(p) if p == "target"))
@@ -58,7 +45,7 @@ pub fn get_default_plugins_path() -> Result<PathBuf, String> {
         return Ok(in_exe_dir);
     }
 
-    // ①.5 🐧 Linux 系统安装包：资源目录探测（deb/rpm/Arch/Flatpak 等）
+    // Linux 系统安装包资源目录探测
     if cfg!(target_os = "linux") {
         let exe_name = exe_path.file_stem().map(|s| s.to_string_lossy().to_string());
         let linux_base_dirs: [&str; 5] = [
@@ -84,7 +71,7 @@ pub fn get_default_plugins_path() -> Result<PathBuf, String> {
         }
     }
 
-    // ①.6 🍎 macOS App Bundle：资源在 Contents/Resources（exe 位于 Contents/MacOS）
+    // macOS App Bundle：Contents/Resources
     if cfg!(target_os = "macos") {
         if let Some(contents_dir) = exe_dir.parent() {
             let resources_dir = contents_dir.join("Resources");
@@ -112,12 +99,7 @@ pub fn get_default_plugins_path() -> Result<PathBuf, String> {
     Ok(path)
 }
 
-// ==========================================
-// 🔵 数据结构
-// ==========================================
-
-/// 单个扩展名的状态
-/// 同时支持两种 JSON 写法：kebab-case（browser-default / enabled / disabled / undeveloped）和 PascalCase（BrowserDefault / Enabled / Disabled / Undeveloped）
+/// 单个扩展名的状态（支持 kebab-case 和 PascalCase 两种 JSON 写法）
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 pub enum ExtensionStatus {
@@ -131,7 +113,7 @@ pub enum ExtensionStatus {
     Undeveloped,
 }
 
-/// 单个扩展名下的一个「处理器」——一个扩展名可以有多个备选处理器，但只有一个 active
+/// 单个扩展名的一个处理器
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ExtensionHandler {
@@ -146,27 +128,23 @@ pub struct ExtensionHandler {
     pub name: String,
 }
 
-/// 单个扩展名的完整配置：多个备选处理器 + 一个当前激活的处理器 ID
+/// 单个扩展名配置：多个备选处理器 + 当前激活的 handler_id
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct ExtensionConfig {
     pub handlers: Vec<ExtensionHandler>,
-    /// 当前激活的处理器 handler_id；None 表示没有激活项（走 browser-default）
+/// 当前激活的 handler_id；None 表示走 browser-default
     #[serde(default)]
     pub active_handler_id: Option<String>,
 }
 
-/// plugins.json 根结构（仅支持新格式：每个扩展名 = handlers[] + active_handler_id）
+/// plugins.json 根结构
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct PluginsConfig {
     pub extensions: HashMap<String, ExtensionConfig>,
 }
 
-// ==========================================
-// 🟢 加载 / 保存函数
-// ==========================================
-
-/// 加载 plugins.json；若文件不存在则返回默认空配置 + 自动创建一个最小文件
+/// 加载 plugins.json；不存在则返回空配置并创建骨架文件
 pub fn load_plugins_config(plugins_path: Option<&str>) -> Result<PluginsConfig, String> {
     let path = match plugins_path {
         Some(p) => PathBuf::from(p),
@@ -236,15 +214,8 @@ pub fn get_plugins_dir() -> Result<PathBuf, String> {
     Ok(path)
 }
 
-// ==========================================
-// 🟡 业务辅助函数
-// ==========================================
-
 impl PluginsConfig {
-    /// 指定扩展名 + 指定 handler_id，把那个处理器设为【当前激活项】
-    /// - 同一扩展名下所有其他处理器：如果是 Enabled → 自动降级为 Disabled（保证互斥）
-    /// - 目标处理器：若为 Disabled → 自动升级为 Enabled；其余状态保留
-    /// 返回该处理器的新状态引用
+    /// 激活指定 handler：同扩展名其他 Enabled→Disabled，目标 Disabled→Enabled
     pub fn activate_handler(
         &mut self,
         ext: &str,
@@ -256,7 +227,7 @@ impl PluginsConfig {
             .get_mut(&ext_key)
             .ok_or_else(|| format!("扩展名 .{} 不存在", ext_key))?;
 
-        // 1. 校验 handler 是否存在
+        // 校验 handler 是否存在
         if !config.handlers.iter().any(|h| h.handler_id == handler_id) {
             return Err(format!(
                 "扩展名 .{} 下找不到处理器 id={}",
@@ -264,7 +235,7 @@ impl PluginsConfig {
             ));
         }
 
-        // 2. 遍历所有 handlers：除目标外，Enabled → Disabled；目标本身 Disabled → Enabled
+        // 遍历 handlers：目标 Disabled→Enabled；其他 Enabled→Disabled
         for handler in config.handlers.iter_mut() {
             if handler.handler_id == handler_id {
                 if matches!(handler.status, ExtensionStatus::Disabled) {
@@ -275,7 +246,7 @@ impl PluginsConfig {
             }
         }
 
-        // 3. 只有目标处理器状态为 Enabled 时才写入 active_handler_id；否则置 None
+        // 只有 Enabled 才写入 active_handler_id，否则 None
         let target = config
             .handlers
             .iter()
@@ -290,8 +261,7 @@ impl PluginsConfig {
         Ok(())
     }
 
-    /// 直接改变指定处理器的状态（不强制互斥，只改那一个条目），
-    /// 若目标设为 Enabled 且其他处理器也有 Enabled，将自动降级其他，以维持互斥语义
+    /// 设置指定 handler 的状态（Enabled 时维持互斥）
     pub fn set_handler_status(
         &mut self,
         ext: &str,
@@ -300,7 +270,7 @@ impl PluginsConfig {
     ) -> Result<(), String> {
         let ext_key = ext.to_lowercase();
 
-        // 若扩展名不存在，且用户想创建一条 default 处理器 → 允许兜底创建
+        // 扩展名不存在且设 default 处理器 → 兜底创建
         let config = self.extensions.entry(ext_key.clone()).or_insert_with(|| ExtensionConfig {
             handlers: vec![ExtensionHandler {
                 handler_id: "default".to_string(),
@@ -313,7 +283,7 @@ impl PluginsConfig {
             active_handler_id: None,
         });
 
-        // 如果要设置的 handler_id 在当前 handlers 中不存在 → 自动加一条（兜底）
+        // handler_id 不存在 → 自动追加
         if !config.handlers.iter().any(|h| h.handler_id == handler_id) {
             config.handlers.push(ExtensionHandler {
                 handler_id: handler_id.to_string(),
@@ -325,7 +295,7 @@ impl PluginsConfig {
             });
         }
 
-        // 状态互斥：如果新状态是 Enabled，其他 handler 的 Enabled → Disabled
+        // 互斥：新状态为 Enabled 时，其他 Enabled→Disabled
         if matches!(new_status, ExtensionStatus::Enabled) {
             for handler in config.handlers.iter_mut() {
                 if handler.handler_id != handler_id
@@ -344,7 +314,7 @@ impl PluginsConfig {
             }
         }
 
-        // 同步 active_handler_id：指向第一个状态为 Enabled 的处理器；若没有则为 None
+        // 同步 active_handler_id 到第一个 Enabled 处理器
         config.active_handler_id = config
             .handlers
             .iter()
@@ -354,9 +324,7 @@ impl PluginsConfig {
         Ok(())
     }
 
-        /// 添加一个自定义插件处理器（新增扩展名或向已有扩展名追加处理器）
-    /// - ext: 扩展名（不带点）
-    /// - folder_name: 插件目录名（即 handlerId / pluginId）
+    /// 添加自定义插件处理器（folder_name 作为 handlerId/pluginId）
     pub fn add_custom_handler(
         &mut self,
         ext: &str,
@@ -395,7 +363,7 @@ impl PluginsConfig {
         Ok(())
     }
 
-    /// 保留旧 API 签名：把整个扩展名统一设为某状态（只对【首个】handler 生效，兼容旧前端调用）
+    /// 兼容旧前端：把扩展名首个 handler 设为指定状态
     pub fn set_extension_status(
         &mut self,
         ext: &str,

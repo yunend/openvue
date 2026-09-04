@@ -126,7 +126,6 @@ const en = {
     invalidPort: 'Please enter a valid port (1-65535)',
     emptyFolder: 'Please enter a public folder path',
     saveFailed: 'Save failed: {err}',
-    folderSelected: '📁 Folder selected: {path}',
     browseFailed: 'Failed to open folder picker: {err}',
     autoStartEnabled: '✅ Auto-start enabled',
     autoStartDisabled: '❌ Auto-start disabled',

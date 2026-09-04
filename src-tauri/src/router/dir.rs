@@ -1,4 +1,3 @@
-// e:\dev\test-tauri\tauri-app\src-tauri\src\router\dir.rs
 //! 目录浏览 API 路由实现
 //!
 //! 提供 POST /api/dir 接口，用于浏览文件系统目录。
@@ -14,14 +13,9 @@ use std::time::SystemTime;
 
 use super::RouterState;
 
-// ==========================================
-// 🔵 请求/响应数据结构
-// ==========================================
-
 #[derive(Debug, Deserialize)]
 pub struct DirRequest {
-    /// 路径数组，如 ["folder1", "subfolder2"]
-    /// 空数组或 None 表示根目录
+    /// 路径数组，如 ["folder1", "subfolder2"]；空数组或 None 表示根目录
     pub path: Option<Vec<String>>,
 }
 
@@ -34,15 +28,11 @@ pub struct FileInfo {
     pub mtime: String,
 }
 
-// ==========================================
-// 🟢 路由处理函数
-// ==========================================
-
 pub async fn handle_dir_list(
-    State(state): State<RouterState>, // ✅ 原来的 State<PathBuf> 替换成这个
+    State(state): State<RouterState>,
     Json(payload): Json<DirRequest>,
 ) -> impl IntoResponse {
-    let root_path = &state.root_path; // ✅ 取实际目录
+    let root_path = &state.root_path;
 
     let path_array = match payload.path {
         Some(arr) if !arr.is_empty() => arr,
@@ -98,10 +88,6 @@ pub async fn handle_dir_list(
             .into_response(),
     }
 }
-
-// ==========================================
-// 🟡 内部辅助函数
-// ==========================================
 
 async fn read_directory(
     dir_path: &PathBuf,

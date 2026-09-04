@@ -126,7 +126,6 @@ const zh = {
     invalidPort: '请输入有效的端口号 (1-65535)',
     emptyFolder: '请输入指定文件目录路径',
     saveFailed: '保存失败: {err}',
-    folderSelected: '📁 已选择目录: {path}',
     browseFailed: '打开文件夹选择失败: {err}',
     autoStartEnabled: '✅ 已开启开机自启动',
     autoStartDisabled: '❌ 已关闭开机自启动',

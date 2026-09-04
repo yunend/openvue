@@ -1,4 +1,3 @@
-// e:\dev\test-tauri\tauri-app\src-tauri\src\router\mod.rs
 //! Router 模块 - 所有 HTTP 路由的统一入口
 //!
 //! 模块结构：
@@ -21,47 +20,24 @@ use tower_http::compression::CompressionLayer;
 use axum::extract::State;
 use crate::plugins::PluginsConfig;
 
-
-
-// ==========================================
-// 🔵 共享状态（通过 Axum State 传递给每个 handler）
-// ==========================================
-
-/// HTTP 路由共享状态（所有 handler 都可以通过 `State<RouterState>` 取到）
-///
+/// HTTP 路由共享状态
 #[derive(Clone)]
 pub struct RouterState {
-    /// 指定文件根目录（同时也是目录浏览 API 的根）
+    /// 指定文件根目录
     pub root_path: PathBuf,
-    /// 是否启用文件上传功能（双重校验用）
+    /// 是否启用文件上传
     pub enable_upload: bool,
-    /// ✅ App 版本号（来自 Cargo.toml 编译期嵌入，/api/about 接口返回）
+    /// App 版本号（/api/about 返回）
     pub app_version: String,
-    /// ✅ 当前配置的 HTTP 端口（/api/about 回显用）
+    /// 当前 HTTP 端口（/api/about 回显）
     pub config_port: u16,
-    /// ✅ 公共目录字符串（/api/about 友好展示，避免再次转 Path）
+    /// 公共目录字符串
     pub config_public_folder: String,
-    /// ✅ 插件配置（扩展名映射表，文件浏览器 /api/plugins 直接返回）
+    /// 插件配置
     pub plugins_config: PluginsConfig,
 }
 
-/// ==========================================
-/// 🔵 对外公开 API（lib.rs 直接调用这个）
-/// ==========================================
-
-/// 创建完整的 HTTP 路由器
-///
-/// 这是本模块对外暴露的唯一入口。
-/// Tauri 命令 start_server() 调用此函数获取 Router。
-///
-/// # 参数
-/// - `root_path`    : 指定文件 / 目录浏览根目录
-/// - `enable_upload`: 是否启用文件上传（config.json 中的 enableUpload 字段）
-/// - `version`      : App 版本号（来自 Cargo.toml，编译期 env! 宏）
-/// - `config_port`  : 当前配置的 HTTP 监听端口（/api/about 回显用）
-///
-/// # 返回
-/// 包含所有 API 路由 + 指定文件服务的完整 Router
+/// 创建完整的 HTTP 路由器（模块对外唯一入口）
 pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, config_port: u16, plugins_config: PluginsConfig) -> Router {
     let state = RouterState {
         config_public_folder: root_path.to_string_lossy().replace('\\', "/"),
@@ -86,14 +62,13 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
     let exe_path = std::env::current_exe().expect("无法获取可执行文件路径");
     let exe_dir = exe_path.parent().expect("无法获取可执行文件目录");
 
-    // ---------- 资源目录查找：支持多平台 / 多安装布局 ----------
-    // 构建候选资源目录列表，按优先级排序
+    // 资源目录查找：支持多平台 / 多安装布局
     let mut resource_candidates: Vec<PathBuf> = Vec::new();
 
     // ① Windows / macOS / AppImage：exe 同级目录
     resource_candidates.push(exe_dir.to_path_buf());
 
-    // ② 🐧 Linux 多发行版探测（deb/rpm/Arch/Flatpak）
+    // ② Linux 多发行版探测
     if cfg!(target_os = "linux") {
         let exe_name = exe_path.file_stem().map(|s| s.to_string_lossy().to_string());
         let linux_base_dirs: [&str; 5] = [
@@ -111,7 +86,7 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
         }
     }
 
-    // ③ 🍎 macOS App Bundle：Contents/Resources（exe 位于 Contents/MacOS）
+    // ③ macOS App Bundle：Contents/Resources
     if cfg!(target_os = "macos") {
         if let Some(contents_dir) = exe_dir.parent() {
             let resources_dir = contents_dir.join("Resources");
@@ -120,7 +95,7 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
         }
     }
 
-    // ✅ 遍历候选目录，找到第一个存在 dist-web 或 public 的
+    // 遍历候选目录，找第一个存在 dist-web 或 public 的
     let mut found_base: Option<PathBuf> = None;
     for res_dir in &resource_candidates {
         let dist_web_dir = res_dir.join("dist-web");
@@ -155,25 +130,12 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
             ServeDir::new(&base_dir)
                 .fallback(ServeFile::new(base_dir.join("404.html"))),
         )
-        // ✅ CompressionLayer 放最外层（响应时最后进入、最先离开）
-        //    charset 中间件放内层（更靠近 ServeDir），确保在压缩之前就把 charset 写进 Content-Type
         .layer(CompressionLayer::new())
         .layer(middleware::from_fn(add_security_headers))
         .layer(middleware::from_fn(add_text_charset_utf8))
-        
 }
 
-// ==========================================
-// 🟢 内部函数（仅本模块使用）
-// ==========================================
-
-// ----------------------------------------------------------------
-// 🛡️ 中间件：为所有响应添加安全头
-//  - Referrer-Policy: same-origin — 防止 Referer 泄露到第三方
-//  - Content-Security-Policy     — 防止 XSS / 数据注入攻击
-//  - X-Frame-Options: DENY        — 防止点击劫持（Clickjacking）
-//  - X-Content-Type-Options: nosniff — 防止 MIME 类型嗅探
-// ----------------------------------------------------------------
+/// 中间件：为所有响应添加安全头（CSP / X-Frame-Options / nosniff / Referrer-Policy）
 async fn add_security_headers(request: Request, next: Next) -> Response {
     let mut response = next.run(request).await;
     let headers = response.headers_mut();
@@ -205,11 +167,7 @@ async fn add_security_headers(request: Request, next: Next) -> Response {
     response
 }
 
-// ----------------------------------------------------------------
-// 🛡️ 中间件：为文本类响应自动追加 charset=utf-8
-//   原因：tower_http::ServeDir 默认只返回 "text/plain" "application/json" 等，不带编码。
-//         中文 Windows 浏览器若未看到 charset，会默认用 GBK 解码 UTF-8 文件 → 乱码。
-// ----------------------------------------------------------------
+/// 中间件：为文本类响应自动追加 charset=utf-8（避免中文 Windows 浏览器 GBK 乱码）
 async fn add_text_charset_utf8(request: Request, next: Next) -> Response {
     let mut response = next.run(request).await;
     if let Some(content_type) = response.headers().get(CONTENT_TYPE).cloned() {
@@ -236,22 +194,12 @@ async fn add_text_charset_utf8(request: Request, next: Next) -> Response {
     response
 }
 
-/// 注册所有 API 路由
-///
-/// # 参数
-/// - `enable_upload`：true 时挂载 /api/upload，否则不挂载（第一层安全保障）
-///
-/// # 返回
-/// 只包含 /api/* 路由的 Router（State 类型为 RouterState）
+/// 注册所有 /api/* 路由（enable_upload=false 时 /upload 返回 403）
 fn register_api_routes(enable_upload: bool) -> Router<RouterState> {
     let mut router = Router::new()
-        // -------- 目录浏览 API --------
+        // 目录浏览 API
         .route("/api/dir", axum::routing::post(dir::handle_dir_list))
-        // ================================================================
-        //   GET /api/about（始终可用，不依赖任何开关）
-        //    指定文件首页（index.html）的「关于」按钮 fetch 此接口后显示模态框
-        //    返回内容：版本号 + 当前配置（config.json 核心字段）+ 帮助链接
-        // ================================================================
+        // /api/about（始终可用）
         .route(
             "/api/about",
             axum::routing::get(|State(s): State<RouterState>| async move {
@@ -278,18 +226,12 @@ fn register_api_routes(enable_upload: bool) -> Router<RouterState> {
                 )
             }),
         )
-        // ================================================================
-        // /api/upload-status（必须无条件挂载！）
-        //   即使enable_upload=false，前端也要能查到"已禁用"的状态
-        // ================================================================
+        // /api/upload-status（无条件挂载，禁用时也能查询）
         .route(
             "/api/upload-status",
             axum::routing::get(upload::handle_upload_status),
         )
-        // ==============================================================
-        // ✅ GET /api/plugins（供 public/index.html 的 handleClick 查表用）
-        //    返回完整 extensions 映射
-        // ==============================================================
+        // /api/plugins（返回完整 extensions 映射）
         .route(
             "/api/plugins",
             axum::routing::get(|State(s): State<RouterState>| async move {
@@ -300,9 +242,8 @@ fn register_api_routes(enable_upload: bool) -> Router<RouterState> {
                 )
             }),
         );
-        
 
-    // -------- 条件挂载：文件上传 API --------
+    // 条件挂载文件上传 API
     if enable_upload {
         router = router.route("/upload", axum::routing::post(upload::handle_upload));
     } else {

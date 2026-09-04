@@ -1,4 +1,3 @@
-// e:\dev\test-tauri\tauri-app\src-tauri\src\router\upload.rs
 //! 文件上传 API 路由实现
 //!
 //! 提供 POST /api/upload 接口，接收 multipart/form-data 上传文件，
@@ -14,23 +13,18 @@ use axum::{
     response::{IntoResponse, Json},
 };
 use serde::Serialize;
-use std::path::Path;
 
 use super::RouterState;
 
-// ==========================================
-// 🔵 响应数据结构
-// ==========================================
-
 #[derive(Debug, Serialize)]
 pub struct UploadedFile {
-    /// 保存后的文件名（为避免重名，自动加时间戳）
+    /// 保存后的文件名（与原始文件名相同，同名会被覆盖）
     pub filename: String,
-    /// 相对公共目录的 URL 路径，可直接在浏览器访问，如 "/upload/abc_1234567.png"
+    /// 相对公共目录的 URL 路径，如 "/upload/abc.png"
     pub url: String,
     /// 文件字节大小
     pub size: u64,
-    /// 原始文件名（用户上传时的名字）
+    /// 原始文件名
     pub original_name: String,
 }
 
@@ -42,19 +36,12 @@ pub struct UploadResponse {
     pub files: Option<Vec<UploadedFile>>,
 }
 
-// ==========================================
-// 🟢 路由处理函数
-// ==========================================
-
-/// POST /api/upload - 多文件上传
-///
-/// Content-Type: multipart/form-data
-/// 字段名：files（支持一次多个同名字段批量上传）
+/// POST /api/upload 多文件上传（字段名：files）
 pub async fn handle_upload(
     State(state): State<RouterState>,
     mut multipart: Multipart,
 ) -> impl IntoResponse {
-    // ──── 第二层安全检查：即便路由被挂载，也要再次读配置判断 ────
+    // 第二层安全检查：即使路由挂载也再次校验配置
     if !state.enable_upload {
         return (
             StatusCode::FORBIDDEN,
@@ -67,7 +54,6 @@ pub async fn handle_upload(
             .into_response();
     }
 
-    // 上传目录：{root_path}/upload  自动创建
     let upload_dir = state.root_path.join("upload");
     if let Err(e) = tokio::fs::create_dir_all(&upload_dir).await {
         return (
@@ -103,8 +89,7 @@ pub async fn handle_upload(
 
         let size = data.len() as u64;
 
-        // 避免重名：文件名 = 原名(无扩展名) + _时间戳.扩展名
-        let saved_filename = generate_unique_filename(&upload_dir, &original_name);
+        let saved_filename = original_name.clone();
         let full_save_path = upload_dir.join(&saved_filename);
 
         if let Err(e) = tokio::fs::write(&full_save_path, &data).await {
@@ -119,7 +104,7 @@ pub async fn handle_upload(
                 .into_response();
         }
 
-        // URL：可直接通过公共服务访问
+        // URL：可通过公共服务访问
         let url = format!("/upload/{}", saved_filename);
 
         uploaded.push(UploadedFile {
@@ -156,30 +141,13 @@ pub async fn handle_upload(
         .into_response()
 }
 
-// ==========================================
-// 🟡 内部辅助函数
-// ==========================================
-
-/// 始终返回原始文件名（同名文件会被覆盖）
-fn generate_unique_filename(_dir: &Path, original: &str) -> String {
-    original.to_string()
-}
-
-// ==========================================
-// 🔵 上传状态查询
-// ==========================================
-
-/// GET /api/upload-status - 查询上传功能状态（不依赖 enable_upload 开关，禁用时也能查）
-///
-/// 前端用途：
-///   - 打开 upload.html 时先调此接口，决定显示上传表单还是「已禁用」提示
-///   - 展示已上传文件数 / 总大小，做简易管理
+/// GET /api/upload-status 查询上传功能状态（禁用时也可查询）
 pub async fn handle_upload_status(State(state): State<RouterState>) -> impl IntoResponse {
 
     let upload_dir = state.root_path.join("upload");
     let dir_exists = upload_dir.exists();
 
-    // ── 遍历目录，统计文件数 + 总大小 ──
+    // 遍历目录，统计文件数 + 总大小
     let mut total_files: u64 = 0;
     let mut total_size: u64 = 0;
 
@@ -189,7 +157,6 @@ pub async fn handle_upload_status(State(state): State<RouterState>) -> impl Into
                 let path = entry.path();
                 if let Ok(meta) = tokio::fs::metadata(&path).await {
                     if meta.is_file() {
-                        // 只统计根目录下的普通文件（不递归子目录，避免超大目录变慢）
                         total_files += 1;
                         total_size += meta.len();
                     }
@@ -198,10 +165,8 @@ pub async fn handle_upload_status(State(state): State<RouterState>) -> impl Into
         }
     }
 
-    // ── 人类可读大小格式化：B / KB / MB / GB ──
     let size_human = human_readable_size(total_size);
 
-    // ── 提示信息 ──
     let hint = if state.enable_upload {
         "POST 字段名使用 'files'，支持一次多文件（multipart/form-data）".to_string()
     } else {
@@ -228,9 +193,6 @@ pub async fn handle_upload_status(State(state): State<RouterState>) -> impl Into
     (StatusCode::OK, Json(resp)).into_response()
 }
 
-// ==========================================
-// 🟡 辅助：字节 → 人类可读
-// ==========================================
 fn human_readable_size(bytes: u64) -> String {
     const UNITS: [&str; 5] = ["B", "KB", "MB", "GB", "TB"];
     let mut size = bytes as f64;

@@ -1,4 +1,3 @@
-// e:\dev\test-tauri\tauri-app\src-tauri\src\config.rs
 //! 配置管理模块
 //!
 //! 从 config.json 加载应用配置（端口号、指定文件路径、上传开关等）
@@ -6,22 +5,16 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-// ==========================================
-// 🔵 配置数据结构
-// ==========================================
-
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AppConfig {
     /// HTTP 服务器端口号
     pub port: u16,
 
-    /// 指定文件目录路径
-    /// config.json 中写 "publicFolder"，Rust 中读为 public_folder
+    /// 指定文件目录路径（JSON 中为 publicFolder）
     pub public_folder: PathBuf,
 
-    /// ✅ 是否启用文件上传功能
-    /// config.json 中写 "enableUpload"，Rust 中读为 enable_upload
+    /// 是否启用文件上传（JSON 中为 enableUpload）
     pub enable_upload: bool,
 }
 
@@ -35,18 +28,8 @@ impl Default for AppConfig {
     }
 }
 
-// ==========================================
-// 🟢 配置加载函数
-// ==========================================
-
-/// 从 config.json 文件加载配置
-///
-/// # 参数
-/// - `config_path`: 配置文件的路径（可选）
-///
-/// # 返回
-/// - 成功：返回 `AppConfig`
-/// - 失败：返回错误信息字符串
+/// 从 config.json 加载配置
+/// config_path: 配置文件路径（None 则用默认路径）
 pub fn load_config(config_path: Option<&str>) -> Result<AppConfig, String> {
     let path = match config_path {
         Some(p) => PathBuf::from(p),
@@ -63,7 +46,7 @@ pub fn load_config(config_path: Option<&str>) -> Result<AppConfig, String> {
     let mut config: AppConfig = serde_json::from_str(&content)
         .map_err(|e| format!("解析 JSON 失败: {}", e))?;
 
-    // ====== 解析相对路径 ======
+    // 解析相对路径
     if !config.public_folder.is_absolute() {
         let config_dir = path.parent()
             .ok_or_else(|| "无法获取配置文件目录".to_string())?;
@@ -88,11 +71,7 @@ pub fn load_config(config_path: Option<&str>) -> Result<AppConfig, String> {
 }
 
 /// 获取默认配置文件路径
-///
-/// 查找顺序：
-/// 1. exe 同级目录下的 config.json   （生产环境 / 打包后）
-/// 2. 工作目录下的 src-tauri/config.json （开发环境）
-/// 3. 工作目录下的 config.json
+/// 查找顺序：exe 同级 → Linux 资源目录 → macOS Resources → 开发目录(Cargo.toml) → cwd
 pub fn get_default_config_path() -> Result<PathBuf, String> {
     let exe_path = std::env::current_exe()
         .map_err(|e| format!("获取可执行文件路径失败: {}", e))?;
@@ -100,18 +79,16 @@ pub fn get_default_config_path() -> Result<PathBuf, String> {
     let exe_dir = exe_path.parent()
         .ok_or_else(|| "无法获取可执行文件目录".to_string())?;
 
-    // ---- 1. 生产环境：exe 同级 config.json（打包后）----
+    // 1. 生产环境：exe 同级 config.json
     let config_in_exe_dir = exe_dir.join("config.json");
     if config_in_exe_dir.exists() {
         return Ok(config_in_exe_dir);
     }
 
-    // ---- 1.5 Linux 系统安装包：资源目录探测（deb/rpm/Arch/Flatpak 等）----
-    //       常见布局：exe=/usr/bin/openvue  →  资源=/usr/lib,/usr/lib64,/usr/share/openvue/
-    //       Flatpak：exe=/app/bin/openvue  →  资源=/app/lib,/app/share/openvue/
+    // 1.5 Linux 系统安装包资源目录探测（deb/rpm/Arch/Flatpak）
     if cfg!(target_os = "linux") {
         let exe_name = exe_path.file_stem().map(|s| s.to_string_lossy().to_string());
-        // 候选资源「根」目录列表（按优先级）
+        // 候选资源根目录（按优先级）
         let linux_base_dirs: [&str; 5] = [
             "/usr/lib",      // Debian/Ubuntu deb
             "/usr/lib64",    // Fedora/RHEL rpm (64-bit)
@@ -137,9 +114,7 @@ pub fn get_default_config_path() -> Result<PathBuf, String> {
         }
     }
 
-    // ---- 1.6 macOS App Bundle：资源在 Contents/Resources（exe 位于 Contents/MacOS）----
-    //       典型布局：MyApp.app/Contents/MacOS/openvue
-    //                         Contents/Resources/config.json
+    // 1.6 macOS App Bundle：Contents/Resources（exe 位于 Contents/MacOS）
     if cfg!(target_os = "macos") {
         // 从 exe_dir (MacOS/) 往上一级到 Contents/，再进入 Resources/
         if let Some(contents_dir) = exe_dir.parent() {
@@ -152,7 +127,7 @@ pub fn get_default_config_path() -> Result<PathBuf, String> {
         }
     }
 
-    // ---- 2. 开发环境：向上查找含 Cargo.toml 的目录 ----
+    // 2. 开发环境：向上查找含 Cargo.toml 的目录
     let mut probe_dir: Option<&std::path::Path> = Some(exe_dir);
     while let Some(dir) = probe_dir {
         let candidate = dir.join("config.json");
@@ -163,7 +138,7 @@ pub fn get_default_config_path() -> Result<PathBuf, String> {
         probe_dir = dir.parent();
     }
 
-    // ---- 3. 当前工作目录下查找 ----
+    // 3. 当前工作目录查找
     if let Ok(cwd) = std::env::current_dir() {
         let in_src_tauri = cwd.join("config.json");
         if in_src_tauri.exists() {
@@ -200,15 +175,13 @@ pub fn validate_config(config: &AppConfig) -> Result<(), String> {
 }
 
 
-/// 保存配置到指定路径
+/// 保存配置到指定路径（public_folder 自动写回相对路径）
 pub fn save_config_to_path(config: &AppConfig, path: &PathBuf) -> Result<(), String> {
-    // 获取 config 所在目录（用于处理 public_folder 相对路径写入）
-    // 写入时：如果 public_folder 恰好位于 config_dir 下，写回相对路径
     let config_dir = path.parent()
         .ok_or_else(|| "无法获取配置文件目录".to_string())?;
 
     let public_folder_write = if config.public_folder.is_absolute() {
-        // 尝试转为相对于 config_dir 的相对路径（更友好）
+        // 转为相对 config_dir 的路径（更友好）
         match config.public_folder.strip_prefix(config_dir) {
             Ok(rel) => rel.to_string_lossy().to_string(),
             Err(_) => config.public_folder.to_string_lossy().to_string(),
