@@ -14,10 +14,6 @@
     {{ t('footer.copyright') }} ·
     <a href="https://github.com/yunend/openvue" target="_blank" class="underline hover:opacity-80">GitHub</a>
   </p>
-  <div class="w-16 h-px bg-current opacity-20 mx-auto my-2"></div>
-  <p class="text-center text-sm opacity-60">
-    <a href="mailto:303218145@qq.com" class="hover:opacity-100 transition-opacity">📧 303218145@qq.com</a>
-  </p>
 </footer>
 
     <AboutModal
