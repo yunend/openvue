@@ -1,7 +1,20 @@
 <template>
   <div id="file-browser" class="w-11/12 bg-card-bg min-h-80 mx-auto mt-6 flex flex-col items-center gap-1 overflow-y-auto p-4 border border-border-color rounded-lg">
     <div class="w-full text-sm text-blue-600 dark:text-blue-400 font-medium mb-1">
-      📂 /{{ currentPath.length > 0 ? currentPath.join('/') : t('home.rootDir') }}
+      📂 /
+      <a
+        href="javascript:void(0)"
+        @click="loadDir([])"
+        class="hover:underline"
+      >{{ t('home.rootDir') }}</a>
+      <template v-for="(segment, index) in currentPath" :key="index">
+        /
+        <a
+          href="javascript:void(0)"
+          @click="loadDir(currentPath.slice(0, index + 1))"
+          class="hover:underline"
+        >{{ segment }}</a>
+      </template>
     </div>
     
     <div class="w-full mb-2">
@@ -60,6 +73,7 @@
         </div>
         
         <div class="flex items-center gap-3">
+          <span v-if="item.type === 'file'" class="text-sm text-text-secondary hidden sm:inline">{{ formatFileSize(item.size || 0) }}</span>
           <span class="text-sm text-text-secondary hidden sm:inline">{{ formatDate(item.mtime) }}</span>
           <button 
             v-if="item.type === 'file'" 
@@ -99,6 +113,14 @@ const {
 } = useFileBrowser()
 
 const { resolvePluginUrl, loadPluginsMap } = usePluginResolver()
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
 
 function formatDate(dateString: string): string {
   if (!dateString) return ''

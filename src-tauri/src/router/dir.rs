@@ -26,6 +26,7 @@ pub struct FileInfo {
     pub file_type: String,
     pub path: String,
     pub mtime: String,
+    pub size: u64,
 }
 
 pub async fn handle_dir_list(
@@ -72,6 +73,7 @@ pub async fn handle_dir_list(
                         .ok()
                         .map(format_iso_time)
                         .unwrap_or_default(),
+                    size: metadata.len(),
                 };
                 (StatusCode::OK, Json(file_info)).into_response()
             }
@@ -123,6 +125,7 @@ async fn read_directory(
             },
             path: relative_path,
             mtime: mtime_str,
+            size: if metadata.is_dir() { 0 } else { metadata.len() },
         });
     }
 
