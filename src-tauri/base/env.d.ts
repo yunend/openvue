@@ -8,19 +8,22 @@ declare module '*.vue' {
 
 /* ========== 通用类型 ========== */
 
-/** 插件扩展名状态 */
-type PluginStatus = 'enabled' | 'disabled' | 'browser-default' | 'undeveloped'
-
-/** 插件扩展名条目 */
-interface PluginEntry {
-  status: PluginStatus
+/** 插件处理器 */
+interface PluginHandler {
+  handlerId: string
   urlTemplate?: string
   pluginId?: string
 }
 
+/** 扩展名配置 */
+interface ExtensionConfig {
+  handlers: PluginHandler[]
+  activeHandlerId?: string | null
+}
+
 /** /api/plugins 响应 */
 interface PluginsData {
-  extensions: Record<string, PluginEntry>
+  extensions: Record<string, ExtensionConfig>
 }
 
 /** 文件/目录条目 */

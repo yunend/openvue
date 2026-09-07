@@ -2,12 +2,9 @@ import { ref, computed } from 'vue'
 import { useToast } from './useToast'
 import { i18n } from '../i18n'
 
-type PluginStatus = 'browser-default' | 'enabled' | 'disabled' | 'undeveloped'
-
 /** 单个处理器（一个扩展名可以有多个） */
 export interface PluginHandler {
   handlerId: string
-  status: string
   name?: string
   description?: string
   pluginId?: string
@@ -32,16 +29,6 @@ export interface PluginItem {
 }
 
 const pluginsCache = ref<PluginsData>({ extensions: {} })
-
-function mapStatus(status: string): PluginStatus {
-  const map: Record<string, PluginStatus> = {
-    'BrowserDefault': 'browser-default',
-    'Enabled': 'enabled',
-    'Disabled': 'disabled',
-    'Undeveloped': 'undeveloped'
-  }
-  return map[status] || (status as PluginStatus) || 'browser-default'
-}
 
 export function fileExtIcon(ext: string): string {
   const e = ext.toLowerCase()
@@ -76,7 +63,7 @@ export function usePluginManager() {
           ? cfg.handlers
           : [{ ...(cfg as unknown as Record<string, unknown>), handlerId: 'default' } as unknown as PluginHandler]
 
-        const activeId = cfg.activeHandlerId ?? handlers.find(h => mapStatus(h.status) === 'enabled')?.handlerId
+        const activeId = cfg.activeHandlerId ?? null
         return {
           ext,
           handlers,
@@ -96,21 +83,20 @@ export function usePluginManager() {
     }
   }
 
-  /** 兼容旧调用：切换某个扩展的【激活处理器】的 enabled/disabled 状态 */
-  async function togglePlugin(ext: string, newStatus: string): Promise<void> {
-    if (!newStatus || newStatus === '__') return
-
+  /** 切回浏览器默认（activeHandlerId 设为 null） */
+  async function setBrowserDefault(ext: string): Promise<void> {
+    if (!ext) return
     try {
       const { invoke } = window.__TAURI__.core
-      await invoke('save_plugin_extension_status', { ext, status: newStatus }) as string
+      await invoke('set_plugin_browser_default', { ext }) as string
       await loadPluginsConfig()
     } catch (e) {
       console.error(e)
-      showToast(i18n.global.t('toast.pluginToggleFailed', { err: String(e) }), 'error')
+      showToast(i18n.global.t('toast.handlerActivateFailed', { err: String(e) }), 'error')
     }
   }
 
-  /** 核心新方法：把某扩展的指定处理器设为激活（自动互斥，其它处理器从 Enabled→Disabled） */
+  /** 把某扩展的指定处理器设为激活 */
   async function activateHandler(ext: string, handlerId: string): Promise<void> {
     if (!ext || !handlerId) return
     try {
@@ -145,8 +131,8 @@ export function usePluginManager() {
   return {
     filteredPlugins,
     loadPluginsConfig,
-    togglePlugin,
     activateHandler,
+    setBrowserDefault,
     getPluginsDir,
     addCustomPlugin
   }

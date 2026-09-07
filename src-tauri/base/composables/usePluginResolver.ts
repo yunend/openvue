@@ -2,7 +2,6 @@ import { ref } from 'vue'
 
 interface PluginHandler {
   handlerId: string
-  status: string
   pluginId?: string
   urlTemplate?: string
   description?: string
@@ -18,15 +17,6 @@ interface PluginsData {
   extensions: Record<string, ExtensionConfig>
 }
 
-/** 旧格式（兼容旧 plugins.json 的条目形态） */
-interface LegacyPluginEntry {
-  status: string
-  pluginId?: string
-  urlTemplate?: string
-  description?: string
-  name?: string
-}
-
 export function usePluginResolver() {
   const pluginsMap = ref<Record<string, ExtensionConfig>>({})
 
@@ -39,23 +29,22 @@ export function usePluginResolver() {
         const normalized: Record<string, ExtensionConfig> = {}
 
         for (const ext of Object.keys(raw)) {
-          const v = raw[ext] as unknown as ExtensionConfig | LegacyPluginEntry
+          const v = raw[ext]
           if (Array.isArray((v as ExtensionConfig).handlers)) {
             normalized[ext] = v as ExtensionConfig
           } else {
-            // 兼容旧格式：包一层，handlerId 复用 pluginId，没有就用 'default'
-            const old = v as LegacyPluginEntry
-            const hId = old.pluginId || 'default'
+            // 兼容旧格式（理论上已不存在，但保留容错）
+            const anyV = v as Record<string, unknown>
+            const hId = (anyV.pluginId as string) || 'default'
             normalized[ext] = {
               handlers: [{
                 handlerId: hId,
-                status: old.status,
-                pluginId: old.pluginId,
-                urlTemplate: old.urlTemplate,
-                description: old.description,
-                name: old.name,
+                pluginId: anyV.pluginId as string | undefined,
+                urlTemplate: anyV.urlTemplate as string | undefined,
+                description: anyV.description as string | undefined,
+                name: anyV.name as string | undefined,
               }],
-              activeHandlerId: old.status === 'enabled' ? hId : null,
+              activeHandlerId: null,
             }
           }
         }
@@ -73,8 +62,8 @@ export function usePluginResolver() {
 
   /**
    * 根据扩展名 + publicPath 算出【当前激活处理器】对应的插件打开 URL
-   * 同一扩展名多个处理器时，只有 activeHandlerId 指向且 status=enabled 的才生效；
-   * 否则回退到第一个 status=enabled 的条目；都没有返回 null 走浏览器默认
+   * activeHandlerId === null → 走浏览器默认
+   * activeHandlerId 有值 → 找对应 handler，有 urlTemplate+pluginId 才返回 URL
    * @param ext 扩展名（不带点，会自动转小写）
    * @param publicPath 文件在服务端的公开路径
    * @returns 应打开的插件完整 URL；null = 走浏览器默认
@@ -86,18 +75,15 @@ export function usePluginResolver() {
     const cfg = pluginsMap.value[key]
     if (!cfg || !cfg.handlers?.length) return null
 
-    // 1. 优先：activeHandlerId 指定的处理器
-    let handler: PluginHandler | undefined = cfg.activeHandlerId
-      ? cfg.handlers.find(h => h.handlerId === cfg.activeHandlerId)
-      : undefined
+    // activeHandlerId 为 null → 浏览器默认
+    const activeId = cfg.activeHandlerId
+    if (!activeId) return null
 
-    // 2. 若 activeHandlerId 指向的条目状态不是 enabled，退回第一个 enabled
-    if (!handler || handler.status !== 'enabled') {
-      handler = cfg.handlers.find(h => h.status === 'enabled')
-    }
+    // 找 activeHandlerId 对应的 handler
+    const handler = cfg.handlers.find(h => h.handlerId === activeId)
     if (!handler) return null
 
-    // 3. 必须有 urlTemplate + pluginId
+    // 必须有 urlTemplate + pluginId
     const tpl = handler.urlTemplate
     const pid = handler.pluginId
     if (!tpl || !pid) return null

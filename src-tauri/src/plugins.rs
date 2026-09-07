@@ -99,27 +99,12 @@ pub fn get_default_plugins_path() -> Result<PathBuf, String> {
     Ok(path)
 }
 
-/// 单个扩展名的状态（支持 kebab-case 和 PascalCase 两种 JSON 写法）
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
-#[serde(rename_all = "kebab-case")]
-pub enum ExtensionStatus {
-    #[serde(alias = "BrowserDefault")]
-    BrowserDefault,
-    #[serde(alias = "Enabled")]
-    Enabled,
-    #[serde(alias = "Disabled")]
-    Disabled,
-    #[serde(alias = "Undeveloped")]
-    Undeveloped,
-}
-
 /// 单个扩展名的一个处理器
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ExtensionHandler {
     /// 处理器唯一 ID（同一扩展名内不重复），如 "pdf-native" / "pdf-onlyoffice"
     pub handler_id: String,
-    pub status: ExtensionStatus,
     #[serde(rename = "pluginId", alias = "plugin_id", default)]
     pub plugin_id: Option<String>,
     #[serde(rename = "urlTemplate", alias = "url_template", default)]
@@ -215,7 +200,7 @@ pub fn get_plugins_dir() -> Result<PathBuf, String> {
 }
 
 impl PluginsConfig {
-    /// 激活指定 handler：同扩展名其他 Enabled→Disabled，目标 Disabled→Enabled
+    /// 激活指定 handler（只需设置 active_handler_id，null = 浏览器默认）
     pub fn activate_handler(
         &mut self,
         ext: &str,
@@ -235,92 +220,21 @@ impl PluginsConfig {
             ));
         }
 
-        // 遍历 handlers：目标 Disabled→Enabled；其他 Enabled→Disabled
-        for handler in config.handlers.iter_mut() {
-            if handler.handler_id == handler_id {
-                if matches!(handler.status, ExtensionStatus::Disabled) {
-                    handler.status = ExtensionStatus::Enabled;
-                }
-            } else if matches!(handler.status, ExtensionStatus::Enabled) {
-                handler.status = ExtensionStatus::Disabled;
-            }
-        }
-
-        // 只有 Enabled 才写入 active_handler_id，否则 None
-        let target = config
-            .handlers
-            .iter()
-            .find(|h| h.handler_id == handler_id)
-            .unwrap();
-        config.active_handler_id = if matches!(target.status, ExtensionStatus::Enabled) {
-            Some(handler_id.to_string())
-        } else {
-            None
-        };
-
+        config.active_handler_id = Some(handler_id.to_string());
         Ok(())
     }
 
-    /// 设置指定 handler 的状态（Enabled 时维持互斥）
-    pub fn set_handler_status(
+    /// 切回浏览器默认（active_handler_id 设为 None）
+    pub fn set_browser_default(
         &mut self,
         ext: &str,
-        handler_id: &str,
-        new_status: ExtensionStatus,
     ) -> Result<(), String> {
         let ext_key = ext.to_lowercase();
-
-        // 扩展名不存在且设 default 处理器 → 兜底创建
-        let config = self.extensions.entry(ext_key.clone()).or_insert_with(|| ExtensionConfig {
-            handlers: vec![ExtensionHandler {
-                handler_id: "default".to_string(),
-                status: ExtensionStatus::Undeveloped,
-                plugin_id: None,
-                url_template: None,
-                description: format!("(.{}) 文件", ext_key),
-                name: format!("{} 文件", ext_key.to_uppercase()),
-            }],
-            active_handler_id: None,
-        });
-
-        // handler_id 不存在 → 自动追加
-        if !config.handlers.iter().any(|h| h.handler_id == handler_id) {
-            config.handlers.push(ExtensionHandler {
-                handler_id: handler_id.to_string(),
-                status: new_status.clone(),
-                plugin_id: None,
-                url_template: None,
-                description: format!("(.{}) 处理器 {}", ext_key, handler_id),
-                name: format!("{} {}", ext_key.to_uppercase(), handler_id),
-            });
-        }
-
-        // 互斥：新状态为 Enabled 时，其他 Enabled→Disabled
-        if matches!(new_status, ExtensionStatus::Enabled) {
-            for handler in config.handlers.iter_mut() {
-                if handler.handler_id != handler_id
-                    && matches!(handler.status, ExtensionStatus::Enabled)
-                {
-                    handler.status = ExtensionStatus::Disabled;
-                }
-            }
-        }
-
-        // 应用目标 handler 状态
-        for handler in config.handlers.iter_mut() {
-            if handler.handler_id == handler_id {
-                handler.status = new_status.clone();
-                break;
-            }
-        }
-
-        // 同步 active_handler_id 到第一个 Enabled 处理器
-        config.active_handler_id = config
-            .handlers
-            .iter()
-            .find(|h| matches!(h.status, ExtensionStatus::Enabled))
-            .map(|h| h.handler_id.clone());
-
+        let config = self
+            .extensions
+            .get_mut(&ext_key)
+            .ok_or_else(|| format!("扩展名 .{} 不存在", ext_key))?;
+        config.active_handler_id = None;
         Ok(())
     }
 
@@ -338,7 +252,6 @@ impl PluginsConfig {
 
         let new_handler = ExtensionHandler {
             handler_id: handler_id.clone(),
-            status: ExtensionStatus::Enabled,
             plugin_id: Some(plugin_id),
             url_template: Some(url_template),
             description: String::new(),
@@ -350,31 +263,9 @@ impl PluginsConfig {
             active_handler_id: None,
         });
 
-        // 同扩展名下其他 Enabled 处理器 → Disabled（互斥）
-        for handler in config.handlers.iter_mut() {
-            if matches!(handler.status, ExtensionStatus::Enabled) {
-                handler.status = ExtensionStatus::Disabled;
-            }
-        }
-
         config.handlers.push(new_handler);
         config.active_handler_id = Some(handler_id);
 
         Ok(())
-    }
-
-    /// 兼容旧前端：把扩展名首个 handler 设为指定状态
-    pub fn set_extension_status(
-        &mut self,
-        ext: &str,
-        new_status: ExtensionStatus,
-    ) -> Result<(), String> {
-        let ext_key = ext.to_lowercase();
-        let first_handler_id = self
-            .extensions
-            .get(&ext_key)
-            .and_then(|cfg| cfg.handlers.first().map(|h| h.handler_id.clone()))
-            .unwrap_or_else(|| "default".to_string());
-        self.set_handler_status(ext, &first_handler_id, new_status)
     }
 }

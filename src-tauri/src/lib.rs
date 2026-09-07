@@ -103,8 +103,8 @@ pub fn run() {
             choose_folder,
             // ✅ 插件配置管理
             get_plugins_config,
-            save_plugin_extension_status,
             activate_plugin_handler,
+            set_plugin_browser_default,
             add_custom_plugin,
             get_plugins_dir,
             open_url,
@@ -472,28 +472,17 @@ fn get_plugins_config(
     Ok(guard.plugins_config.clone())
 }
 
-// 切换某扩展名的状态（enabled/disabled/browser-default/undeveloped）
+// 切回浏览器默认（activeHandlerId 设为 null）
 #[tauri::command]
-fn save_plugin_extension_status(
+fn set_plugin_browser_default(
     state: tauri::State<'_, Arc<Mutex<ServerState>>>,
     ext: String,
-    status: String,
 ) -> Result<String, String> {
-    use plugins::ExtensionStatus;
     let arc_state = Arc::clone(state.inner());
-
-    let new_status = match status.as_str() {
-        "enabled" => ExtensionStatus::Enabled,
-        "disabled" => ExtensionStatus::Disabled,
-        "browser-default" => ExtensionStatus::BrowserDefault,
-        "undeveloped" => ExtensionStatus::Undeveloped,
-        other => return Err(format!("未知状态值: {}", other)),
-    };
-
     let mut guard = state.lock().map_err(|e| e.to_string())?;
     guard
         .plugins_config
-        .set_extension_status(&ext, new_status.clone())?;
+        .set_browser_default(&ext)?;
     plugins::save_plugins_config(&guard.plugins_config)?;
     let was_running = guard.cancel_token.is_some();
     drop(guard);

@@ -121,11 +121,11 @@ const {
 const enabledPlugins = computed(() => {
   if (!aboutPlugins.value) return []
   return Object.values(aboutPlugins.value)
-    .filter(p => p.activeStatus === 'enabled')
+    // activeHandlerId != null → 表示该扩展名已启用插件处理
+    .filter(p => p.activeHandlerId != null)
     .map(p => ({
       ext: p.ext,
       activeHandlerId: p.activeHandlerId,
-      activeStatus: p.activeStatus,
       activeHandler: p.activeHandler,
     }))
 })

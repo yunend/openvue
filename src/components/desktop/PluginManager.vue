@@ -99,7 +99,7 @@ const {
   filteredPlugins,
   loadPluginsConfig,
   activateHandler,
-  togglePlugin,
+  setBrowserDefault,
   getPluginsDir,
   addCustomPlugin
 } = usePluginManager()
@@ -112,21 +112,20 @@ const BROWSER_DEFAULT = '__browser_default__'
 /** 根据插件当前激活状态，计算下拉框应该显示的值 */
 function getCurrentSelectValue(plugin: PluginItem): string {
   if (plugin.activeHandlerId) {
-    const h = plugin.handlers.find(h => h.handlerId === plugin.activeHandlerId)
-    // 激活的 handler 存在 且 有 pluginId（在下拉选项中）→ 显示它
-    if (h && h.pluginId) return h.handlerId
+    // activeHandlerId 有值 → 说明已激活某个 handler
+    return plugin.activeHandlerId
   }
-  // 激活的 handler 无 pluginId（如 BrowserDefault/Undeveloped），或根本没激活 → 浏览器默认
+  // 否则 → 浏览器默认
   return BROWSER_DEFAULT
 }
 
 /** 下拉选择变化 */
 async function handleSelectChange(ext: string, value: string) {
   if (value === BROWSER_DEFAULT) {
-    // 切换到浏览器默认：禁用当前激活的 handler
-    await togglePlugin(ext, 'disabled')
+    // 切回浏览器默认
+    await setBrowserDefault(ext)
   } else {
-    // 切换到某个 handler：激活它
+    // 切换到某个 handler
     await activateHandler(ext, value)
   }
 }

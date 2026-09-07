@@ -4,7 +4,6 @@
       "handlers": [
         {
           "handlerId": "ppt-office",
-          "status": "enabled",
           "pluginId": "office",
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "PPT 演示文稿 / PowerPoint Presentation",
@@ -17,7 +16,6 @@
       "handlers": [
         {
           "handlerId": "ggb-official",
-          "status": "enabled",
           "pluginId": "ggb",
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "GeoGebra 官方 HTML5 播放器 / Official GeoGebra Player",
@@ -30,7 +28,6 @@
       "handlers": [
         {
           "handlerId": "video-default",
-          "status": "browser-default",
           "pluginId": null,
           "urlTemplate": null,
           "description": "MP4 视频 / MP4 Video",
@@ -43,7 +40,6 @@
       "handlers": [
         {
           "handlerId": "image-default-2",
-          "status": "browser-default",
           "pluginId": null,
           "urlTemplate": null,
           "description": "JPEG 图片 / JPEG Image",
@@ -56,7 +52,6 @@
       "handlers": [
         {
           "handlerId": "xlsx-office",
-          "status": "enabled",
           "pluginId": "office",
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "Excel 表格 / Excel Spreadsheet",
@@ -64,7 +59,6 @@
         },
         {
           "handlerId": "xlsx-office-vue",
-          "status": "disabled",
           "pluginId": "office-vue",
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "Excel 表格 / Excel Spreadsheet",
@@ -77,7 +71,6 @@
       "handlers": [
         {
           "handlerId": "html-default",
-          "status": "browser-default",
           "pluginId": null,
           "urlTemplate": null,
           "description": "HTML 网页 / HTML Webpage",
@@ -90,7 +83,6 @@
       "handlers": [
         {
           "handlerId": "md-builtin",
-          "status": "enabled",
           "pluginId": "md",
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "内置 Markdown 渲染器 / Built-in Markdown Renderer",
@@ -103,7 +95,6 @@
       "handlers": [
         {
           "handlerId": "pptx-office",
-          "status": "enabled",
           "pluginId": "office",
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "PPT 演示文稿 / PowerPoint Presentation",
@@ -116,7 +107,6 @@
       "handlers": [
         {
           "handlerId": "image-default",
-          "status": "browser-default",
           "pluginId": null,
           "urlTemplate": null,
           "description": "JPG 图片 / JPG Image",
@@ -129,7 +119,6 @@
       "handlers": [
         {
           "handlerId": "image-default-3",
-          "status": "browser-default",
           "pluginId": null,
           "urlTemplate": null,
           "description": "PNG 图片 / PNG Image",
@@ -142,7 +131,6 @@
       "handlers": [
         {
           "handlerId": "zip-builtin",
-          "status": "undeveloped",
           "pluginId": null,
           "urlTemplate": null,
           "description": "ZIP 压缩包 / ZIP Archive",
@@ -155,7 +143,6 @@
       "handlers": [
         {
           "handlerId": "doc-office",
-          "status": "enabled",
           "pluginId": "office",
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "Word 文档 / Word Document",
@@ -163,7 +150,6 @@
         },
         {
           "handlerId": "doc-office-vue",
-          "status": "disabled",
           "pluginId": "office-vue",
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "Word 文档 / Word Document",
@@ -176,7 +162,6 @@
       "handlers": [
         {
           "handlerId": "text-default",
-          "status": "browser-default",
           "pluginId": null,
           "urlTemplate": null,
           "description": "纯文本文件 / Plain Text File",
@@ -189,7 +174,6 @@
       "handlers": [
         {
           "handlerId": "docx-office",
-          "status": "disabled",
           "pluginId": "office",
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "Word 文档 / Word Document",
@@ -197,20 +181,18 @@
         },
         {
           "handlerId": "docx-office-vue",
-          "status": "enabled",
           "pluginId": "office-vue",
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "Word 文档 / Word Document",
           "name": "Office 文档查看器 (Vue) / Office Viewer (Vue)"
         }
       ],
-      "activeHandlerId": "docx-office-vue"
+      "activeHandlerId": "docx-office"
     },
     "mp3": {
       "handlers": [
         {
           "handlerId": "audio-default",
-          "status": "browser-default",
           "pluginId": null,
           "urlTemplate": null,
           "description": "MP3 音频 / MP3 Audio",
@@ -223,7 +205,6 @@
       "handlers": [
         {
           "handlerId": "pdf-office-vue",
-          "status": "enabled",
           "pluginId": "office-vue",
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "PDF 文档 / PDF Document",
@@ -236,7 +217,6 @@
       "handlers": [
         {
           "handlerId": "svg-default",
-          "status": "browser-default",
           "pluginId": null,
           "urlTemplate": null,
           "description": "SVG 矢量图 / SVG Vector Graphic",
@@ -249,7 +229,6 @@
       "handlers": [
         {
           "handlerId": "image-default-4",
-          "status": "browser-default",
           "pluginId": null,
           "urlTemplate": null,
           "description": "GIF 动图 / GIF Animation",
@@ -262,7 +241,6 @@
       "handlers": [
         {
           "handlerId": "xls-office",
-          "status": "enabled",
           "pluginId": "office",
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "Excel 表格 / Excel Spreadsheet",
@@ -270,7 +248,6 @@
         },
         {
           "handlerId": "xls-office-vue",
-          "status": "disabled",
           "pluginId": "office-vue",
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "Excel 表格 / Excel Spreadsheet",
