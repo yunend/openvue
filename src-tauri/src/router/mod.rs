@@ -59,67 +59,17 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
     } else {
         println!("❌ 文件上传已禁用（config.enableUpload = false）");
     }
-    let exe_path = std::env::current_exe().expect("无法获取可执行文件路径");
-    let exe_dir = exe_path.parent().expect("无法获取可执行文件目录");
+    // 资源目录查找：委托给 paths::find_app_root()
+    let app_root = crate::paths::find_app_root().expect("无法定位应用资源根目录");
 
-    // 资源目录查找：支持多平台 / 多安装布局
-    let mut resource_candidates: Vec<PathBuf> = Vec::new();
-
-    // ① Windows / macOS / AppImage：exe 同级目录
-    resource_candidates.push(exe_dir.to_path_buf());
-
-    // ② Linux 多发行版探测
-    if cfg!(target_os = "linux") {
-        let exe_name = exe_path.file_stem().map(|s| s.to_string_lossy().to_string());
-        let linux_base_dirs: [&str; 5] = [
-            "/usr/lib",      // Debian/Ubuntu deb
-            "/usr/lib64",    // Fedora/RHEL rpm (64-bit)
-            "/usr/share",    // Arch/FHS 标准（架构无关资源）
-            "/app/lib",      // Flatpak 运行时
-            "/app/share",    // Flatpak 运行时（架构无关）
-        ];
-        for base in linux_base_dirs {
-            if let Some(ref name) = exe_name {
-                resource_candidates.push(PathBuf::from(base).join(name));
-            }
-            resource_candidates.push(PathBuf::from(base).join("openvue"));
-        }
-    }
-
-    // ③ macOS App Bundle：Contents/Resources
-    if cfg!(target_os = "macos") {
-        if let Some(contents_dir) = exe_dir.parent() {
-            let resources_dir = contents_dir.join("Resources");
-            println!("🍎 [macOS App] 尝试资源目录: {}", resources_dir.display());
-            resource_candidates.push(resources_dir);
-        }
-    }
-
-    // 遍历候选目录，找第一个存在 dist-web 或 public 的
-    let mut found_base: Option<PathBuf> = None;
-    for res_dir in &resource_candidates {
-        let dist_web_dir = res_dir.join("dist-web");
-        if dist_web_dir.exists() {
-            println!("✅ 使用 Vite 构建产物: {:?}", dist_web_dir);
-            found_base = Some(dist_web_dir);
-            break;
-        }
-    }
-    let base_dir = match found_base {
-        Some(dir) => dir,
-        None => {
-            // 回退：找 public 目录
-            let mut fallback = exe_dir.join("public");
-            for res_dir in &resource_candidates {
-                let public_dir = res_dir.join("public");
-                if public_dir.exists() {
-                    fallback = public_dir;
-                    break;
-                }
-            }
-            println!("⚠️ 未找到 dist-web 构建产物，使用目录: {:?}", fallback);
-            fallback
-        }
+    let dist_web_dir = app_root.join("dist-web");
+    let base_dir = if dist_web_dir.exists() {
+        println!("✅ 使用 Vite 构建产物: {}", dist_web_dir.display());
+        dist_web_dir
+    } else {
+        let fallback = app_root.join("public");
+        println!("⚠️ 未找到 dist-web 构建产物，使用目录: {}", fallback.display());
+        fallback
     };
     Router::new()
         .merge(api_routes)

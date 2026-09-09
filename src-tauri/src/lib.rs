@@ -1,4 +1,5 @@
 mod config;
+mod paths;
 mod plugins;
 mod router;
 

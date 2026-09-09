@@ -71,78 +71,9 @@ pub fn load_config(config_path: Option<&str>) -> Result<AppConfig, String> {
 }
 
 /// 获取默认配置文件路径
-/// 查找顺序：exe 同级 → Linux 资源目录 → macOS Resources → 开发目录(Cargo.toml) → cwd
+/// 委托给 paths::config_path()，自动处理 Windows / macOS / Linux 差异
 pub fn get_default_config_path() -> Result<PathBuf, String> {
-    let exe_path = std::env::current_exe()
-        .map_err(|e| format!("获取可执行文件路径失败: {}", e))?;
-
-    let exe_dir = exe_path.parent()
-        .ok_or_else(|| "无法获取可执行文件目录".to_string())?;
-
-    // 1. 生产环境：exe 同级 config.json
-    let config_in_exe_dir = exe_dir.join("config.json");
-    if config_in_exe_dir.exists() {
-        return Ok(config_in_exe_dir);
-    }
-
-    // 1.5 Linux 系统安装包资源目录探测（deb/rpm/Arch/Flatpak）
-    if cfg!(target_os = "linux") {
-        let exe_name = exe_path.file_stem().map(|s| s.to_string_lossy().to_string());
-        // 候选资源根目录（按优先级）
-        let linux_base_dirs: [&str; 5] = [
-            "/usr/lib",      // Debian/Ubuntu deb
-            "/usr/lib64",    // Fedora/RHEL rpm (64-bit)
-            "/usr/share",    // Arch/FHS 标准（架构无关资源）
-            "/app/lib",      // Flatpak 运行时
-            "/app/share",    // Flatpak 运行时（架构无关）
-        ];
-        for base in linux_base_dirs {
-            // ① 基于可执行文件名动态拼接
-            if let Some(ref name) = exe_name {
-                let candidate = PathBuf::from(base).join(name).join("config.json");
-                if candidate.exists() {
-                    println!("🐧 [Linux {}] config.json 位于: {}", base, candidate.display());
-                    return Ok(candidate);
-                }
-            }
-            // ② 硬编码产品名兜底（稳定性）
-            let hardcoded = PathBuf::from(base).join("openvue").join("config.json");
-            if hardcoded.exists() {
-                println!("🐧 [Linux {}] config.json 位于: {}", base, hardcoded.display());
-                return Ok(hardcoded);
-            }
-        }
-    }
-
-    // 1.6 macOS App Bundle：Contents/Resources（exe 位于 Contents/MacOS）
-    if cfg!(target_os = "macos") {
-        // 从 exe_dir (MacOS/) 往上一级到 Contents/，再进入 Resources/
-        if let Some(contents_dir) = exe_dir.parent() {
-            let resources_dir = contents_dir.join("Resources");
-            let candidate = resources_dir.join("config.json");
-            if candidate.exists() {
-                println!("🍎 [macOS App] config.json 位于: {}", candidate.display());
-                return Ok(candidate);
-            }
-        }
-    }
-
-    // 2. 开发环境：向上查找含 Cargo.toml 的目录
-    let mut probe_dir: Option<&std::path::Path> = Some(exe_dir);
-    while let Some(dir) = probe_dir {
-        let candidate = dir.join("config.json");
-        let has_cargo = dir.join("Cargo.toml").exists();
-        if candidate.exists() && has_cargo {
-            return Ok(candidate.canonicalize().unwrap_or(candidate));
-        }
-        probe_dir = dir.parent();
-    }
-    Err(format!(
-        "未找到配置文件。请确保存在 config.json：\n   \
-         - [打包后] 安装目录 (exe 同级)\n   \
-         - [开发时]  src-tauri/config.json\n   \
-         当前 exe 目录: {}", exe_dir.display()
-    ))
+    crate::paths::config_path()
 }
 
 /// 验证配置有效性

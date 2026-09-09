@@ -2,101 +2,12 @@
 
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
-use std::env;
 use std::path::PathBuf;
 
-/// 查找可执行文件所在目录
-fn get_exe_dir() -> Result<PathBuf, String> {
-    let exe_path = env::current_exe()
-        .map_err(|e| format!("无法获取当前可执行文件路径: {}", e))?;
-    exe_path
-        .parent()
-        .map(|p| p.to_path_buf())
-        .ok_or_else(|| "可执行文件没有父目录".to_string())
-}
-
-/// plugins.json 默认路径（与 config.json 同目录查找逻辑）
+/// plugins.json 默认路径
+/// 委托给 paths::plugins_path()，自动处理 Windows / macOS / Linux 差异
 pub fn get_default_plugins_path() -> Result<PathBuf, String> {
-    let exe_dir = get_exe_dir()?;
-    let exe_path = env::current_exe()
-        .map_err(|e| format!("无法获取当前可执行文件路径: {}", e))?;
-
-    // ① 直接在 exe_dir 下找
-    let in_exe_dir = exe_dir.join("plugins.json");
-    if in_exe_dir.exists()
-        // 如果路径的父级是 target，说明是 Rust 开发模式，返回 exe_dir 下的路径
-        || exe_dir
-            .components()
-            .any(|c| matches!(c, std::path::Component::Normal(p) if p == "target"))
-    {
-        // Tauri/Rust dev 模式（target/debug 或 release）→ src-tauri/plugins.json
-        if exe_dir
-            .components()
-            .any(|c| matches!(c, std::path::Component::Normal(p) if p == "target"))
-        {
-            let src_tauri_root = exe_dir
-                .parent()          // target/debug -> target
-                .and_then(|p| p.parent()) // target -> src-tauri
-                .ok_or_else(|| "无法向上走到 src-tauri 目录".to_string())?;
-            let path = src_tauri_root.join("plugins.json");
-            println!("📁 [dev 模式] plugins.json 位于: {}", path.display());
-            return Ok(path);
-        }
-        return Ok(in_exe_dir);
-    }
-
-    // Linux 系统安装包资源目录探测
-    if cfg!(target_os = "linux") {
-        let exe_name = exe_path.file_stem().map(|s| s.to_string_lossy().to_string());
-        let linux_base_dirs: [&str; 5] = [
-            "/usr/lib",      // Debian/Ubuntu deb
-            "/usr/lib64",    // Fedora/RHEL rpm (64-bit)
-            "/usr/share",    // Arch/FHS 标准（架构无关资源）
-            "/app/lib",      // Flatpak 运行时
-            "/app/share",    // Flatpak 运行时（架构无关）
-        ];
-        for base in linux_base_dirs {
-            if let Some(ref name) = exe_name {
-                let candidate = PathBuf::from(base).join(name).join("plugins.json");
-                if candidate.exists() {
-                    println!("🐧 [Linux {}] plugins.json 位于: {}", base, candidate.display());
-                    return Ok(candidate);
-                }
-            }
-            let hardcoded = PathBuf::from(base).join("openvue").join("plugins.json");
-            if hardcoded.exists() {
-                println!("🐧 [Linux {}] plugins.json 位于: {}", base, hardcoded.display());
-                return Ok(hardcoded);
-            }
-        }
-    }
-
-    // macOS App Bundle：Contents/Resources
-    if cfg!(target_os = "macos") {
-        if let Some(contents_dir) = exe_dir.parent() {
-            let resources_dir = contents_dir.join("Resources");
-            let candidate = resources_dir.join("plugins.json");
-            if candidate.exists() {
-                println!("🍎 [macOS App] plugins.json 位于: {}", candidate.display());
-                return Ok(candidate);
-            }
-        }
-    }
-
-    // ② 上一级目录
-    if let Some(parent) = exe_dir.parent() {
-        let in_parent = parent.join("plugins.json");
-        if in_parent.exists() {
-            return Ok(in_parent);
-        }
-    }
-
-    // ③ 兜底：当前工作目录
-    let cwd = env::current_dir()
-        .map_err(|e| format!("获取当前工作目录失败: {}", e))?;
-    let path = cwd.join("plugins.json");
-    println!("⚠️ 使用兜底路径（当前工作目录）: {}", path.display());
-    Ok(path)
+    crate::paths::plugins_path()
 }
 
 /// 单个扩展名的一个处理器
@@ -176,10 +87,7 @@ pub fn save_plugins_config(cfg: &PluginsConfig) -> Result<(), String> {
 
 /// 获取 dist-web/plugins 目录的绝对路径
 pub fn get_plugins_dir() -> Result<PathBuf, String> {
-    let exe_dir = get_exe_dir()?;
-    let path = exe_dir.join("dist-web").join("plugins");
-    println!("📁 [生产模式] plugins 目录: {}", path.display());
-    Ok(path)
+    crate::paths::plugins_dir()
 }
 
 impl PluginsConfig {
