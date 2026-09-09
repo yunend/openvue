@@ -34,7 +34,7 @@ export function usePluginResolver() {
             normalized[ext] = v as ExtensionConfig
           } else {
             // 兼容旧格式（理论上已不存在，但保留容错）
-            const anyV = v as Record<string, unknown>
+            const anyV = v as unknown as Record<string, unknown>
             const hId = (anyV.pluginId as string) || 'default'
             normalized[ext] = {
               handlers: [{

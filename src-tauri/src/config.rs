@@ -137,19 +137,6 @@ pub fn get_default_config_path() -> Result<PathBuf, String> {
         }
         probe_dir = dir.parent();
     }
-
-    // 3. 当前工作目录查找
-    if let Ok(cwd) = std::env::current_dir() {
-        let in_src_tauri = cwd.join("config.json");
-        if in_src_tauri.exists() {
-            return Ok(in_src_tauri.canonicalize().unwrap_or(in_src_tauri));
-        }
-        let in_parent = cwd.join("src-tauri/config.json");
-        if in_parent.exists() {
-            return Ok(in_parent.canonicalize().unwrap_or(in_parent));
-        }
-    }
-
     Err(format!(
         "未找到配置文件。请确保存在 config.json：\n   \
          - [打包后] 安装目录 (exe 同级)\n   \

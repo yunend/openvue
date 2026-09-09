@@ -31,10 +31,8 @@ export function useSystemSettings(): UseSystemSettingsReturn {
       const { invoke } = window.__TAURI__.core
       if (shouldEnable) {
         await invoke('plugin:autostart|enable')
-        showToast(i18n.global.t('toast.autoStartEnabled'), 'success')
       } else {
         await invoke('plugin:autostart|disable')
-        showToast(i18n.global.t('toast.autoStartDisabled'), 'success')
       }
       autoStartEnabled.value = shouldEnable
     } catch (e) {

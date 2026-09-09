@@ -4,8 +4,8 @@
       <a class="text-4xl px-5 py-3 hover:translate-x-5 duration-300" href="/">OpenVue</a>
       
       <ul class="hidden md:flex gap-x-5 mx-3 items-center">
-        <li class="p-3 hover:bg-white/20 cursor-pointer"><router-link to="/">{{ t('nav.home') }}</router-link></li>
-        <li class="p-3 hover:bg-white/20 cursor-pointer"><router-link to="/upload">{{ t('nav.upload') }}</router-link></li>
+        <li class="p-3 hover:bg-white/20 cursor-pointer"><router-link class="block" to="/">{{ t('nav.home') }}</router-link></li>
+        <li class="p-3 hover:bg-white/20 cursor-pointer"><router-link class="block" to="/upload">{{ t('nav.upload') }}</router-link></li>
       </ul>
       
       <ul class="hidden lg:flex mx-3 items-center ml-auto">

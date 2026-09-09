@@ -1,7 +1,7 @@
 //! 插件配置管理模块（plugins.json 加载 / 保存 + 扩展名映射查询）
 
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::env;
 use std::path::PathBuf;
 
@@ -126,7 +126,7 @@ pub struct ExtensionConfig {
 /// plugins.json 根结构
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct PluginsConfig {
-    pub extensions: HashMap<String, ExtensionConfig>,
+    pub extensions: BTreeMap<String, ExtensionConfig>,
 }
 
 /// 加载 plugins.json；不存在则返回空配置并创建骨架文件
@@ -175,25 +175,8 @@ pub fn save_plugins_config(cfg: &PluginsConfig) -> Result<(), String> {
 }
 
 /// 获取 dist-web/plugins 目录的绝对路径
-/// 查找策略与 router 中资源目录解析一致
 pub fn get_plugins_dir() -> Result<PathBuf, String> {
     let exe_dir = get_exe_dir()?;
-
-    // 开发模式：target/debug 或 target/release 下 → 向上走到 src-tauri/dist-web/plugins
-    if exe_dir
-        .components()
-        .any(|c| matches!(c, std::path::Component::Normal(p) if p == "target"))
-    {
-        let src_tauri_root = exe_dir
-            .parent()
-            .and_then(|p| p.parent())
-            .ok_or_else(|| "无法找到 src-tauri 目录".to_string())?;
-        let path = src_tauri_root.join("dist-web").join("plugins");
-        println!("📁 [dev 模式] plugins 目录: {}", path.display());
-        return Ok(path);
-    }
-
-    // 生产模式：exe 同级目录下的 dist-web/plugins
     let path = exe_dir.join("dist-web").join("plugins");
     println!("📁 [生产模式] plugins 目录: {}", path.display());
     Ok(path)

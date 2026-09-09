@@ -127,8 +127,6 @@ const en = {
     emptyFolder: 'Please enter a public folder path',
     saveFailed: 'Save failed: {err}',
     browseFailed: 'Failed to open folder picker: {err}',
-    autoStartEnabled: '✅ Auto-start enabled',
-    autoStartDisabled: '❌ Auto-start disabled',
     operationFailed: 'Operation failed: {err}',
     minimized: '📦 Minimized to tray',
     hideFailed: 'Hide failed: {err}',

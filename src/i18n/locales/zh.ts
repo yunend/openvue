@@ -127,8 +127,6 @@ const zh = {
     emptyFolder: '请输入指定文件目录路径',
     saveFailed: '保存失败: {err}',
     browseFailed: '打开文件夹选择失败: {err}',
-    autoStartEnabled: '✅ 已开启开机自启动',
-    autoStartDisabled: '❌ 已关闭开机自启动',
     operationFailed: '操作失败: {err}',
     minimized: '📦 已最小化到系统托盘',
     hideFailed: '隐藏失败: {err}',
