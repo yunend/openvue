@@ -53,8 +53,8 @@
             </svg>
           </button>
         </li>
-        <li><router-link class="block p-3 hover:bg-white/20 duration-300" to="/">{{ t('nav.home') }}</router-link></li>
-        <li><router-link class="block p-3 hover:bg-white/20 duration-300" to="/upload">{{ t('nav.upload') }}</router-link></li>
+        <li><router-link class="block p-3 hover:bg-white/20 duration-300" to="/" @click="$emit('close-menu')">{{ t('nav.home') }}</router-link></li>
+        <li><router-link class="block p-3 hover:bg-white/20 duration-300" to="/upload" @click="$emit('close-menu')">{{ t('nav.upload') }}</router-link></li>
         <li 
           class="p-3 hover:bg-white/20 cursor-pointer duration-300"
           @click="$emit('open-about'); $emit('close-menu')"
