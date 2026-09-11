@@ -82,13 +82,32 @@ pub fn load_config(config_path: Option<&str>) -> Result<AppConfig, String> {
         let config_dir = path.parent()
             .ok_or_else(|| "无法获取配置文件目录".to_string())?;
         let raw = config_dir.join(&config.public_folder);
-        // ✅ 先尝试 canonicalize（存在就取真实路径），失败就直接 normalize 软规范化
-        config.public_folder = match raw.canonicalize() {
+
+        // 🔧 关键修复：如果用户目录下找不到，就回退到资源目录查找
+        // （首次启动时 config.json 在 ~/.config/openvue/，但 public/ 还在 /usr/lib/openvue/）
+        let resolved = if raw.exists() {
+            raw
+        } else {
+            match crate::paths::find_app_root() {
+                Ok(app_root) => {
+                    let fallback = app_root.join(&config.public_folder);
+                    if fallback.exists() {
+                        println!("⚠️ 用户目录下未找到 {}，回退到资源目录: {}", 
+                                 config.public_folder.display(), fallback.display());
+                        fallback
+                    } else {
+                        raw // 两边都找不到，保持原样让 validate_config 报错
+                    }
+                }
+                Err(_) => raw, // 拿不到资源目录，保持原样
+            }
+        };
+
+        config.public_folder = match resolved.canonicalize() {
             Ok(p) => normalize_path(p),
-            Err(_) => normalize_path(raw),
+            Err(_) => normalize_path(resolved),
         };
     } else {
-        // 绝对路径也处理一下 \\?\
         config.public_folder = normalize_path(config.public_folder.clone());
     }
 
