@@ -29,15 +29,46 @@ impl Default for AppConfig {
 }
 
 /// 从 config.json 加载配置
-/// config_path: 配置文件路径（None 则用默认路径）
+/// config_path: 配置文件路径（None 则用用户目录下的可写路径）
+///
+/// ⚡ 首次启动时，如果用户目录下还没有 config.json，
+///    会自动从应用资源目录（只读）复制默认模板过去，再加载。
 pub fn load_config(config_path: Option<&str>) -> Result<AppConfig, String> {
     let path = match config_path {
         Some(p) => PathBuf::from(p),
         None => get_default_config_path()?,
     };
 
+    // 首次启动：从资源目录复制默认模板到用户可写目录
     if !path.exists() {
-        return Err(format!("配置文件不存在: {}", path.display()));
+        let template = crate::paths::default_config_path()?;
+        if template.exists() {
+            if let Some(parent) = path.parent() {
+                if !parent.exists() {
+                    std::fs::create_dir_all(parent)
+                        .map_err(|e| format!("创建配置目录失败: {}", e))?;
+                }
+            }
+            std::fs::copy(&template, &path).map_err(|e| {
+                format!(
+                    "从模板复制 config.json 失败: {} → {} ({})",
+                    template.display(),
+                    path.display(),
+                    e
+                )
+            })?;
+            println!("📋 config.json 首次启动，已从资源模板复制: {}", path.display());
+        } else {
+            // 资源目录也没有模板，就直接用 Default 构造一份写过去
+            if let Some(parent) = path.parent() {
+                if !parent.exists() {
+                    std::fs::create_dir_all(parent).ok();
+                }
+            }
+            let default_cfg = AppConfig::default();
+            save_config_to_path(&default_cfg, &path)?;
+            println!("📋 config.json 首次启动（无模板），已写入默认配置: {}", path.display());
+        }
     }
 
     let content = std::fs::read_to_string(&path)

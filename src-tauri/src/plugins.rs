@@ -40,7 +40,11 @@ pub struct PluginsConfig {
     pub extensions: BTreeMap<String, ExtensionConfig>,
 }
 
-/// 加载 plugins.json；不存在则返回空配置并创建骨架文件
+/// 加载 plugins.json
+///
+/// ⚡ 首次启动时，如果用户可写目录下还没有 plugins.json：
+///    优先从应用资源目录（只读）复制默认模板过去；
+///    资源目录也没有模板时，才创建空骨架。
 pub fn load_plugins_config(plugins_path: Option<&str>) -> Result<PluginsConfig, String> {
     let path = match plugins_path {
         Some(p) => PathBuf::from(p),
@@ -48,10 +52,29 @@ pub fn load_plugins_config(plugins_path: Option<&str>) -> Result<PluginsConfig, 
     };
 
     if !path.exists() {
-        println!("⚠️ plugins.json 不存在，使用默认空配置并创建骨架文件: {}", path.display());
-        let default = PluginsConfig::default();
-        save_plugins_config_to_path(&default, &path)?;
-        return Ok(default);
+        let template = crate::paths::default_plugins_path()?;
+        if template.exists() {
+            if let Some(parent) = path.parent() {
+                if !parent.exists() {
+                    std::fs::create_dir_all(parent)
+                        .map_err(|e| format!("创建插件配置目录失败: {}", e))?;
+                }
+            }
+            std::fs::copy(&template, &path).map_err(|e| {
+                format!(
+                    "从模板复制 plugins.json 失败: {} → {} ({})",
+                    template.display(),
+                    path.display(),
+                    e
+                )
+            })?;
+            println!("📋 plugins.json 首次启动，已从资源模板复制: {}", path.display());
+        } else {
+            println!("⚠️ plugins.json 不存在且无资源模板，使用默认空配置: {}", path.display());
+            let default = PluginsConfig::default();
+            save_plugins_config_to_path(&default, &path)?;
+            return Ok(default);
+        }
     }
 
     let content = std::fs::read_to_string(&path)
