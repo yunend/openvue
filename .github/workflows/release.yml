@@ -15,8 +15,6 @@ jobs:
         run: |
           echo "Deleting existing release for tag ${{ github.ref_name }}..."
           gh release delete ${{ github.ref_name }} --yes || echo "Release not found or already deleted"
-          echo "Deleting existing tag ${{ github.ref_name }}..."
-          git push origin --delete ${{ github.ref_name }} || echo "Tag not found or already deleted"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -93,7 +91,7 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: "Release ${{ github.ref_name }}"
           releaseBody: "See the assets to download this version and install."
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
       
       - name: Upload Windows Release Asset
@@ -101,7 +99,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
+          name: "Release ${{ github.ref_name }}"
+          body: "See the assets to download this version and install."
           files: src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*
+          update_existing_releases: true
+          overwrite_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
