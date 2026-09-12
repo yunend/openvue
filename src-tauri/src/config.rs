@@ -16,6 +16,11 @@ pub struct AppConfig {
 
     /// 是否启用文件上传（JSON 中为 enableUpload）
     pub enable_upload: bool,
+
+    /// 用户自定义插件根目录（JSON 中为 pluginsFolder）
+    /// None 时使用默认路径：用户配置目录/plugins/
+    #[serde(default)]
+    pub plugins_folder: Option<PathBuf>,
 }
 
 impl Default for AppConfig {
@@ -23,7 +28,8 @@ impl Default for AppConfig {
         Self {
             port: 8005,
             public_folder: PathBuf::from("public"),
-            enable_upload: false, // 默认关闭上传，更安全
+            enable_upload: false,
+            plugins_folder: None,
         }
     }
 }
@@ -111,11 +117,43 @@ pub fn load_config(config_path: Option<&str>) -> Result<AppConfig, String> {
         config.public_folder = normalize_path(config.public_folder.clone());
     }
 
+    // 解析 plugins_folder 相对路径
+    if let Some(ref mut pf) = config.plugins_folder {
+        if !pf.is_absolute() {
+            let config_dir = path.parent()
+                .ok_or_else(|| "无法获取配置文件目录".to_string())?;
+            let raw = config_dir.join(&*pf);
+            let resolved = if raw.exists() {
+                raw
+            } else {
+                match crate::paths::find_app_root() {
+                    Ok(app_root) => {
+                        let fallback = app_root.join(&*pf);
+                        if fallback.exists() { fallback } else { raw }
+                    }
+                    Err(_) => raw,
+                }
+            };
+            *pf = match resolved.canonicalize() {
+                Ok(p) => normalize_path(p),
+                Err(_) => normalize_path(resolved),
+            };
+        } else {
+            *pf = normalize_path(pf.clone());
+        }
+    }
+
+    let plugins_dir_display = match &config.plugins_folder {
+        Some(p) => p.display().to_string(),
+        None => "(默认: 用户配置目录/plugins/)".to_string(),
+    };
+
     println!("✅ 配置加载成功:");
     println!("   配置文件: {}", path.display());
     println!("   端口: {}", config.port);
     println!("   指定文件目录: {}", config.public_folder.display());
     println!("   文件上传: {}", if config.enable_upload { "✅ 启用" } else { "❌ 禁用" });
+    println!("   插件根目录: {}", plugins_dir_display);
 
     Ok(config)
 }
@@ -139,6 +177,15 @@ pub fn validate_config(config: &AppConfig) -> Result<(), String> {
         ));
     }
 
+    // plugins_folder 不存在时自动创建，不阻断
+    if let Some(ref pf) = config.plugins_folder {
+        if !pf.exists() {
+            if let Err(e) = std::fs::create_dir_all(pf) {
+                println!("⚠️ 插件目录不存在且无法自动创建: {} ({})", pf.display(), e);
+            }
+        }
+    }
+
     Ok(())
 }
 
@@ -158,18 +205,35 @@ pub fn save_config_to_path(config: &AppConfig, path: &PathBuf) -> Result<(), Str
         config.public_folder.to_string_lossy().to_string()
     };
 
+    let plugins_folder_write = match &config.plugins_folder {
+        Some(p) => {
+            if p.is_absolute() {
+                match p.strip_prefix(config_dir) {
+                    Ok(rel) => Some(rel.to_string_lossy().to_string()),
+                    Err(_) => Some(p.to_string_lossy().to_string()),
+                }
+            } else {
+                Some(p.to_string_lossy().to_string())
+            }
+        }
+        None => None,
+    };
+
     #[derive(Serialize)]
     #[serde(rename_all = "camelCase")]
     struct ConfigFile {
         port: u16,
         public_folder: String,
         enable_upload: bool,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        plugins_folder: Option<String>,
     }
 
     let file_data = ConfigFile {
         port: config.port,
         public_folder: public_folder_write,
         enable_upload: config.enable_upload,
+        plugins_folder: plugins_folder_write,
     };
 
     let json = serde_json::to_string_pretty(&file_data)

@@ -154,11 +154,42 @@ pub fn default_plugins_path() -> Result<PathBuf, String> {
     Ok(find_app_root()?.join("plugins.json"))
 }
 
-// dist-web / plugins 目录仍然在资源目录下（只读静态资源）
+// dist-web 目录仍然在资源目录下（只读静态资源）
 pub fn dist_web_dir() -> Result<PathBuf, String> {
     Ok(find_app_root()?.join("dist-web"))
 }
 
-pub fn plugins_dir() -> Result<PathBuf, String> {
+/// 内置插件目录（资源目录/dist-web/plugins/，只读）
+pub fn builtin_plugins_dir() -> Result<PathBuf, String> {
     Ok(dist_web_dir()?.join("plugins"))
+}
+
+/// 用户可写插件目录（用户配置目录/plugins/，默认放用户新建的插件）
+pub fn user_plugins_dir() -> Result<PathBuf, String> {
+    let dir = user_config_dir()?.join("plugins");
+    if !dir.exists() {
+        std::fs::create_dir_all(&dir)
+            .map_err(|e| format!("创建用户插件目录失败 {}: {}", dir.display(), e))?;
+    }
+    Ok(dir)
+}
+
+/// 根据 AppConfig 的 plugins_folder 解析最终插件根目录
+/// - Some(path) → 使用该路径（不存在则自动创建）
+/// - None → 使用 user_plugins_dir()（用户配置目录/plugins/）
+pub fn resolve_plugins_dir(config_plugins_folder: Option<&std::path::Path>) -> Result<PathBuf, String> {
+    if let Some(pf) = config_plugins_folder {
+        if !pf.exists() {
+            std::fs::create_dir_all(pf)
+                .map_err(|e| format!("创建插件目录失败 {}: {}", pf.display(), e))?;
+        }
+        Ok(pf.to_path_buf())
+    } else {
+        user_plugins_dir()
+    }
+}
+
+/// 保留旧函数名以兼容（返回用户可写插件目录）
+pub fn plugins_dir() -> Result<PathBuf, String> {
+    user_plugins_dir()
 }

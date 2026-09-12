@@ -35,10 +35,19 @@ pub struct RouterState {
     pub config_public_folder: String,
     /// 插件配置
     pub plugins_config: PluginsConfig,
+    /// 用户自定义插件根目录（/pfolder 前缀 serve 此目录）
+    pub plugins_folder: PathBuf,
 }
 
 /// 创建完整的 HTTP 路由器（模块对外唯一入口）
-pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, config_port: u16, plugins_config: PluginsConfig) -> Router {
+pub fn create_router(
+    root_path: PathBuf,
+    enable_upload: bool,
+    version: String,
+    config_port: u16,
+    plugins_config: PluginsConfig,
+    plugins_folder: PathBuf,
+) -> Router {
     let state = RouterState {
         config_public_folder: root_path.to_string_lossy().replace('\\', "/"),
         root_path: root_path.clone(),
@@ -46,11 +55,13 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
         app_version: version,
         config_port,
         plugins_config,
+        plugins_folder: plugins_folder.clone(),
     };
 
     let api_routes = register_api_routes(enable_upload);
 
     println!("📂 指定文件目录: {}", root_path.display());
+    println!("📦 自定义插件目录: {}", plugins_folder.display());
     if enable_upload {
         println!(
             "✅ 文件上传已启用，文件将保存到: {}",
@@ -71,9 +82,24 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
         println!("⚠️ 未找到 dist-web 构建产物，使用目录: {}", fallback.display());
         fallback
     };
+    // 🔀 路由注册顺序很重要：/pfolder /plugins /public 等前缀路由必须在根 / 之前
+    let builtin_plugins_dir = crate::paths::builtin_plugins_dir()
+        .unwrap_or_else(|_| base_dir.join("plugins"));
     Router::new()
         .merge(api_routes)
         .with_state(state)
+        // 🆕 /pfolder —— 用户自定义可写插件目录（与 /plugins 内置前缀相异）
+        .nest_service(
+            "/pfolder",
+            ServeDir::new(&plugins_folder)
+                .fallback(ServeFile::new(base_dir.join("404.html"))),
+        )
+        // /plugins —— 内置只读插件目录（资源目录）
+        .nest_service(
+            "/plugins",
+            ServeDir::new(&builtin_plugins_dir)
+                .fallback(ServeFile::new(base_dir.join("404.html"))),
+        )
         .nest_service(
             "/public",
             ServeDir::new(&root_path)

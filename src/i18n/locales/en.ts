@@ -38,7 +38,13 @@ const en = {
     folderHint: 'Supports relative or absolute paths; click the button to browse',
     browse: '📁 Browse...',
     enableUpload: 'Enable File Upload',
-    enableUploadHint: 'Allow users to upload files via /api/upload'
+    enableUploadHint: 'Allow users to upload files via /api/upload',
+    pluginsFolderLabel: '🧩 Plugins Root Folder',
+    pluginsFolderActive: 'Effective',
+    pluginsFolderPlaceholder: 'Leave empty for default, or browse to choose',
+    pluginsFolderHint: 'New custom plugins will be placed here; empty = user config dir/plugins/',
+    apply: '✅ Apply',
+    reset: '🔄 Reset'
   },
   system: {
     title: '🖥️ OS Behavior',
@@ -86,11 +92,12 @@ const en = {
     clear: '🗑️ Clear Filter',
     customExtLabel: 'File Extension (without dot)',
     customExtPlaceholder: 'e.g. xmind',
-    customFolderLabel: 'Plugin Dir (under dist-web/plugins)',
-    customFolderPlaceholder: 'Click browse to select',
+    customFolderLabel: 'Plugin Folder (must contain index.html)',
+    customFolderPlaceholder: 'Click browse to select a folder with index.html',
     customBrowse: 'Browse',
     customAdd: 'Add Plugin',
-    customSection: '🔧 Custom Plugin'
+    customSection: '🔧 Custom Plugin',
+    customFolderMustBeUnder: 'Plugin folder must be under: {root}'
   },
   about: {
     title: 'About OpenVue',

@@ -29,10 +29,18 @@ pub fn quit_app(app: tauri::AppHandle) {
 #[tauri::command]
 pub fn get_config(state: tauri::State<'_, Arc<Mutex<server::ServerState>>>) -> Result<serde_json::Value, String> {
     let state = state.lock().map_err(|e| e.to_string())?;
+    let plugins_folder = state.app_config.plugins_folder
+        .as_ref()
+        .map(|p| p.to_string_lossy().replace('\\', "/"));
+    let effective_dir = crate::paths::resolve_plugins_dir(state.app_config.plugins_folder.as_deref())
+        .map(|p| p.to_string_lossy().replace('\\', "/"))
+        .unwrap_or_default();
     Ok(serde_json::json!({
         "port": state.app_config.port,
         "publicFolder": state.app_config.public_folder.to_string_lossy().to_string(),
         "enableUpload": state.app_config.enable_upload,
+        "pluginsFolder": plugins_folder,
+        "effectivePluginsDir": effective_dir,
     }))
 }
 
@@ -63,10 +71,18 @@ pub fn save_config(
         config_dir.join(&public_path)
     };
 
+    // 保留原有的 plugins_folder
+    let existing_plugins_folder = state.lock()
+        .map_err(|e| e.to_string())?
+        .app_config
+        .plugins_folder
+        .clone();
+
     let new_config = config::AppConfig {
         port,
         public_folder: abs_public_path.clone(),
         enable_upload,
+        plugins_folder: existing_plugins_folder,
     };
 
     config::save_config_to_path(&new_config, &path).map_err(|e| e.to_string())?;
@@ -183,8 +199,11 @@ pub fn activate_plugin_handler(
 }
 
 #[tauri::command]
-pub fn get_plugins_dir() -> Result<String, String> {
-    let dir = plugins::get_plugins_dir()?;
+pub fn get_plugins_dir(
+    state: tauri::State<'_, Arc<Mutex<server::ServerState>>>,
+) -> Result<String, String> {
+    let guard = state.lock().map_err(|e| e.to_string())?;
+    let dir = crate::paths::resolve_plugins_dir(guard.app_config.plugins_folder.as_deref())?;
     Ok(dir.to_string_lossy().replace('\\', "/"))
 }
 
@@ -195,28 +214,32 @@ pub fn add_custom_plugin(
     folder_path: String,
 ) -> Result<String, String> {
     let arc_state = Arc::clone(state.inner());
-    let plugins_dir = plugins::get_plugins_dir()?;
-    let plugins_dir_canonical = plugins_dir
+
+    // 当前生效的插件根目录
+    let plugins_root = {
+        let guard = state.lock().map_err(|e| e.to_string())?;
+        crate::paths::resolve_plugins_dir(guard.app_config.plugins_folder.as_deref())?
+    };
+    let plugins_root_canonical = plugins_root
         .canonicalize()
-        .unwrap_or_else(|_| plugins_dir.clone());
+        .unwrap_or_else(|_| plugins_root.clone());
 
     let user_path = PathBuf::from(&folder_path);
     let user_path_canonical = user_path
         .canonicalize()
         .map_err(|_| format!("目录不存在: {}", folder_path))?;
 
-    if !user_path_canonical.starts_with(&plugins_dir_canonical) {
+    // ⚠️ 必须在 plugins_root 下，否则 /pfolder/ ServeDir 无法访问
+    if !user_path_canonical.starts_with(&plugins_root_canonical) {
         return Err(format!(
-            "插件目录必须在 dist-web/plugins 下，当前: {}",
+            "插件目录必须位于插件根目录下。\n\n\
+             插件根目录: {}\n\
+             当前选择:   {}\n\n\
+             请在【配置面板】修改插件根目录，或把插件文件夹移到插件根目录下。",
+            plugins_root_canonical.display(),
             folder_path
         ));
     }
-
-    let folder_name = user_path_canonical
-        .file_name()
-        .ok_or_else(|| "无法提取目录名".to_string())?
-        .to_string_lossy()
-        .to_string();
 
     let index_html = user_path_canonical.join("index.html");
     if !index_html.exists() {
@@ -225,6 +248,12 @@ pub fn add_custom_plugin(
             index_html.display()
         ));
     }
+
+    let folder_name = user_path_canonical
+        .file_name()
+        .ok_or_else(|| "无法提取目录名".to_string())?
+        .to_string_lossy()
+        .to_string();
 
     let mut guard = state.lock().map_err(|e| e.to_string())?;
     guard.plugins_config.add_custom_handler(&ext, &folder_name)?;
@@ -238,6 +267,75 @@ pub fn add_custom_plugin(
         }
     }
     Ok("__OK__".to_string())
+}
+
+/// 设置插件根目录（写入 config.json + 更新运行时状态 + 重启服务）
+#[tauri::command]
+pub fn set_plugins_folder(
+    state: tauri::State<'_, Arc<Mutex<server::ServerState>>>,
+    folder_path: String,
+) -> Result<String, String> {
+    let arc_state = Arc::clone(state.inner());
+    let path = config::get_default_config_path().map_err(|e| e.to_string())?;
+
+    let pf = PathBuf::from(&folder_path);
+    if !pf.exists() {
+        std::fs::create_dir_all(&pf)
+            .map_err(|e| format!("创建插件目录失败: {} ({})", folder_path, e))?;
+    }
+
+    let mut current_config = config::load_config(Some(path.to_string_lossy().as_ref()))?;
+    current_config.plugins_folder = Some(pf.clone());
+    config::save_config_to_path(&current_config, &path)?;
+
+    let mut guard = state.lock().map_err(|e| e.to_string())?;
+    guard.app_config.plugins_folder = Some(pf);
+    let was_running = guard.cancel_token.is_some();
+    drop(guard);
+
+    if was_running {
+        if let Err(e) = server::restart_server(&arc_state) {
+            return Ok(format!("__RESTART_FAILED__{}", e));
+        }
+    }
+    Ok("__OK__".to_string())
+}
+
+/// 重置插件根目录为默认（清除 config.json 中的 pluginsFolder 字段）
+#[tauri::command]
+pub fn reset_plugins_folder(
+    state: tauri::State<'_, Arc<Mutex<server::ServerState>>>,
+) -> Result<String, String> {
+    let arc_state = Arc::clone(state.inner());
+    let path = config::get_default_config_path().map_err(|e| e.to_string())?;
+
+    let mut current_config = config::load_config(Some(path.to_string_lossy().as_ref()))?;
+    current_config.plugins_folder = None;
+    config::save_config_to_path(&current_config, &path)?;
+
+    let mut guard = state.lock().map_err(|e| e.to_string())?;
+    guard.app_config.plugins_folder = None;
+    let was_running = guard.cancel_token.is_some();
+    drop(guard);
+
+    if was_running {
+        if let Err(e) = server::restart_server(&arc_state) {
+            return Ok(format!("__RESTART_FAILED__{}", e));
+        }
+    }
+    Ok("__OK__".to_string())
+}
+
+/// 用系统文件管理器打开当前生效的插件目录
+#[tauri::command]
+pub fn open_plugins_folder(
+    state: tauri::State<'_, Arc<Mutex<server::ServerState>>>,
+) -> Result<(), String> {
+    let dir = {
+        let guard = state.lock().map_err(|e| e.to_string())?;
+        crate::paths::resolve_plugins_dir(guard.app_config.plugins_folder.as_deref())?
+    };
+    open::that(&dir).map_err(|e| e.to_string())
 }
 
 // ========== 系统 / 工具 ==========
@@ -256,6 +354,7 @@ pub fn get_version() -> String {
 pub async fn choose_folder(
     app: tauri::AppHandle,
     initial_dir: Option<String>,
+    title: Option<String>,
 ) -> Result<Option<String>, String> {
     use tauri_plugin_dialog::DialogExt;
 
@@ -263,13 +362,31 @@ pub async fn choose_folder(
     let tx_cell = RefCell::new(Some(tx));
 
     let mut builder = app.dialog().file();
-    builder = builder.set_title("选择指定文件根目录");
+    let dialog_title = title.unwrap_or_else(|| "选择文件夹".to_string());
+    builder = builder.set_title(&dialog_title);
 
-    if let Some(dir) = initial_dir {
-        let p = PathBuf::from(&dir);
-        if p.exists() {
-            builder = builder.set_directory(p);
+    // 🧭 处理 initial_dir：确保绝对路径 + 存在 + 规范化
+    if let Some(dir_str) = initial_dir {
+        let raw = PathBuf::from(&dir_str);
+        let resolved = if raw.is_absolute() {
+            raw.clone()
+        } else {
+            std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")).join(&raw)
+        };
+        let exists = resolved.exists();
+        let canonical = resolved.canonicalize().unwrap_or_else(|_| resolved.clone());
+        println!("📂 [choose_folder] title={}", dialog_title);
+        println!("📂 [choose_folder] initial_dir 原始: {}", dir_str);
+        println!("📂 [choose_folder] 解析后: {}", resolved.display());
+        println!("📂 [choose_folder] 存在: {} | canonical: {}", exists, canonical.display());
+        if exists {
+            builder = builder.set_directory(&canonical);
+            println!("📂 [choose_folder] ✅ 已设置初始目录");
+        } else {
+            println!("⚠️ [choose_folder] 初始目录不存在，跳过 set_directory");
         }
+    } else {
+        println!("📂 [choose_folder] 无 initial_dir，使用系统默认");
     }
 
     builder.pick_folder(move |fp_opt| {
@@ -299,4 +416,18 @@ pub async fn choose_folder(
 #[tauri::command]
 pub async fn open_url(url: String) -> Result<(), String> {
     open::that(&url).map_err(|e| e.to_string())
+}
+
+/// 清理 Windows canonicalize 产生的 \\?\ UNC 前缀
+/// 某些原生 Windows API（如文件对话框）不认这种前缀
+fn normalize_path_for_dialog(p: &std::path::Path) -> std::path::PathBuf {
+    let s = p.to_string_lossy().to_string();
+    let cleaned = if let Some(rest) = s.strip_prefix(r"\\?\") {
+        rest.to_string()
+    } else if let Some(rest) = s.strip_prefix(r"\\?\UNC\") {
+        format!(r"\\{}", rest)
+    } else {
+        s
+    };
+    std::path::PathBuf::from(cleaned)
 }

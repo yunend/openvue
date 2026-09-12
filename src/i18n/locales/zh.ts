@@ -38,7 +38,13 @@ const zh = {
     folderHint: '支持相对路径或绝对路径；点击右侧按钮可直接选择文件夹',
     browse: '📁 浏览...',
     enableUpload: '启用文件上传功能',
-    enableUploadHint: '开启后，前端用户可通过 /api/upload 上传文件'
+    enableUploadHint: '开启后，前端用户可通过 /api/upload 上传文件',
+    pluginsFolderLabel: '🧩 插件根目录',
+    pluginsFolderActive: '当前生效',
+    pluginsFolderPlaceholder: '留空使用默认路径，或浏览选择自定义目录',
+    pluginsFolderHint: '新建的自定义插件将存放在此目录下；留空时使用用户配置目录/plugins/',
+    apply: '✅ 应用',
+    reset: '🔄 重置'
   },
   system: {
     title: '🖥️ 操作系统行为',
@@ -86,11 +92,12 @@ const zh = {
     clear: '🗑️ 清除筛选',
     customExtLabel: '文件后缀名（不含点）',
     customExtPlaceholder: '例如：xmind',
-    customFolderLabel: '插件目录（dist-web/plugins 下）',
-    customFolderPlaceholder: '点击右侧按钮选择目录',
+    customFolderLabel: '插件目录（含 index.html）',
+    customFolderPlaceholder: '点击右侧按钮选择已含 index.html 的插件目录',
     customBrowse: '浏览',
     customAdd: '添加插件',
-    customSection: '🔧 自定义插件'
+    customSection: '🔧 自定义插件',
+    customFolderMustBeUnder: '插件目录必须位于插件根目录下：{root}'
   },
   about: {
     title: '关于 OpenVue / About',

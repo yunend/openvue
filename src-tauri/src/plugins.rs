@@ -10,6 +10,18 @@ pub fn get_default_plugins_path() -> Result<PathBuf, String> {
     crate::paths::plugins_path()
 }
 
+/// 插件来源：内置（dist-web/plugins/）或用户自定义（可写插件目录）
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum PluginSource {
+    Builtin,
+    Custom,
+}
+
+impl Default for PluginSource {
+    fn default() -> Self { PluginSource::Builtin }
+}
+
 /// 单个扩展名的一个处理器
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -22,6 +34,9 @@ pub struct ExtensionHandler {
     pub url_template: Option<String>,
     pub description: String,
     pub name: String,
+    /// 插件来源：builtin=内置资源, custom=用户自定义
+    #[serde(default)]
+    pub source: PluginSource,
 }
 
 /// 单个扩展名配置：多个备选处理器 + 当前激活的 handler_id
@@ -153,6 +168,7 @@ impl PluginsConfig {
     }
 
     /// 添加自定义插件处理器（folder_name 作为 handlerId/pluginId）
+    /// url_template 使用 "/pfolder/" 前缀（与内置的 "/plugins/" 相异）
     pub fn add_custom_handler(
         &mut self,
         ext: &str,
@@ -161,7 +177,8 @@ impl PluginsConfig {
         let ext_key = ext.to_lowercase();
         let handler_id = folder_name.to_string();
         let plugin_id = folder_name.to_string();
-        let url_template = "/plugins/{pluginId}/?path={publicPath}".to_string();
+        // ⚠️ 关键：自定义插件用 /pfolder/ 前缀，与内置 /plugins/ 相异
+        let url_template = "/pfolder/{pluginId}/?path={publicPath}".to_string();
         let name = format!("自定义{}", ext_key);
 
         let new_handler = ExtensionHandler {
@@ -170,6 +187,7 @@ impl PluginsConfig {
             url_template: Some(url_template),
             description: String::new(),
             name,
+            source: PluginSource::Custom,
         };
 
         let config = self.extensions.entry(ext_key.clone()).or_insert_with(|| ExtensionConfig {

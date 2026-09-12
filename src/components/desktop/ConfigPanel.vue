@@ -46,7 +46,57 @@
           <span class="slider"></span>
         </label>
       </div>
-      
+
+      <!-- 插件文件夹配置 -->
+      <div class="mb-[18px] px-[18px] py-[14px] bg-white border border-primary-50 rounded-[10px]">
+        <label class="block text-[0.9rem] text-primary-900 font-semibold mb-2">{{ t('config.pluginsFolderLabel') }}</label>
+
+        <!-- 当前生效目录（展示 + 打开超链接） -->
+        <div class="flex items-center gap-2 mb-2 text-[0.82rem] flex-wrap">
+          <span class="text-primary-500">{{ t('config.pluginsFolderActive') }}:</span>
+          <a
+            class="text-blue-500 hover:text-blue-700 underline break-all cursor-pointer"
+            @click="handleOpenPluginsFolder"
+          >
+            {{ localConfig.effectivePluginsDir || '(加载中...)' }}
+          </a>
+        </div>
+
+        <!-- 自定义路径输入行 -->
+        <div class="flex gap-[8px] items-stretch flex-wrap">
+          <input
+            type="text"
+            class="flex-1 min-w-[180px] px-[12px] py-[9px] border-2 border-primary-100 rounded-[8px] text-sm text-primary-900 bg-white focus:outline-none focus:border-blue-400"
+            v-model="pluginsFolderInput"
+            :placeholder="t('config.pluginsFolderPlaceholder')"
+          >
+          <button
+            type="button"
+            class="flex-none px-[14px] py-0 text-[0.88rem] font-semibold border-none rounded-[8px] cursor-pointer bg-slate-500 text-white hover:bg-slate-600 whitespace-nowrap"
+            @click="handleBrowsePluginsFolder"
+          >
+            {{ t('config.browse') }}
+          </button>
+          <button
+            type="button"
+            class="flex-none px-[14px] py-0 text-[0.88rem] font-semibold border-none rounded-[8px] cursor-pointer bg-blue-500 text-white hover:bg-blue-600 whitespace-nowrap"
+            @click="handleApplyPluginsFolder"
+          >
+            {{ t('config.apply') }}
+          </button>
+          <button
+            v-if="localConfig.pluginsFolder"
+            type="button"
+            class="flex-none px-[14px] py-0 text-[0.88rem] font-semibold border-none rounded-[8px] cursor-pointer bg-gray-400 text-white hover:bg-gray-500 whitespace-nowrap"
+            @click="handleResetPluginsFolder"
+          >
+            🔄 {{ t('config.reset') }}
+          </button>
+        </div>
+        <div class="text-[0.8rem] text-primary-300 mt-[5px]">
+          {{ t('config.pluginsFolderHint') }}
+        </div>
+      </div>
 
     </div>
   </div>
@@ -55,16 +105,23 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useConfigManager } from '../../composables/useConfigManager'
+import { useConfigManager, type AppConfig } from '../../composables/useConfigManager'
 import { useServerControl } from '../../composables/useServerControl'
 
 defineProps({ isActive: Boolean })
 
 const { t } = useI18n()
 
-const { config, loadConfig, saveConfig, browseFolder } = useConfigManager()
+const { config, loadConfig, saveConfig, browseFolder, setPluginsFolder, resetPluginsFolder, openPluginsFolder } = useConfigManager()
 const { refreshStatus } = useServerControl()
-const localConfig = ref({ port: 8005, publicFolder: 'public', enableUpload: false })
+const localConfig = ref<AppConfig>({
+  port: 8005,
+  publicFolder: 'public',
+  enableUpload: false,
+  pluginsFolder: null,
+  effectivePluginsDir: ''
+})
+const pluginsFolderInput = ref('')
 const initialized = ref(false)
 let pathDebounceTimer: ReturnType<typeof setTimeout> | null = null
 let portDebounceTimer: ReturnType<typeof setTimeout> | null = null
@@ -72,6 +129,7 @@ let portDebounceTimer: ReturnType<typeof setTimeout> | null = null
 onMounted(async () => {
   await loadConfig()
   localConfig.value = { ...config.value }
+  pluginsFolderInput.value = config.value.pluginsFolder || ''
   await nextTick()
   initialized.value = true
 })
@@ -102,9 +160,48 @@ watch(() => localConfig.value.publicFolder, async () => {
 })
 
 async function handleBrowseFolder() {
-  const chosen = await browseFolder(localConfig.value.publicFolder)
+  const chosen = await browseFolder(
+    localConfig.value.publicFolder,
+    '选择指定文件根目录'
+  )
   if (chosen) {
     localConfig.value.publicFolder = chosen
   }
+}
+
+async function handleBrowsePluginsFolder() {
+  const initial = localConfig.value.pluginsFolder || localConfig.value.effectivePluginsDir
+  const chosen = await browseFolder(
+    initial || undefined,
+    '选择插件根目录'
+  )
+  if (chosen) {
+    pluginsFolderInput.value = chosen
+  }
+}
+
+async function handleApplyPluginsFolder() {
+  const path = pluginsFolderInput.value.trim()
+  if (!path) {
+    await resetPluginsFolder()
+    pluginsFolderInput.value = ''
+    localConfig.value = { ...config.value }
+    setTimeout(refreshStatus, 300)
+    return
+  }
+  await setPluginsFolder(path)
+  localConfig.value = { ...config.value }
+  setTimeout(refreshStatus, 300)
+}
+
+async function handleResetPluginsFolder() {
+  await resetPluginsFolder()
+  pluginsFolderInput.value = ''
+  localConfig.value = { ...config.value }
+  setTimeout(refreshStatus, 300)
+}
+
+async function handleOpenPluginsFolder() {
+  await openPluginsFolder()
 }
 </script>

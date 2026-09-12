@@ -59,7 +59,14 @@ pub fn do_spawn_server(
         let enable_upload = app_config.enable_upload;
         let plugins_for_router = plugins_config;
         let version_str = env!("CARGO_PKG_VERSION").to_string();
-        let app = router::create_router(public_folder, enable_upload, version_str, port, plugins_for_router);
+        // 从 config 解析最终插件目录
+        let plugins_folder = crate::paths::resolve_plugins_dir(
+            app_config.plugins_folder.as_deref()
+        ).unwrap_or_else(|_| std::path::PathBuf::from("./plugins"));
+        let app = router::create_router(
+            public_folder, enable_upload, version_str, port,
+            plugins_for_router, plugins_folder
+        );
 
         let listener = match tokio::net::TcpListener::bind(&addr).await {
             Ok(l) => l,

@@ -90,10 +90,12 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePluginManager, fileExtIcon, type PluginItem } from '../../composables/usePluginManager'
+import { useToast } from '../../composables/useToast'
 
 defineProps({ isActive: Boolean })
 
 const { t } = useI18n()
+const { showToast } = useToast()
 
 const {
   filteredPlugins,
@@ -134,8 +136,21 @@ async function handleBrowseCustomFolder() {
   try {
     const pluginsDir = await getPluginsDir()
     const { invoke } = window.__TAURI__.core
-    const chosen = await invoke('choose_folder', { initialDir: pluginsDir }) as string | null
+    const chosen = await invoke('choose_folder', {
+      initialDir: pluginsDir,
+      title: '选择插件目录（必须在插件根目录下）'
+    }) as string | null
     if (chosen) {
+      // 🔒 前端即时校验：选的目录必须在当前插件根目录下
+      const normChosen = chosen.replace(/\\/g, '/')
+      const normRoot = pluginsDir.replace(/\\/g, '/').replace(/\/$/, '')
+      if (!normChosen.startsWith(normRoot + '/') && normChosen !== normRoot) {
+        showToast(
+          t('plugins.customFolderMustBeUnder', { root: pluginsDir }),
+          'error'
+        )
+        return
+      }
       customFolderPath.value = chosen
     }
   } catch (e) {
