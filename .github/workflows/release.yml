@@ -6,7 +6,22 @@ on:
       - 'v*'
 
 jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Delete existing release and tag
+        run: |
+          echo "Deleting existing release for tag ${{ github.ref_name }}..."
+          gh release delete ${{ github.ref_name }} --yes || echo "Release not found or already deleted"
+          echo "Deleting existing tag ${{ github.ref_name }}..."
+          git push origin --delete ${{ github.ref_name }} || echo "Tag not found or already deleted"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   release:
+    needs: cleanup
     permissions:
       contents: write
     strategy:
