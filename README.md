@@ -124,31 +124,33 @@ npm run tauri dev
 ```json
 {
   "extensions": {
-    "ggb": {
-      "status": "Enabled",
-      "pluginId": "ggb",
-      "urlTemplate": "/plugins/ggb/index.html?file={filePath}",
-      "description": "GeoGebra 数学动态几何工具",
-      "name": "GeoGebra"
+   "ggb": {
+      "handlers": [
+        {
+          "handlerId": "ggb-official",
+          "pluginId": "ggb",
+          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
+          "description": "GeoGebra 官方 HTML5 播放器 / Official GeoGebra Player",
+          "name": "GeoGebra 官方插件 / Official GeoGebra Plugin"
+        }
+      ],
+      "activeHandlerId": "ggb-official"
     },
-    "pdf": {
-      "status": "BrowserDefault",
-      "pluginId": null,
-      "urlTemplate": null,
-      "description": "PDF 文档",
-      "name": "PDF"
-    }
+    "gif": {
+      "handlers": [
+        {
+          "handlerId": "image-default-4",
+          "pluginId": null,
+          "urlTemplate": null,
+          "description": "GIF 动图 / GIF Animation",
+          "name": "图片预览 / Image Viewer"
+        }
+      ],
+      "activeHandlerId": null
+    },
   }
 }
 ```
-
-| status 值 | 含义 |
-|-----------|------|
-| `BrowserDefault` | 由浏览器默认打开 |
-| `Enabled` | 启用插件打开 |
-| `Disabled` | 禁用（不显示在列表中） |
-| `Undeveloped` | 尚未开发（灰色显示） |
-
 ---
 
 ## 🔌 插件持续开发与集成
@@ -178,7 +180,7 @@ plugins/
 
 除了手动编辑 `plugins.json`，你还可以在桌面端插件配置面板中**一键添加自定义插件**，无需改代码、无需重启：
 
-1. 把插件文件（含 `index.html`）放到 `dist-web/plugins/` 下的新目录中
+1. 把插件文件（含 `index.html`）放到插件所在文件夹下的新目录中
 2. 打开桌面端 → 插件配置面板 → 🔧 自定义插件区域
 3. 输入文件后缀名（如 `xmind`），点击 📁 浏览选择插件目录
 4. 点击 ➕ 添加插件

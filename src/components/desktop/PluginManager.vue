@@ -6,7 +6,7 @@
       <div class="mb-[18px] px-5 py-4 bg-white border border-dashed border-blue-200 rounded-[10px]">
         <div class="text-[0.95rem] font-semibold text-primary-900 mb-3">{{ t('plugins.customSection') }}</div>
         <div class="flex flex-wrap items-end gap-3">
-          <div class="flex-1 min-w-[120px]">
+          <div class="flex-shrink-0 w-[140px]">
             <label class="block text-[0.82rem] text-primary-500 font-medium mb-1">{{ t('plugins.customExtLabel') }}</label>
             <input
               type="text"
@@ -15,19 +15,19 @@
               :placeholder="t('plugins.customExtPlaceholder')"
             >
           </div>
-          <div class="flex-[2] min-w-[200px]">
+          <div class="flex-1 min-w-[240px]">
             <label class="block text-[0.82rem] text-primary-500 font-medium mb-1">{{ t('plugins.customFolderLabel') }}</label>
             <div class="flex gap-[8px] items-stretch">
               <input
                 type="text"
-                class="flex-1 px-[12px] py-[9px] border-2 border-primary-100 rounded-[8px] text-sm text-primary-900 bg-white focus:outline-none focus:border-blue-400"
+                class="flex-1 min-w-0 px-[12px] py-[9px] border-2 border-primary-100 rounded-[8px] text-sm text-primary-900 bg-white focus:outline-none focus:border-blue-400"
                 v-model="customFolderPath"
                 :placeholder="t('plugins.customFolderPlaceholder')"
                 readonly
               >
               <button
                 type="button"
-                class="flex-none px-[14px] py-0 text-[0.88rem] font-semibold border-none rounded-[8px] cursor-pointer bg-slate-500 text-white hover:bg-slate-600 whitespace-nowrap"
+                class="flex-none px-[14px] py-[9px] text-[0.88rem] font-semibold border-none rounded-[8px] cursor-pointer bg-slate-500 text-white hover:bg-slate-600 whitespace-nowrap"
                 @click="handleBrowseCustomFolder"
               >
                 📁 {{ t('plugins.customBrowse') }}
