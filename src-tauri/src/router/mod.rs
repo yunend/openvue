@@ -35,8 +35,6 @@ pub struct RouterState {
     pub config_public_folder: String,
     /// 插件配置
     pub plugins_config: PluginsConfig,
-    /// 用户自定义插件根目录（/pfolder 前缀 serve 此目录）
-    pub plugins_folder: PathBuf,
 }
 
 /// 创建完整的 HTTP 路由器（模块对外唯一入口）
@@ -55,7 +53,6 @@ pub fn create_router(
         app_version: version,
         config_port,
         plugins_config,
-        plugins_folder: plugins_folder.clone(),
     };
 
     let api_routes = register_api_routes(enable_upload);

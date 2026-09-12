@@ -374,11 +374,13 @@ pub async fn choose_folder(
             std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")).join(&raw)
         };
         let exists = resolved.exists();
-        let canonical = resolved.canonicalize().unwrap_or_else(|_| resolved.clone());
+        // ⚠️ Windows canonicalize 会返回 \\?\ UNC 前缀路径，dialog 的 set_directory 不认
+        let canonical_raw = resolved.canonicalize().unwrap_or_else(|_| resolved.clone());
+        let canonical = normalize_path_for_dialog(&canonical_raw);
         println!("📂 [choose_folder] title={}", dialog_title);
         println!("📂 [choose_folder] initial_dir 原始: {}", dir_str);
         println!("📂 [choose_folder] 解析后: {}", resolved.display());
-        println!("📂 [choose_folder] 存在: {} | canonical: {}", exists, canonical.display());
+        println!("📂 [choose_folder] 存在: {} | 规范化后: {}", exists, canonical.display());
         if exists {
             builder = builder.set_directory(&canonical);
             println!("📂 [choose_folder] ✅ 已设置初始目录");

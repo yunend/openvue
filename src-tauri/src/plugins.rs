@@ -123,10 +123,6 @@ pub fn save_plugins_config(cfg: &PluginsConfig) -> Result<(), String> {
     save_plugins_config_to_path(cfg, &path)
 }
 
-/// 获取 dist-web/plugins 目录的绝对路径
-pub fn get_plugins_dir() -> Result<PathBuf, String> {
-    crate::paths::plugins_dir()
-}
 
 impl PluginsConfig {
     /// 激活指定 handler（只需设置 active_handler_id，null = 浏览器默认）

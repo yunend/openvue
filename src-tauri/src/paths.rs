@@ -188,8 +188,3 @@ pub fn resolve_plugins_dir(config_plugins_folder: Option<&std::path::Path>) -> R
         user_plugins_dir()
     }
 }
-
-/// 保留旧函数名以兼容（返回用户可写插件目录）
-pub fn plugins_dir() -> Result<PathBuf, String> {
-    user_plugins_dir()
-}
