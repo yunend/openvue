@@ -13,8 +13,22 @@ jobs:
     steps:
       - name: Delete existing release and tag
         run: |
-          echo "Deleting existing release for tag ${{ github.ref_name }}..."
-          gh release delete ${{ github.ref_name }} --yes || echo "Release not found or already deleted"
+          echo "=== Cleaning up old release for tag ${{ github.ref_name }} ==="
+
+          # 1. 直接通过 tag 名删除（正常情况）
+          echo "Step 1: Trying gh release delete ${{ github.ref_name }}"
+          gh release delete ${{ github.ref_name }} --yes 2>/dev/null && echo "Deleted by tag name" || echo "Not found by tag name"
+
+          # 2. 如果上面没删掉（可能 tag 已被手动删除，release 变了 draft），
+          #    再通过搜索 release 列表来删除残留的 draft release
+          echo "Step 2: Searching for any remaining releases with tag ${{ github.ref_name }}"
+          gh release list --limit 100 | grep "${{ github.ref_name }}" | while read -r release url; do
+            echo "Found release: $release ($url)"
+            # 从 URL 提取 release ID 或直接用 release 名删
+            gh release delete "$release" --yes 2>/dev/null || true
+          done
+          
+          echo "=== Cleanup complete ==="
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

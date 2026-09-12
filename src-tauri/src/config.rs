@@ -89,7 +89,7 @@ pub fn load_config(config_path: Option<&str>) -> Result<AppConfig, String> {
             .ok_or_else(|| "无法获取配置文件目录".to_string())?;
         let raw = config_dir.join(&config.public_folder);
 
-        // 🔧 关键修复：如果用户目录下找不到，就回退到资源目录查找
+        // 🔧 如果用户目录下找不到，就回退到资源目录查找
         // （首次启动时 config.json 在 ~/.config/openvue/，但 public/ 还在 /usr/lib/openvue/）
         let resolved = if raw.exists() {
             raw
