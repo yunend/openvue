@@ -56,12 +56,14 @@
 import { ref, onMounted, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useConfigManager } from '../../composables/useConfigManager'
+import { useServerControl } from '../../composables/useServerControl'
 
 defineProps({ isActive: Boolean })
 
 const { t } = useI18n()
 
 const { config, loadConfig, saveConfig, browseFolder } = useConfigManager()
+const { refreshStatus } = useServerControl()
 const localConfig = ref({ port: 8005, publicFolder: 'public', enableUpload: false })
 const initialized = ref(false)
 let pathDebounceTimer: ReturnType<typeof setTimeout> | null = null
@@ -74,23 +76,28 @@ onMounted(async () => {
   initialized.value = true
 })
 
-watch(() => localConfig.value.port, () => {
+watch(() => localConfig.value.port, async () => {
   if (!initialized.value) return
   if (portDebounceTimer) clearTimeout(portDebounceTimer)
-  portDebounceTimer = setTimeout(() => {
-    saveConfig(localConfig.value)
+  portDebounceTimer = setTimeout(async () => {
+    const ok = await saveConfig(localConfig.value)
+    if (ok) setTimeout(refreshStatus, 300)
   }, 500)
 })
 
-watch(() => localConfig.value.enableUpload, () => {
-  if (initialized.value) saveConfig(localConfig.value)
+watch(() => localConfig.value.enableUpload, async () => {
+  if (initialized.value) {
+    const ok = await saveConfig(localConfig.value)
+    if (ok) setTimeout(refreshStatus, 300)
+  }
 })
 
-watch(() => localConfig.value.publicFolder, () => {
+watch(() => localConfig.value.publicFolder, async () => {
   if (!initialized.value) return
   if (pathDebounceTimer) clearTimeout(pathDebounceTimer)
-  pathDebounceTimer = setTimeout(() => {
-    saveConfig(localConfig.value)
+  pathDebounceTimer = setTimeout(async () => {
+    const ok = await saveConfig(localConfig.value)
+    if (ok) setTimeout(refreshStatus, 300)
   }, 500)
 })
 

@@ -74,7 +74,11 @@ pub fn create_router(root_path: PathBuf, enable_upload: bool, version: String, c
     Router::new()
         .merge(api_routes)
         .with_state(state)
-        .nest_service("/public", ServeDir::new(root_path))
+        .nest_service(
+            "/public",
+            ServeDir::new(&root_path)
+                .fallback(ServeFile::new(base_dir.join("404.html"))),
+        )
         .nest_service(
             "/",
             ServeDir::new(&base_dir)
