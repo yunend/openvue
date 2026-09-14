@@ -41,6 +41,13 @@
           >
             ➕ {{ t('plugins.customAdd') }}
           </button>
+          <button
+            type="button"
+            class="flex-none px-[18px] py-[9px] text-[0.9rem] font-semibold border-none rounded-[8px] cursor-pointer bg-red-500 text-white hover:bg-red-600 whitespace-nowrap"
+            @click="handleRemoveCustomPlugin"
+          >
+            🗑️ {{ t('plugins.customRemove') }}
+          </button>
         </div>
       </div>
 
@@ -103,7 +110,8 @@ const {
   activateHandler,
   setBrowserDefault,
   getPluginsDir,
-  addCustomPlugin
+  addCustomPlugin,
+  removeCustomPlugin
 } = usePluginManager()
 
 const customExt = ref('')
@@ -160,6 +168,12 @@ async function handleBrowseCustomFolder() {
 
 async function handleAddCustomPlugin() {
   await addCustomPlugin(customExt.value.trim(), customFolderPath.value)
+  customExt.value = ''
+  customFolderPath.value = ''
+}
+
+async function handleRemoveCustomPlugin() {
+  await removeCustomPlugin(customExt.value.trim(), customFolderPath.value)
   customExt.value = ''
   customFolderPath.value = ''
 }

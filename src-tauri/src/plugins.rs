@@ -196,4 +196,58 @@ impl PluginsConfig {
 
         Ok(())
     }
+
+    /// 删除自定义插件处理器
+    /// - 根据扩展名 + folder_name（即 handler_id）定位
+    /// - 只能删除 source=Custom 的 handler，内置插件不可删除
+    /// - 如果插件不存在或未添加过，返回 Err 提示
+    pub fn remove_custom_handler(
+        &mut self,
+        ext: &str,
+        folder_name: &str,
+    ) -> Result<(), String> {
+        let ext_key = ext.to_lowercase();
+        let handler_id = folder_name.to_string();
+
+        let config = self.extensions.get_mut(&ext_key).ok_or_else(|| {
+            format!(
+                "扩展名 .{} 没有任何插件处理器，请先添加自定义插件",
+                ext_key
+            )
+        })?;
+
+        // 找到匹配的 handler 索引
+        let idx = config.handlers.iter().position(|h| {
+            h.handler_id == handler_id
+        });
+
+        match idx {
+            Some(i) => {
+                let handler = &config.handlers[i];
+                if handler.source != PluginSource::Custom {
+                    return Err(format!(
+                        "❌ 内置插件不可删除（.{} / {}）",
+                        ext_key, handler_id
+                    ));
+                }
+                config.handlers.remove(i);
+
+                // 如果被删除的 handler 是当前激活项，回退到浏览器默认
+                if config.active_handler_id.as_deref() == Some(&handler_id) {
+                    config.active_handler_id = None;
+                }
+
+                // 如果该扩展名下已无任何 handler，清理整个条目
+                if config.handlers.is_empty() {
+                    self.extensions.remove(&ext_key);
+                }
+
+                Ok(())
+            }
+            None => Err(format!(
+                "自定义插件不存在：.{} / {}，请确认已先添加此插件",
+                ext_key, handler_id
+            )),
+        }
+    }
 }

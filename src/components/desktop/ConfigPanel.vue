@@ -72,14 +72,14 @@
           >
           <button
             type="button"
-            class="flex-none px-[14px] py-0 text-[0.88rem] font-semibold border-none rounded-[8px] cursor-pointer bg-slate-500 text-white hover:bg-slate-600 whitespace-nowrap"
+            class="flex-none px-[14px] py-2 text-[0.88rem] font-semibold border-none rounded-[8px] cursor-pointer bg-slate-500 text-white hover:bg-slate-600 whitespace-nowrap"
             @click="handleBrowsePluginsFolder"
           >
             {{ t('config.browse') }}
           </button>
           <button
             type="button"
-            class="flex-none px-[14px] py-0 text-[0.88rem] font-semibold border-none rounded-[8px] cursor-pointer bg-blue-500 text-white hover:bg-blue-600 whitespace-nowrap"
+            class="flex-none px-[14px] py-2 text-[0.88rem] font-semibold border-none rounded-[8px] cursor-pointer bg-blue-500 text-white hover:bg-blue-600 whitespace-nowrap"
             @click="handleApplyPluginsFolder"
           >
             {{ t('config.apply') }}
@@ -87,10 +87,10 @@
           <button
             v-if="localConfig.pluginsFolder"
             type="button"
-            class="flex-none px-[14px] py-0 text-[0.88rem] font-semibold border-none rounded-[8px] cursor-pointer bg-gray-400 text-white hover:bg-gray-500 whitespace-nowrap"
+            class="flex-none px-[14px] py-2 text-[0.88rem] font-semibold border-none rounded-[8px] cursor-pointer bg-gray-400 text-white hover:bg-gray-500 whitespace-nowrap"
             @click="handleResetPluginsFolder"
           >
-            🔄 {{ t('config.reset') }}
+            {{ t('config.reset') }}
           </button>
         </div>
         <div class="text-[0.8rem] text-primary-300 mt-[5px]">

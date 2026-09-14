@@ -61,6 +61,7 @@ pub fn run() {
             commands::activate_plugin_handler,
             commands::set_plugin_browser_default,
             commands::add_custom_plugin,
+            commands::remove_custom_plugin,
             commands::get_plugins_dir,
             commands::open_url,
             commands::set_plugins_folder,

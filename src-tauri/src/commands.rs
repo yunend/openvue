@@ -269,6 +269,36 @@ pub fn add_custom_plugin(
     Ok("__OK__".to_string())
 }
 
+#[tauri::command]
+pub fn remove_custom_plugin(
+    state: tauri::State<'_, Arc<Mutex<server::ServerState>>>,
+    ext: String,
+    folder_path: String,
+) -> Result<String, String> {
+    let arc_state = Arc::clone(state.inner());
+
+    // 从 folder_path 提取目录名作为 folder_name
+    let user_path = PathBuf::from(&folder_path);
+    let folder_name = user_path
+        .file_name()
+        .ok_or_else(|| "无法从路径中提取目录名".to_string())?
+        .to_string_lossy()
+        .to_string();
+
+    let mut guard = state.lock().map_err(|e| e.to_string())?;
+    guard.plugins_config.remove_custom_handler(&ext, &folder_name)?;
+    plugins::save_plugins_config(&guard.plugins_config)?;
+    let was_running = guard.cancel_token.is_some();
+    drop(guard);
+
+    if was_running {
+        if let Err(e) = server::restart_server(&arc_state) {
+            return Ok(format!("__RESTART_FAILED__{}", e));
+        }
+    }
+    Ok("__OK__".to_string())
+}
+
 /// 设置插件根目录（写入 config.json + 更新运行时状态 + 重启服务）
 #[tauri::command]
 pub fn set_plugins_folder(

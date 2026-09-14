@@ -128,12 +128,33 @@ export function usePluginManager() {
     }
   }
 
+  async function removeCustomPlugin(ext: string, folderPath: string): Promise<void> {
+    if (!ext || !folderPath) {
+      showToast(i18n.global.t('toast.customPluginRemoveEmpty'), 'error')
+      return
+    }
+    try {
+      const { invoke } = window.__TAURI__.core
+      const result = await invoke('remove_custom_plugin', { ext, folderPath }) as string
+      await loadPluginsConfig()
+      if (result.startsWith('__RESTART_FAILED__')) {
+        showToast(i18n.global.t('toast.customPluginRemoved', { ext }), 'success')
+        showToast(i18n.global.t('toast.restartFailed', { err: result.slice('__RESTART_FAILED__'.length) }), 'error')
+      } else {
+        showToast(i18n.global.t('toast.customPluginRemoved', { ext }), 'success')
+      }
+    } catch (e) {
+      showToast(i18n.global.t('toast.customPluginRemoveFailed', { err: String(e) }), 'error')
+    }
+  }
+
   return {
     filteredPlugins,
     loadPluginsConfig,
     activateHandler,
     setBrowserDefault,
     getPluginsDir,
-    addCustomPlugin
+    addCustomPlugin,
+    removeCustomPlugin
   }
 }

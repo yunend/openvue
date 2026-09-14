@@ -96,6 +96,7 @@ const en = {
     customFolderPlaceholder: 'Click browse to select a folder with index.html',
     customBrowse: 'Browse',
     customAdd: 'Add Plugin',
+    customRemove: 'Remove Plugin',
     customSection: '🔧 Custom Plugin',
     customFolderMustBeUnder: 'Plugin folder must be under: {root}'
   },
@@ -139,7 +140,10 @@ const en = {
     hideFailed: 'Hide failed: {err}',
     quitConfirm: '⚠️ HTTP service is running, are you sure you want to quit?',
     customPluginEmpty: 'Please fill in extension and select plugin folder',
-    customPluginFailed: '❌ Failed to add custom plugin: {err}'
+    customPluginFailed: '❌ Failed to add custom plugin: {err}',
+    customPluginRemoveEmpty: 'Please fill in extension and select the plugin folder to remove',
+    customPluginRemoved: '✅ Custom plugin .{ext} removed',
+    customPluginRemoveFailed: '❌ Failed to remove custom plugin: {err}'
   },
   language: {
     switchTo: '中文'

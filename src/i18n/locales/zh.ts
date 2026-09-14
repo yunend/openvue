@@ -96,6 +96,7 @@ const zh = {
     customFolderPlaceholder: '点击右侧按钮选择已含 index.html 的插件目录',
     customBrowse: '浏览',
     customAdd: '添加插件',
+    customRemove: '删除插件',
     customSection: '🔧 自定义插件',
     customFolderMustBeUnder: '插件目录必须位于插件根目录下：{root}'
   },
@@ -139,7 +140,10 @@ const zh = {
     hideFailed: '隐藏失败: {err}',
     quitConfirm: '⚠️ HTTP 服务正在运行，确定要退出吗？',
     customPluginEmpty: '请填写后缀名并选择插件目录',
-    customPluginFailed: '❌ 添加自定义插件失败: {err}'
+    customPluginFailed: '❌ 添加自定义插件失败: {err}',
+    customPluginRemoveEmpty: '请填写后缀名并选择要删除的插件目录',
+    customPluginRemoved: '✅ 自定义插件 .{ext} 已删除',
+    customPluginRemoveFailed: '❌ 删除自定义插件失败: {err}'
   },
   language: {
     switchTo: 'English'
