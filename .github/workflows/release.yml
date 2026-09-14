@@ -13,21 +13,21 @@ jobs:
     steps:
       - name: Delete existing release and tag
         run: |
-          echo "=== Cleaning up old release for tag ${{ github.ref_name }} ==="
+          REPO="${{ github.repository }}"
+          TAG="${{ github.ref_name }}"
+          echo "=== Cleaning up old release for tag $TAG in $REPO ==="
 
-          # 1. 直接通过 tag 名删除（正常情况）
-          echo "Step 1: Trying gh release delete ${{ github.ref_name }}"
-          gh release delete ${{ github.ref_name }} --yes 2>/dev/null && echo "Deleted by tag name" || echo "Not found by tag name"
+          # 1. 直接通过 tag 名删除（-R 明确指定仓库，不依赖本地 git）
+          echo "Step 1: Trying gh release delete $TAG"
+          gh release delete "$TAG" -R "$REPO" --yes --cleanup-tag 2>/dev/null && echo "Deleted by tag name" || echo "Not found by tag name"
 
-          # 2. 如果上面没删掉（可能 tag 已被手动删除，release 变了 draft），
-          #    再通过搜索 release 列表来删除残留的 draft release
-          echo "Step 2: Searching for any remaining releases with tag ${{ github.ref_name }}"
-          gh release list --limit 100 | grep "${{ github.ref_name }}" | while read -r release url; do
-            echo "Found release: $release ($url)"
-            # 从 URL 提取 release ID 或直接用 release 名删
-            gh release delete "$release" --yes 2>/dev/null || true
+          # 2. API 兜底：用 REST API 列出所有 release，jq 筛选同名残留（tag 已断的 draft）
+          echo "Step 2: API fallback search for orphaned releases matching $TAG"
+          gh api "repos/$REPO/releases?per_page=100" --jq ".[] | select(.name == \"$TAG\" or .tag_name == \"$TAG\") | .id" 2>/dev/null | while read -r RELEASE_ID; do
+            echo "Deleting orphan release ID: $RELEASE_ID"
+            gh api "repos/$REPO/releases/$RELEASE_ID" -X DELETE 2>/dev/null && echo "Deleted orphan release $RELEASE_ID" || echo "Failed to delete $RELEASE_ID"
           done
-          
+
           echo "=== Cleanup complete ==="
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
