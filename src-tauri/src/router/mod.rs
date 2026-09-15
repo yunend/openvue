@@ -129,6 +129,7 @@ async fn add_security_headers(request: Request, next: Next) -> Response {
              img-src 'self' data: blob:; \
              font-src 'self' data:; \
              connect-src 'self' ipc.localhost https://api.github.com; \
+             frame-src 'self' https://*.officeapps.live.com https://*.wopi.net; \
              worker-src 'self' data: blob:; \
              frame-ancestors 'none';"
         ),
