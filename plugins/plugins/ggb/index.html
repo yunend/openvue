@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GGB预览与编辑 - 插件</title>
+    <title>GGB-plugin</title>
     <script src="./tailwind.js"></script>
     <script defer src="./GeoGebra/deployggb.js"></script>
     <link rel="shortcut icon" href="./logo.ico" type="image/x-icon">
@@ -45,18 +45,12 @@
     <!-- 导航栏 -->
     <nav class="w-full bg-blue-700">
         <section class="h-20 w-10/12 mx-auto font-mono text-white flex items-center gap-x-3">
-            <a class="text-4xl px-5 py-3 hover:translate-x-5 duration-300">GGB</a>
-            <ul class="hidden md:flex gap-x-5 mx-3 items-center">
-                <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><a href="/">主页</a></li>
-                <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><a href="./GeoGebra/HTML5/5.0/GeoGebra.html" target="_blank">GGB本地</a></li>
+            <span class="text-xl font-black tracking-wider text-yellow-400">GGB</span>
+            <ul class="flex gap-x-3 items-center">
+                <li><a href="/" class="block p-3 hover:bg-blue-900/50 transition-colors duration-200">Home</a></li>
+                <li><a href="./GeoGebra/HTML5/5.0/GeoGebra.html" target="_blank" class="block p-3 hover:bg-blue-900/50 transition-colors duration-200">Local</a></li>
+                <li><button onclick="toggleToolBar()" class="block p-3 hover:bg-blue-900/50 transition-colors duration-200 text-white cursor-pointer" title="显示/隐藏工具按钮">Editor</button></li>
             </ul>
-            <button 
-                onclick="toggleToolBar()"
-                class="ml-auto px-3 py-2 bg-blue-500/40 border border-blue-400/40 rounded-lg hover:bg-blue-400/60 active:scale-95 transition-all text-white text-sm font-bold whitespace-nowrap"
-                title="显示/隐藏工具按钮"
-            >
-                ✏️ 编辑
-            </button>
         </section>
     </nav>
 
@@ -67,7 +61,7 @@
         </div>
 
         <!-- GGB容器 -->
-        <div class="ggb-container w-[85%] max-w-[1280px] aspect-video relative p-0 overflow-hidden flex justify-center items-center border-3 border-blue-600 rounded-xl shadow-lg shadow-blue-600/30 transition-colors">
+        <div class="ggb-container w-[85%] max-w-[1280px] aspect-video relative p-0 overflow-hidden flex justify-center items-center rounded-xl shadow-lg shadow-blue-600/30 transition-colors">
             <div id="loading" class="sk-spinner-pulse"></div>
             <div id="ggb-element"></div>
         </div>
@@ -92,7 +86,7 @@
             "filename": ggbFilePath,
             "width": 1280,
             "height": 720,
-            "borderColor": "#3c3c3c",
+            "borderColor": "transparent",
             "showFullscreenButton": true,
             showResetIcon: true,
             enableRightClick: false,

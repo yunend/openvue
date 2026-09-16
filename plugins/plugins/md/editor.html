@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MD编辑器 - 插件</title>
+    <title>MD-plugin</title>
     <script src="./tailwind.js"></script>
     <link rel="stylesheet" href="./katex.min.css">
     <link rel="shortcut icon" href="./logo.ico" type="image/x-icon">
@@ -305,10 +305,9 @@
     <!-- 导航栏 -->
     <nav class="w-full bg-blue-700">
         <section class="h-20 w-10/12 mx-auto font-mono text-white flex items-center gap-x-3">
-            <a class="text-4xl px-5 py-3 hover:translate-x-5 duration-300">MD</a>
-            <ul class="hidden md:flex gap-x-5 mx-3 items-center">
-                <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><a href="/">主页</a></li>
-                <li class="p-3 hover:bg-blue-900/50 cursor-pointer"><a href="./index.html">MD阅读</a></li>
+            <span class="text-xl font-black tracking-wider text-yellow-400">MD</span>
+            <ul class="flex gap-x-5 mx-3 items-center">
+                <li><a href="/" class="block p-3 hover:bg-blue-900/50 transition-colors duration-200">Home</a></li>
             </ul>
         </section>
     </nav>
