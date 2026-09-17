@@ -15,180 +15,51 @@
     <!-- Mermaid 懒加载：仅在需要时加载 -->
 
     <style>
+        :root {
+            --c-heading: #1e293b;
+            --c-text: #334155;
+            --c-muted: #475569;
+            --c-light: #64748b;
+            --c-border: #e2e8f0;
+            --c-bg: #f1f5f9;
+            --c-blue: #2563eb;
+            --c-blue-dk: #1d4ed8;
+            --c-blue-br: #3b82f6;
+            --c-scroll: #94a3b8;
+            --c-scroll-hv: #64748b;
+            --c-pre-bg: #1e293b;
+            --c-pre-text: #e2e8f0;
+        }
+
         /* Markdown 内容样式 */
-        .markdown-body {
-            line-height: 1.8;
-            color: #334155;
-        }
-
-        .markdown-body h1 {
-            font-size: 2em;
-            font-weight: 700;
-            margin-top: 1.5em;
-            margin-bottom: 0.5em;
-            padding-bottom: 0.3em;
-            border-bottom: 2px solid #e2e8f0;
-            color: #1e293b;
-        }
-
-        .markdown-body h2 {
-            font-size: 1.5em;
-            font-weight: 600;
-            margin-top: 1.4em;
-            margin-bottom: 0.4em;
-            padding-bottom: 0.2em;
-            border-bottom: 1px solid #e2e8f0;
-            color: #1e293b;
-        }
-
-        .markdown-body h3 {
-            font-size: 1.25em;
-            font-weight: 600;
-            margin-top: 1.2em;
-            margin-bottom: 0.3em;
-            color: #1e293b;
-        }
-
-        .markdown-body h4,
-        .markdown-body h5,
-        .markdown-body h6 {
-            font-weight: 600;
-            margin-top: 1em;
-            margin-bottom: 0.3em;
-            color: #1e293b;
-        }
-
-        .markdown-body p {
-            margin-bottom: 1em;
-        }
-
-        .markdown-body a {
-            color: #2563eb;
-            text-decoration: underline;
-        }
-
-        .markdown-body a:hover {
-            color: #1d4ed8;
-        }
-
-        .markdown-body ul,
-        .markdown-body ol {
-            margin-bottom: 1em;
-            padding-left: 2em;
-        }
-
-        .markdown-body ul {
-            list-style-type: disc;
-        }
-
-        .markdown-body ol {
-            list-style-type: decimal;
-        }
-
-        .markdown-body li {
-            margin-bottom: 0.3em;
-        }
-
-        .markdown-body blockquote {
-            margin: 1em 0;
-            padding: 0.5em 1em;
-            border-left: 4px solid #3b82f6;
-            background-color: #f1f5f9;
-            border-radius: 0 0.5rem 0.5rem 0;
-            color: #475569;
-        }
-
-        .markdown-body code {
-            background-color: #f1f5f9;
-            padding: 0.2em 0.4em;
-            border-radius: 0.25rem;
-            font-size: 0.875em;
-            font-family: 'Courier New', Courier, monospace;
-            color: #dc2626;
-        }
-
-        .markdown-body pre {
-            background-color: #1e293b;
-            color: #e2e8f0;
-            padding: 1em;
-            border-radius: 0.5rem;
-            overflow-x: auto;
-            margin-bottom: 1em;
-        }
-
-        .markdown-body pre code {
-            background-color: transparent;
-            padding: 0;
-            border-radius: 0;
-            color: inherit;
-            font-size: 0.9em;
-        }
-
-        .markdown-body table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 1em;
-        }
-
-        .markdown-body th,
-        .markdown-body td {
-            border: 1px solid #cbd5e1;
-            padding: 0.5em 0.75em;
-            text-align: left;
-        }
-
-        .markdown-body th {
-            background-color: #f1f5f9;
-            font-weight: 600;
-        }
-
-        .markdown-body tr:nth-child(even) {
-            background-color: #f8fafc;
-        }
-
-        .markdown-body img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 0.5rem;
-            margin: 1em 0;
-        }
-
-        .markdown-body hr {
-            border: none;
-            border-top: 1px solid #e2e8f0;
-            margin: 2em 0;
-        }
-
-        .markdown-body strong {
-            font-weight: 700;
-        }
-
-        .markdown-body em {
-            font-style: italic;
-        }
-
-        .markdown-body > :first-child {
-            margin-top: 0;
-        }
-
-        .markdown-body > :last-child {
-            margin-bottom: 0;
-        }
+        .markdown-body { line-height:1.8; color:var(--c-text); }
+        .markdown-body h1 { font-size:2em; font-weight:700; margin-top:1.5em; margin-bottom:.5em; padding-bottom:.3em; border-bottom:2px solid var(--c-border); color:var(--c-heading); }
+        .markdown-body h2 { font-size:1.5em; font-weight:600; margin-top:1.4em; margin-bottom:.4em; padding-bottom:.2em; border-bottom:1px solid var(--c-border); color:var(--c-heading); }
+        .markdown-body h3 { font-size:1.25em; font-weight:600; margin-top:1.2em; margin-bottom:.3em; color:var(--c-heading); }
+        .markdown-body h4, .markdown-body h5, .markdown-body h6 { font-weight:600; margin-top:1em; margin-bottom:.3em; color:var(--c-heading); }
+        .markdown-body p { margin-bottom:1em; }
+        .markdown-body a { color:var(--c-blue); text-decoration:underline; }
+        .markdown-body a:hover { color:var(--c-blue-dk); }
+        .markdown-body ul, .markdown-body ol { margin-bottom:1em; padding-left:2em; }
+        .markdown-body li { margin-bottom:.3em; }
+        .markdown-body blockquote { margin:1em 0; padding:.5em 1em; border-left:4px solid var(--c-blue-br); background-color:var(--c-bg); border-radius:0 .5rem .5rem 0; color:var(--c-muted); }
+        .markdown-body code { background-color:var(--c-bg); padding:.2em .4em; border-radius:.25rem; font-size:.875em; font-family:'Courier New', Courier, monospace; color:#dc2626; }
+        .markdown-body pre { background-color:var(--c-pre-bg); color:var(--c-pre-text); padding:1em; border-radius:.5rem; overflow-x:auto; margin-bottom:1em; }
+        .markdown-body pre code { background:transparent; padding:0; border-radius:0; color:inherit; font-size:.9em; }
+        .markdown-body table { width:100%; border-collapse:collapse; margin-bottom:1em; }
+        .markdown-body th, .markdown-body td { border:1px solid #cbd5e1; padding:.5em .75em; text-align:left; }
+        .markdown-body th { background-color:var(--c-bg); font-weight:600; }
+        .markdown-body tr:nth-child(even) { background-color:#f8fafc; }
+        .markdown-body img { max-width:100%; height:auto; border-radius:.5rem; margin:1em 0; }
+        .markdown-body hr { border:none; border-top:1px solid var(--c-border); margin:2em 0; }
+        .markdown-body strong { font-weight:700; }
+        .markdown-body em { font-style:italic; }
+        .markdown-body > :first-child { margin-top:0; }
+        .markdown-body > :last-child { margin-bottom:0; }
 
         /* Mermaid 图表样式 */
-        .mermaid {
-            background-color: #f8fafc;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            margin: 1em 0;
-            text-align: center;
-            border: 1px solid #e2e8f0;
-        }
-
-        .mermaid svg {
-            max-width: 100%;
-            height: auto;
-        }
+        .mermaid { background-color:#f8fafc; border-radius:.5rem; padding:1.5rem; margin:1em 0; text-align:center; border:1px solid var(--c-border); }
+        .mermaid svg { max-width:100%; height:auto; }
 
         /* ========== 页面布局：左目录 + 右主体 ========== */
         .page-layout {
@@ -202,7 +73,7 @@
         /* 目录侧边栏 */
         .toc-container {
             flex-shrink: 0;
-            width: 220px;
+            width: 280px;
             position: sticky;
             top: 0;
             height: fit-content;
@@ -231,32 +102,20 @@
         }
 
         /* 目录折叠状态 */
-        .toc-container.collapsed + .content-area #md-content,
         .toc-container.collapsed ~ .content-area #md-content {
             border-radius: 0 0.75rem 0.75rem 0.75rem;
         }
 
-        .toc-sidebar::-webkit-scrollbar {
-            width: 10px;
-        }
-        .toc-sidebar::-webkit-scrollbar-track {
-            background-color: #f1f5f9;
-            border-radius: 5px;
-        }
-        .toc-sidebar::-webkit-scrollbar-thumb {
-            background-color: #94a3b8;
-            border-radius: 5px;
-            border: 2px solid #f1f5f9;
-        }
-        .toc-sidebar::-webkit-scrollbar-thumb:hover {
-            background-color: #64748b;
-        }
+        .toc-sidebar::-webkit-scrollbar { width:16px; }
+        .toc-sidebar::-webkit-scrollbar-track { background:var(--c-bg); border-radius:5px; }
+        .toc-sidebar::-webkit-scrollbar-thumb { background:var(--c-scroll); border-radius:5px; border:2px solid var(--c-bg); }
+        .toc-sidebar::-webkit-scrollbar-thumb:hover { background:var(--c-scroll-hv); }
 
         .toc-header {
-            font-size: 1rem;
+            font-size: 1.15rem;
             font-weight: 700;
             color: #1e293b;
-            padding-bottom: 0.5rem;
+            padding-bottom: 0.6rem;
             margin-bottom: 0.75rem;
             border-bottom: 2px solid #3b82f6;
             display: flex;
@@ -266,18 +125,11 @@
 
         /* 折叠/展开切换按钮 */
         .collapse-btn {
-            background: none;
-            border: none;
-            color: #64748b;
-            cursor: pointer;
-            padding: 0;
-            font-size: 1.1rem;
-            line-height: 1;
-            transition: transform 0.2s, color 0.2s;
+            background:none; border:none; color:var(--c-light);
+            cursor:pointer; padding:0; font-size:1.1rem; line-height:1;
+            transition:transform .2s, color .2s;
         }
-        .collapse-btn:hover {
-            color: #2563eb;
-        }
+        .collapse-btn:hover { color:var(--c-blue); }
 
         .toc-list {
             list-style: none;
@@ -289,12 +141,12 @@
         }
         .toc-list a {
             display: block;
-            padding: 0.3rem 0.5rem;
+            padding: 0.35rem 0.6rem;
             color: #475569;
             text-decoration: none;
             border-radius: 0.375rem;
-            font-size: 0.85rem;
-            line-height: 1.4;
+            font-size: 0.98rem;
+            line-height: 1.5;
             transition: all 0.2s ease;
             border-left: 3px solid transparent;
             word-break: break-all;
@@ -315,7 +167,7 @@
         .toc-level-1 {
             padding-left: 0;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 1.08rem;
             color: #1e293b;
             padding-top: 0.5rem;
             padding-bottom: 0.5rem;
@@ -340,33 +192,17 @@
             color: #3730a3;
         }
 
-        .toc-empty {
-            color: #94a3b8;
-            font-size: 0.8rem;
-            text-align: center;
-            padding: 0.5rem;
-        }
+        .toc-empty { color:var(--c-scroll); font-size:.9rem; text-align:center; padding:.5rem; }
 
-        /* 展开目录按钮（目录折叠后显示） */
         .expand-toc-btn {
-            flex-shrink: 0;
-            align-self: flex-start;
-            background-color: #ffffff;
-            border: none;
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            padding: 0.75rem 0.4rem;
-            color: #64748b;
-            transition: color 0.2s;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-shrink:0; align-self:flex-start;
+            background:#fff; border:none; border-radius:.5rem;
+            box-shadow:0 2px 8px rgba(0,0,0,.1);
+            cursor:pointer; padding:.75rem .4rem; color:var(--c-light);
+            transition:color .2s; font-size:1.1rem;
+            display:flex; align-items:center; justify-content:center;
         }
-        .expand-toc-btn:hover {
-            color: #2563eb;
-        }
+        .expand-toc-btn:hover { color:var(--c-blue); }
 
         /* 主内容区域 */
         .content-area {
@@ -457,7 +293,7 @@
 
     <!-- 页脚 -->
     <footer class="w-full bg-blue-700 text-white py-4">
-        <p class="text-center">问君能有几多愁？</p>
+        <p class="text-center">© 2026 yunend All rights reserved</p>
     </footer>
 
     <script>
@@ -488,68 +324,45 @@
             });
         }
 
+        const $ = id => document.getElementById(id);
+
         function getQueryParams() {
-            const queryString = location.search;
-            const queryParams = new URLSearchParams(queryString);
-            return queryParams;
+            return new URLSearchParams(location.search);
         }
 
-        function updateTitle(filePath) {
-            const titleElement = document.getElementById('current-file-title');
-            if (filePath) {
-                const fileName = filePath.split('/').pop().split('\\').pop();
-                titleElement.textContent = `${fileName}`;
-            } else {
-                titleElement.textContent = '未选择文件';
-            }
+        function updateTitle(fp) { 
+            $('current-file-title').textContent = fp ? fp.split(/[\\/]/).pop() : '未选择文件'; 
         }
-
-        function showError(message) {
-            const errorEl = document.getElementById('error-message');
-            errorEl.textContent = message;
-            errorEl.classList.remove('hidden');
+        function showError(m) { 
+            const e=$('error-message'); 
+            e.textContent=m; 
+            e.classList.remove('hidden'); 
         }
-
-        function hideError() {
-            const errorEl = document.getElementById('error-message');
-            errorEl.classList.add('hidden');
+        function hideError() { 
+            $('error-message').classList.add('hidden'); 
         }
 
         let mathPlaceholders = [];
 
         function protectMath(text) {
             mathPlaceholders = [];
-            
-            text = text.replace(/\$\$([\s\S]*?)\$\$/g, function(match, formula) {
-                mathPlaceholders.push({ type: 'display', formula: formula.trim() });
+            const push = (type, formula) => {
+                mathPlaceholders.push({ type, formula: formula.trim() });
                 return `%%MATH_PLACEHOLDER_${mathPlaceholders.length - 1}%%`;
-            });
-
-            text = text.replace(/\$([^$]+?)\$/g, function(match, formula) {
-                mathPlaceholders.push({ type: 'inline', formula: formula.trim() });
-                return `%%MATH_PLACEHOLDER_${mathPlaceholders.length - 1}%%`;
-            });
-
-            return text;
+            };
+            return text.replace(/\$\$([\s\S]*?)\$\$/g, (_, f) => push('display', f))
+                       .replace(/\$([^$]+?)\$/g, (_, f) => push('inline', f));
         }
 
         function restoreMath(html) {
             for (let i = 0; i < mathPlaceholders.length; i++) {
-                const placeholder = mathPlaceholders[i];
+                const p = mathPlaceholders[i];
                 try {
-                    const rendered = katex.renderToString(placeholder.formula, {
-                        displayMode: placeholder.type === 'display',
-                        throwOnError: false
-                    });
-                    
-                    if (placeholder.type === 'display') {
-                        html = html.replace(`%%MATH_PLACEHOLDER_${i}%%`, `<div class="katex-display">${rendered}</div>`);
-                    } else {
-                        html = html.replace(`%%MATH_PLACEHOLDER_${i}%%`, rendered);
-                    }
-                } catch (e) {
-                    console.error('KaTeX 渲染错误:', e);
-                }
+                    const r = katex.renderToString(p.formula, { displayMode: p.type === 'display', throwOnError: false });
+                    const tag = p.type === 'display' ? 'div' : 'span';
+                    const cls = p.type === 'display' ? ' class="katex-display"' : '';
+                    html = html.replace(`%%MATH_PLACEHOLDER_${i}%%`, `<${tag}${cls}>${r}</${tag}>`);
+                } catch (e) { console.error('KaTeX 渲染错误:', e); }
             }
             return html;
         }
@@ -629,6 +442,7 @@
                     e.preventDefault();
                     document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
                     setActiveHeading(id);
+                    scrollSidebarToLink(a);
                 });
 
                 li.appendChild(a);
@@ -649,32 +463,35 @@
             const headings = document.querySelectorAll('#md-content h1, #md-content h2, #md-content h3, #md-content h4, #md-content h5, #md-content h6');
             if (headings.length === 0) return;
 
-            const scrollContainer = document.documentElement;
-
-            scrollContainer.addEventListener('scroll', () => {
-                const scrollPos = window.scrollY + 120;
+            window.addEventListener('scroll', () => {
                 let currentId = '';
 
                 headings.forEach(heading => {
-                    if (heading.offsetTop <= scrollPos) {
+                    // 用 getBoundingClientRect 避免父容器 position:relative 干扰
+                    if (heading.getBoundingClientRect().top <= 120) {
                         currentId = heading.id;
                     }
                 });
 
                 if (currentId) {
                     setActiveHeading(currentId);
-                    // 自动滚动目录到可视区域
                     const activeLink = document.querySelector(`#toc-list a[data-target="${currentId}"]`);
-                    if (activeLink) {
-                        const tocSidebar = document.getElementById('toc-sidebar');
-                        const linkRect = activeLink.getBoundingClientRect();
-                        const sidebarRect = tocSidebar.getBoundingClientRect();
-                        if (linkRect.top < sidebarRect.top + 10 || linkRect.bottom > sidebarRect.bottom - 10) {
-                            activeLink.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                        }
-                    }
+                    if (activeLink) scrollSidebarToLink(activeLink);
                 }
-            });
+            }, { passive: true });
+        }
+
+        // 滚动侧边栏，让指定链接居中可见
+        function scrollSidebarToLink(link) {
+            const sidebar = document.querySelector('.toc-sidebar');
+            if (!sidebar) return;
+            const linkRect = link.getBoundingClientRect();
+            const sidebarRect = sidebar.getBoundingClientRect();
+            // 只在链接超出侧边栏可视区时滚动
+            if (linkRect.top < sidebarRect.top + 10 || linkRect.bottom > sidebarRect.bottom - 10) {
+                const offset = linkRect.top - sidebarRect.top;
+                sidebar.scrollBy({ top: offset - sidebarRect.height / 2 + linkRect.height / 2, behavior: 'smooth' });
+            }
         }
 
         function setupTocToggle() {
@@ -739,15 +556,13 @@
                 updateTitle(filePath);
                 document.getElementById('toc-list').innerHTML = '<li class="toc-empty">暂无目录</li>';
             } finally {
-                // 加载完成
             }
         }
 
         window.addEventListener('DOMContentLoaded', function () {
             setupTocToggle();
-            const queryParams = getQueryParams();
-            const mdFilePath = queryParams.has('path') ? queryParams.get('path') : '';
-            loadMarkdown(mdFilePath);
+            const q = new URLSearchParams(location.search);
+            loadMarkdown(q.has('path') ? q.get('path') : '');
         });
     </script>
 </body>
