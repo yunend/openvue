@@ -214,6 +214,18 @@
             padding-left: 0.25rem; /* 轻微重叠，消除缝隙 */
         }
 
+        /* 电脑屏幕下限制内容最大宽度 */
+        @media (min-width: 1200px) {
+            .content-area {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+            
+            #md-content {
+                max-width: 900px;
+            }
+        }
+
         /* 目录展开时：内容卡片左侧直角，与目录无缝贴合 */
         .page-layout:not(:has(.toc-container.collapsed)) .content-area #md-content {
             border-top-left-radius: 0;
@@ -347,12 +359,16 @@
         function protectMath(text) {
             mathPlaceholders = [];
             const push = (type, formula) => {
-                mathPlaceholders.push({ type, formula: formula.trim() });
+                // 替换弯引号为直引号，避免 KaTeX 报 Unicode 警告
+                const fixed = formula.trim()
+                    .replace(/[\u2018\u2019]/g, "'")   // ' ' → '
+                    .replace(/[\u201C\u201D]/g, '"');   // " " → "
+                mathPlaceholders.push({ type, formula: fixed });
                 return `%%MATH_PLACEHOLDER_${mathPlaceholders.length - 1}%%`;
             };
             return text.replace(/\$\$([\s\S]*?)\$\$/g, (_, f) => push('display', f))
-                       .replace(/\$([^$]+?)\$/g, (_, f) => push('inline', f));
-        }
+                    .replace(/\$([^$]+?)\$/g, (_, f) => push('inline', f));
+}
 
         function restoreMath(html) {
             for (let i = 0; i < mathPlaceholders.length; i++) {
