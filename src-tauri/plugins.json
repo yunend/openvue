@@ -8,13 +8,6 @@
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "Word 文档 / Word Document",
           "name": "Office 文档查看器 / Office Viewer"
-        },
-        {
-          "handlerId": "doc-office-vue",
-          "pluginId": "office-vue",
-          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
-          "description": "Word 文档 / Word Document",
-          "name": "Office 文档查看器 (Vue) / Office Viewer (Vue)"
         }
       ],
       "activeHandlerId": "doc-office"
@@ -214,13 +207,6 @@
           "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
           "description": "Excel 表格 / Excel Spreadsheet",
           "name": "Office 文档查看器 / Office Viewer"
-        },
-        {
-          "handlerId": "xls-office-vue",
-          "pluginId": "office-vue",
-          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
-          "description": "Excel 表格 / Excel Spreadsheet",
-          "name": "Office 文档查看器 (Vue) / Office Viewer (Vue)"
         }
       ],
       "activeHandlerId": "xls-office"

@@ -200,7 +200,7 @@ plugins/
 | `pdf` | office-vue | PDF 文档预览（本地渲染，✅ 无需公网） |
 | `ppt` `pptx` | Office Viewer | PowerPoint 演示文稿预览（微软在线查看器，⚠️ 需 HTTPS 公网） |
 
-> **📌 office-vue（无需公网）**：`xls`、`xlsx`、`doc`、`docx`、`pdf` 通过 `office-vue` 插件在浏览器端本地渲染，文件直接从本地 HTTP 服务加载，**无需公网、无需 HTTPS**，纯局域网环境即可使用。
+> **📌 office-vue（无需公网）**：`xlsx`、`docx`、`pdf` 通过 `office-vue` 插件在浏览器端本地渲染，文件直接从本地 HTTP 服务加载，**无需公网、无需 HTTPS**，纯局域网环境即可使用。
 >
 > **⚠️ Office Viewer（需公网）**：`ppt`、`pptx` 仍通过 `https://view.officeapps.live.com` 微软在线查看器渲染，要求文件 URL 必须满足：
 > 1. **公网可访问**：微软服务器需要能从外网拉取到你的文件，纯局域网 IP（`192.168.x.x` / `10.x.x.x`）无法使用
