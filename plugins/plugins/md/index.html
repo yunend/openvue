@@ -385,14 +385,29 @@
         .toc-empty { color:var(--c-scroll); font-size:.9rem; text-align:center; padding:.5rem; }
 
         .expand-toc-btn {
-            flex-shrink:0; align-self:flex-start;
-            background:#fff; border:none; border-radius:.5rem;
-            box-shadow:0 2px 8px rgba(0,0,0,.1);
-            cursor:pointer; padding:.75rem .4rem; color:var(--c-light);
-            transition:color .2s; font-size:1.1rem;
-            display:flex; align-items:center; justify-content:center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            padding: 0.7rem 0.35rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.20);
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-left: none;
+            font-size: 1rem;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
-        .expand-toc-btn:hover { color:var(--c-blue); }
+        .expand-toc-btn:hover {
+            color: #2563eb;
+            box-shadow: 2px 6px 16px rgba(0, 0, 0, 0.25);
+        }
 
         /* 主内容区域 */
         .content-area {
@@ -422,12 +437,61 @@
             border-bottom-left-radius: 0;
         }
 
-        /* 响应式：手机端隐藏目录和切换按钮，减少左右边距 */
+        /* ========== 手机端：浮动 TOC 按钮 + 抽屉式目录 ========== */
         @media (max-width: 767px) {
-            .toc-container,
-            .expand-toc-btn {
-                display: none !important;
+            /* TOC 抽屉：固定覆盖层，从左侧滑入 */
+            .toc-container {
+                display: block !important;
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 280px;
+                max-width: 75vw;
+                z-index: 1002;
+                margin: 0;
+                padding: 0;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                background: #ffffff;
+                box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+                height: 100vh;
+                max-height: 100vh;
+                overflow-y: auto;
+                border-radius: 0;
             }
+
+            /* TOC 打开状态 */
+            .toc-container.mobile-open {
+                transform: translateX(0);
+            }
+
+            /* TOC 内部容器 */
+            .toc-container .toc-sidebar {
+                border-radius: 0;
+                box-shadow: none;
+                padding: 1rem;
+                max-height: 100vh;
+                height: 100%;
+                overflow-y: auto;
+            }
+
+            /* 遮罩层 */
+            .toc-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 1001;
+                background: rgba(0, 0, 0, 0.4);
+                backdrop-filter: blur(2px);
+                -webkit-backdrop-filter: blur(2px);
+                transition: opacity 0.3s ease;
+            }
+
+            .toc-overlay.show {
+                display: block;
+            }
+
             .page-layout {
                 padding: 0.5rem 0.25rem;
                 gap: 0;
@@ -512,7 +576,7 @@
     <!-- 页面主体布局：左目录 + 右内容 -->
     <div class="page-layout">
         <!-- 目录侧边栏 -->
-        <button id="expand-toc" class="expand-toc-btn hidden" title="展开目录">»</button>
+        <button id="expand-toc" class="expand-toc-btn" title="展开目录">»</button>
         <aside id="toc-container" class="toc-container">
             <div class="toc-sidebar">
                 <div class="toc-header">
@@ -536,6 +600,9 @@
             <div id="error-message" class="hidden text-red-500 bg-red-50 border border-red-200 rounded-lg px-6 py-4 mt-4 text-center"></div>
         </main>
     </div>
+
+    <!-- 手机端 TOC 遮罩层 -->
+    <div id="toc-overlay" class="toc-overlay"></div>
 
     <!-- 页脚 -->
     <footer class="w-full bg-blue-700 text-white py-4">
@@ -690,6 +757,13 @@
 
                 a.addEventListener('click', (e) => {
                     e.preventDefault();
+                    // 锁定 scroll spy，防止平滑滚动过程中逐个跳动
+                    applyTocScrollLock();
+                    // 手机端先关闭目录抽屉，避免覆盖层干扰页面滚动
+                    if (window.innerWidth <= 767) {
+                        document.getElementById('toc-container').classList.remove('mobile-open');
+                        document.getElementById('toc-overlay').classList.remove('show');
+                    }
                     document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
                     setActiveHeading(id);
                     scrollSidebarToLink(a);
@@ -700,6 +774,27 @@
             });
 
             setupScrollSpy();
+        }
+
+        // TOC 滚动锁定：点击目录项触发的平滑滚动期间，暂停 scroll spy
+        let tocScrollLock = false;
+        let tocScrollTimer = null;
+
+        function isTocScrollLocked() {
+            return tocScrollLock;
+        }
+
+        function applyTocScrollLock() {
+            tocScrollLock = true;
+            if (tocScrollTimer) clearTimeout(tocScrollTimer);
+            // 平滑滚动完成后自动解锁（scrollend 优先，setTimeout 兜底）
+            const unlock = () => {
+                tocScrollLock = false;
+                tocScrollTimer = null;
+            };
+            const scrollEl = document.scrollingElement || document.documentElement;
+            scrollEl.addEventListener('scrollend', unlock, { once: true });
+            tocScrollTimer = setTimeout(unlock, 800);
         }
 
         function setActiveHeading(id) {
@@ -714,6 +809,9 @@
             if (headings.length === 0) return;
 
             window.addEventListener('scroll', () => {
+                // TOC 触发的平滑滚动期间，跳过 scroll spy，避免逐个跳动
+                if (isTocScrollLocked()) return;
+
                 let currentId = '';
 
                 headings.forEach(heading => {
@@ -748,17 +846,64 @@
             const tocContainer = document.getElementById('toc-container');
             const collapseBtn = document.getElementById('collapse-btn');
             const expandBtn = document.getElementById('expand-toc');
+            const overlay = document.getElementById('toc-overlay');
 
-            // 折叠目录
-            collapseBtn.addEventListener('click', () => {
-                tocContainer.classList.add('collapsed');
-                expandBtn.classList.remove('hidden');
+            // 判断是否为手机端
+            function isMobile() {
+                return window.innerWidth <= 767;
+            }
+
+            // 关闭手机端 TOC
+            function closeMobileToc() {
+                tocContainer.classList.remove('mobile-open');
+                overlay.classList.remove('show');
+            }
+
+            // 打开手机端 TOC
+            function openMobileToc() {
+                tocContainer.classList.add('mobile-open');
+                overlay.classList.add('show');
+            }
+
+            // 统一 toggle：电脑端用 collapsed，手机端用 mobile-open 抽屉
+            function toggleToc(open) {
+                if (isMobile()) {
+                    if (open) {
+                        openMobileToc();
+                    } else {
+                        closeMobileToc();
+                    }
+                } else {
+                    if (open) {
+                        tocContainer.classList.remove('collapsed');
+                    } else {
+                        tocContainer.classList.add('collapsed');
+                    }
+                }
+            }
+
+            // 浮动按钮：切换展开/折叠
+            expandBtn.addEventListener('click', () => {
+                if (isMobile()) {
+                    toggleToc(true);
+                } else {
+                    toggleToc(tocContainer.classList.contains('collapsed'));
+                }
             });
 
-            // 展开目录
-            expandBtn.addEventListener('click', () => {
-                tocContainer.classList.remove('collapsed');
-                expandBtn.classList.add('hidden');
+            // 折叠/关闭按钮
+            collapseBtn.addEventListener('click', () => {
+                toggleToc(false);
+            });
+
+            // 点击遮罩层关闭
+            overlay.addEventListener('click', closeMobileToc);
+
+            // 窗口尺寸变化恢复
+            window.addEventListener('resize', () => {
+                if (!isMobile()) {
+                    closeMobileToc();
+                }
             });
         }
 
