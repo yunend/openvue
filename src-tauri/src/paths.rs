@@ -139,19 +139,14 @@ pub fn config_path() -> Result<PathBuf, String> {
     Ok(user_config_dir()?.join("config.json"))
 }
 
-/// 用户可写的 plugins.json 路径（运行时读写用这个）
-pub fn plugins_path() -> Result<PathBuf, String> {
-    Ok(user_config_dir()?.join("plugins.json"))
-}
-
 /// 应用资源目录里的 config.json 模板（只读，用于首次启动时复制到用户目录）
 pub fn default_config_path() -> Result<PathBuf, String> {
     Ok(find_app_root()?.join("config.json"))
 }
 
-/// 应用资源目录里的 plugins.json 模板（只读，用于首次启动时复制到用户目录）
-pub fn default_plugins_path() -> Result<PathBuf, String> {
-    Ok(find_app_root()?.join("plugins.json"))
+/// 用户可写的 plugins_state.json 路径（存储用户偏好：激活选择、下载源偏好）
+pub fn plugins_state_path() -> Result<PathBuf, String> {
+    Ok(user_config_dir()?.join("plugins_state.json"))
 }
 
 // dist-web 目录仍然在资源目录下（只读静态资源）

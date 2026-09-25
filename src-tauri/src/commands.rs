@@ -149,6 +149,17 @@ pub fn get_server_status(state: tauri::State<'_, Arc<Mutex<server::ServerState>>
 
 // ========== 插件管理 ==========
 
+/// 重新扫描插件目录并重建运行时配置
+fn rescan_and_rebuild(
+    guard: &mut server::ServerState,
+    state: &plugins::PluginsState,
+) -> Result<(), String> {
+    let builtin_dir = crate::paths::builtin_plugins_dir()?;
+    let user_dir = crate::paths::resolve_plugins_dir(guard.app_config.plugins_folder.as_deref())?;
+    guard.plugins_config = plugins::scan_and_build_config(&builtin_dir, &user_dir, state);
+    Ok(())
+}
+
 #[tauri::command]
 pub fn get_plugins_config(
     state: tauri::State<'_, Arc<Mutex<server::ServerState>>>,
@@ -164,8 +175,14 @@ pub fn set_plugin_browser_default(
 ) -> Result<String, String> {
     let arc_state = Arc::clone(state.inner());
     let mut guard = state.lock().map_err(|e| e.to_string())?;
+
+    // 更新运行时配置
     guard.plugins_config.set_browser_default(&ext)?;
-    plugins::save_plugins_config(&guard.plugins_config)?;
+    // 更新用户状态（清除激活选择）
+    let mut plugins_state = plugins::load_plugins_state().unwrap_or_default();
+    plugins_state.clear_active(&ext);
+    plugins::save_plugins_state(&plugins_state)?;
+
     let was_running = guard.cancel_token.is_some();
     drop(guard);
 
@@ -185,8 +202,14 @@ pub fn activate_plugin_handler(
 ) -> Result<String, String> {
     let arc_state = Arc::clone(state.inner());
     let mut guard = state.lock().map_err(|e| e.to_string())?;
+
+    // 更新运行时配置
     guard.plugins_config.activate_handler(&ext, &handler_id)?;
-    plugins::save_plugins_config(&guard.plugins_config)?;
+    // 持久化用户激活选择到 plugins_state.json
+    let mut plugins_state = plugins::load_plugins_state().unwrap_or_default();
+    plugins_state.set_active(&ext, &handler_id);
+    plugins::save_plugins_state(&plugins_state)?;
+
     let was_running = guard.cancel_token.is_some();
     drop(guard);
 
@@ -229,7 +252,6 @@ pub fn add_custom_plugin(
         .canonicalize()
         .map_err(|_| format!("目录不存在: {}", folder_path))?;
 
-    // ⚠️ 必须在 plugins_root 下，否则 /pfolder/ ServeDir 无法访问
     if !user_path_canonical.starts_with(&plugins_root_canonical) {
         return Err(format!(
             "插件目录必须位于插件根目录下。\n\n\
@@ -257,7 +279,14 @@ pub fn add_custom_plugin(
 
     let mut guard = state.lock().map_err(|e| e.to_string())?;
     guard.plugins_config.add_custom_handler(&ext, &folder_name)?;
-    plugins::save_plugins_config(&guard.plugins_config)?;
+
+    // 持久化激活选择
+    let mut plugins_state = plugins::load_plugins_state().unwrap_or_default();
+    let handler_id = folder_name.clone();
+    // 自定义插件的 handler_id 就是 folder_name（与旧逻辑一致）
+    plugins_state.set_active(&ext, &handler_id);
+    plugins::save_plugins_state(&plugins_state)?;
+
     let was_running = guard.cancel_token.is_some();
     drop(guard);
 
@@ -277,7 +306,6 @@ pub fn remove_custom_plugin(
 ) -> Result<String, String> {
     let arc_state = Arc::clone(state.inner());
 
-    // 从 folder_path 提取目录名作为 folder_name
     let user_path = PathBuf::from(&folder_path);
     let folder_name = user_path
         .file_name()
@@ -287,7 +315,12 @@ pub fn remove_custom_plugin(
 
     let mut guard = state.lock().map_err(|e| e.to_string())?;
     guard.plugins_config.remove_custom_handler(&ext, &folder_name)?;
-    plugins::save_plugins_config(&guard.plugins_config)?;
+
+    // 清除该 handler 的激活选择
+    let mut plugins_state = plugins::load_plugins_state().unwrap_or_default();
+    plugins_state.clear_active(&ext);
+    plugins::save_plugins_state(&plugins_state)?;
+
     let was_running = guard.cancel_token.is_some();
     drop(guard);
 
@@ -320,6 +353,9 @@ pub fn set_plugins_folder(
 
     let mut guard = state.lock().map_err(|e| e.to_string())?;
     guard.app_config.plugins_folder = Some(pf);
+    // 重新扫描插件
+    let plugins_state = plugins::load_plugins_state().unwrap_or_default();
+    let _ = rescan_and_rebuild(&mut guard, &plugins_state);
     let was_running = guard.cancel_token.is_some();
     drop(guard);
 
@@ -345,6 +381,9 @@ pub fn reset_plugins_folder(
 
     let mut guard = state.lock().map_err(|e| e.to_string())?;
     guard.app_config.plugins_folder = None;
+    // 重新扫描插件
+    let plugins_state = plugins::load_plugins_state().unwrap_or_default();
+    let _ = rescan_and_rebuild(&mut guard, &plugins_state);
     let was_running = guard.cancel_token.is_some();
     drop(guard);
 
@@ -462,4 +501,31 @@ fn normalize_path_for_dialog(p: &std::path::Path) -> std::path::PathBuf {
         s
     };
     std::path::PathBuf::from(cleaned)
+}
+
+// ========== 下载源偏好 ==========
+
+/// 获取用户偏好的下载源标签
+#[tauri::command]
+pub fn get_preferred_download_source(
+    state: tauri::State<'_, Arc<Mutex<server::ServerState>>>,
+) -> Result<Option<String>, String> {
+    let ps = plugins::load_plugins_state()?;
+    Ok(ps.preferred_download_source_label)
+}
+
+/// 设置用户偏好的下载源标签
+#[tauri::command]
+pub fn set_preferred_download_source(
+    state: tauri::State<'_, Arc<Mutex<server::ServerState>>>,
+    label: String,
+) -> Result<String, String> {
+    let mut ps = plugins::load_plugins_state()?;
+    ps.preferred_download_source_label = if label.is_empty() {
+        None
+    } else {
+        Some(label)
+    };
+    plugins::save_plugins_state(&ps)?;
+    Ok("__OK__".to_string())
 }

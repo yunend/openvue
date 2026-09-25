@@ -27,7 +27,6 @@
     "targets": "all",
     "resources": [
       "config.json",
-      "plugins.json",
       "dist-web/**/*",
       "public/**/*"
     ],

@@ -17,7 +17,12 @@ pub fn run() {
 
     let app_config = config::load_config(None).expect("加载配置失败");
     config::validate_config(&app_config).expect("配置验证失败");
-    let plugins_config = plugins::load_plugins_config(None).expect("加载插件配置失败");
+
+    let builtin_dir = paths::builtin_plugins_dir().expect("获取内置插件目录失败");
+    let user_dir = paths::resolve_plugins_dir(app_config.plugins_folder.as_deref())
+        .expect("获取用户插件目录失败");
+    let plugins_state = plugins::load_plugins_state().unwrap_or_default();
+    let plugins_config = plugins::scan_and_build_config(&builtin_dir, &user_dir, &plugins_state);
 
     let server_state = Arc::new(Mutex::new(server::ServerState {
         cancel_token: None,
@@ -67,6 +72,8 @@ pub fn run() {
             commands::set_plugins_folder,
             commands::reset_plugins_folder,
             commands::open_plugins_folder,
+            commands::get_preferred_download_source,
+            commands::set_preferred_download_source,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

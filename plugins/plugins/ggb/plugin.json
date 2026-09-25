@@ -1,0 +1,13 @@
+{
+  "id": "ggb",
+  "name": "GeoGebra 官方插件 / Official GeoGebra Plugin",
+  "version": "1.0.0",
+  "description": "GeoGebra 官方 HTML5 播放器 / Official GeoGebra Player",
+  "extensions": ["ggb"],
+  "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
+  "homepage": "https://www.geogebra.org/",
+  "downloadSources": [],
+  "sha256": "",
+  "archiveFormat": "zip",
+  "sizeBytes": 0
+}
