@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenVue - 轻量级本地 HTTP 文件服务</title>
+  <meta name="description" content="基于 Tauri 2 + Axum 构建的轻量级本地 HTTP 文件服务工具。一键启动、插件扩展、多端预览。">
+  <style>
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+      color: #1a1a2e;
+      background: #f8f9fc;
+      line-height: 1.6;
+    }
+    a { color: #3b82f6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    /* ===== Hero ===== */
+    .hero {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #3730a3 100%);
+      color: #fff;
+      padding: 80px 0 64px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+    .hero .tagline {
+      font-size: 1.2rem;
+      opacity: 0.85;
+      max-width: 640px;
+      margin: 0 auto 28px;
+    }
+    .hero-badges {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .hero-badges img { height: 28px; border-radius: 4px; }
+    .hero-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 12px 28px; border-radius: 8px; font-size: 1rem; font-weight: 600;
+      transition: all 0.2s; border: none; cursor: pointer;
+    }
+    .btn-primary {
+      background: #3b82f6; color: #fff;
+    }
+    .btn-primary:hover { background: #2563eb; text-decoration: none; transform: translateY(-1px); }
+    .btn-outline {
+      background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.35);
+    }
+    .btn-outline:hover { border-color: #fff; text-decoration: none; transform: translateY(-1px); }
+
+    /* ===== Section ===== */
+    .section { padding: 60px 0; }
+    .section-title {
+      font-size: 1.8rem; font-weight: 700; text-align: center;
+      margin-bottom: 8px; color: #1e1b4b;
+    }
+    .section-subtitle {
+      text-align: center; color: #6b7280; margin-bottom: 40px; font-size: 1rem;
+    }
+
+    /* ===== Features ===== */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    .feature-card {
+      background: #fff; border-radius: 12px; padding: 28px 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06); transition: box-shadow 0.2s;
+    }
+    .feature-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .feature-icon { font-size: 2rem; margin-bottom: 12px; }
+    .feature-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
+    .feature-card p { color: #6b7280; font-size: 0.92rem; }
+
+    /* ===== Plugin Dev Steps ===== */
+    .steps { counter-reset: step; }
+    .step {
+      background: #fff; border-radius: 12px; padding: 28px 24px 28px 68px;
+      position: relative; margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute; left: 20px; top: 28px;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #3b82f6; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.95rem;
+    }
+    .step h3 { font-size: 1.05rem; margin-bottom: 6px; }
+    .step p { color: #6b7280; font-size: 0.92rem; margin-bottom: 4px; }
+    .step code {
+      background: #f1f5f9; padding: 2px 8px; border-radius: 4px;
+      font-size: 0.85rem; color: #475569;
+    }
+
+    /* ===== Code Block ===== */
+    .code-block {
+      background: #1e293b; color: #e2e8f0; border-radius: 8px;
+      padding: 20px 24px; overflow-x: auto; font-size: 0.82rem;
+      font-family: "JetBrains Mono", "Fira Code", monospace;
+      line-height: 1.5; margin-top: 20px;
+    }
+    .code-block .comment { color: #64748b; }
+    .code-block .key { color: #93c5fd; }
+    .code-block .str { color: #a7f3d0; }
+    .code-block .val { color: #fde68a; }
+
+    /* ===== Architecture ===== */
+    .arch-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .arch-card {
+      background: #fff; border-radius: 10px; padding: 20px;
+      text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .arch-card .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; margin-bottom: 4px; }
+    .arch-card .value { font-weight: 600; font-size: 1rem; }
+
+    /* ===== Divider ===== */
+    .divider { max-width: 80px; height: 3px; background: linear-gradient(90deg, #3b82f6, #8b5cf6); margin: 0 auto 20px; border-radius: 2px; }
+
+    /* ===== Footer ===== */
+    .footer {
+      background: #1e1b4b; color: rgba(255,255,255,0.7);
+      text-align: center; padding: 36px 0; font-size: 0.9rem;
+    }
+    .footer a { color: #93c5fd; }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 2rem; }
+      .hero .tagline { font-size: 1rem; }
+      .section { padding: 40px 0; }
+      .step { padding: 20px 20px 20px 56px; }
+      .step::before { left: 16px; top: 20px; width: 28px; height: 28px; font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ==================== Hero ==================== -->
+<section class="hero">
+  <div class="container">
+    <h1>⚡ OpenVue</h1>
+    <p class="tagline">
+      基于 Tauri 2 + Axum 的轻量级本地 HTTP 文件服务。<br>
+      一键启动、插件扩展、多端预览，开箱即用。
+    </p>
+    <div class="hero-badges">
+      <img src="https://img.shields.io/github/v/release/yunend/openvue?style=flat-square&color=3b82f6" alt="Release">
+      <img src="https://img.shields.io/github/stars/yunend/openvue?style=flat-square" alt="Stars">
+      <img src="https://img.shields.io/github/license/yunend/openvue?style=flat-square" alt="License">
+      <img src="https://img.shields.io/badge/Tauri-2.0-8b5cf6?style=flat-square" alt="Tauri">
+    </div>
+    <div class="hero-actions">
+      <a href="https://github.com/yunend/openvue/releases" class="btn btn-primary">⬇️ 下载体验</a>
+      <a href="#plugin-dev" class="btn btn-outline">🧩 开发插件</a>
+      <a href="https://github.com/yunend/openvue" class="btn btn-outline">📦 GitHub</a>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 特性 ==================== -->
+<section class="section" id="features">
+  <div class="container">
+    <h2 class="section-title">🎯 核心特性</h2>
+    <div class="divider"></div>
+    <p class="section-subtitle">桌面端 + HTTP 服务双模式，覆盖多种使用场景</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3>一键启动</h3>
+        <p>安装即用，桌面端可配置开机自启。HTTP 服务与 Tauri GUI 结合，既有桌面操控感，又有浏览器随处访问的便利。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧩</div>
+        <h3>插件扩展</h3>
+        <p>通过 HTML 页面扩展文件预览能力。支持 GeoGebra、Markdown、Office 文档等多种格式。插件可自定义、可下载、可卸载。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📂</div>
+        <h3>目录浏览 &amp; 文件上传</h3>
+        <p>浏览器中浏览指定目录，支持文件上传。局域网内任意设备即可访问，无需安装额外工具。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌐</div>
+        <h3>双模式运行</h3>
+        <p><strong>Desktop 模式</strong>：Tauri 窗口管理插件与配置；<strong>Server 模式</strong>：纯 HTTP 后台服务，适合服务器部署。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔌</div>
+        <h3>插件市场</h3>
+        <p>内置插件市场，从远程索引一键下载安装第三方插件，自动校验哈希，更新卸载随心所欲。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <h3>国际化</h3>
+        <p>内置中英文界面，桌面端与 Web 页面均支持语言切换，满足不同语言用户需求。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 技术架构 ==================== -->
+<section class="section" style="background:#f1f5f9;">
+  <div class="container">
+    <h2 class="section-title">🔧 技术架构</h2>
+    <div class="divider"></div>
+    <p class="section-subtitle">一次配置，随处访问</p>
+    <div class="arch-grid">
+      <div class="arch-card">
+        <div class="label">前端框架</div>
+        <div class="value">Vue 3 + TypeScript</div>
+      </div>
+      <div class="arch-card">
+        <div class="label">桌面壳</div>
+        <div class="value">Tauri 2.x</div>
+      </div>
+      <div class="arch-card">
+        <div class="label">HTTP 后端</div>
+        <div class="value">Rust + Axum</div>
+      </div>
+      <div class="arch-card">
+        <div class="label">构建工具</div>
+        <div class="value">Vite 5</div>
+      </div>
+      <div class="arch-card">
+        <div class="label">最小体积</div>
+        <div class="value">~8 MB</div>
+      </div>
+      <div class="arch-card">
+        <div class="label">跨平台</div>
+        <div class="value">Windows / macOS / Linux</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 插件开发 ==================== -->
+<section class="section" id="plugin-dev">
+  <div class="container">
+    <h2 class="section-title">🧩 插件开发</h2>
+    <div class="divider"></div>
+    <p class="section-subtitle">
+      OpenVue 插件本质上是一个<strong>标准的 Web 页面</strong>（HTML + CSS + JS），
+      通过 iframe 嵌入渲染对应格式的文件。只需 3 步即可创建自己的插件！
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <h3>创建插件目录</h3>
+        <p>在 <code>plugins/</code> 下创建以插件 ID 命名的文件夹，例如 <code>my-viewer</code>。</p>
+      </div>
+      <div class="step">
+        <h3>编写 <code>index.html</code></h3>
+        <p>制作一个预览页面，通过 <code>?path=</code> 参数获取文件访问地址，加载并渲染文件内容。</p>
+      </div>
+      <div class="step">
+        <h3>添加 <code>plugin.json</code></h3>
+        <p>在插件目录下创建 <code>plugin.json</code>，描述插件名称、支持扩展名、下载源等信息。</p>
+      </div>
+    </div>
+
+    <div class="code-block">
+<span class="comment">// plugin.json 示例</span>
+{
+  <span class="key">"id"</span>: <span class="str">"my-viewer"</span>,
+  <span class="key">"name"</span>: <span class="str">"我的预览器"</span>,
+  <span class="key">"version"</span>: <span class="str">"1.0.0"</span>,
+  <span class="key">"extensions"</span>: [<span class="str">"ext1"</span>, <span class="str">"ext2"</span>],
+  <span class="key">"urlTemplate"</span>: <span class="str">"/plugins/{pluginId}/?path={publicPath}"</span>,
+  <span class="key">"downloadSources"</span>: [
+    { <span class="key">"label"</span>: <span class="str">"Github"</span>, <span class="key">"url"</span>: <span class="str">"https://..."</span>, <span class="key">"priority"</span>: 1 }
+  ],
+  <span class="key">"sha256"</span>: <span class="str">"e261d6162b91991c..."</span>
+}
+    </div>
+
+    <div style="margin-top: 28px; text-align: center;">
+      <p style="color: #6b7280; margin-bottom: 16px;">
+        💡 开发完成后，将插件打包为 ZIP，连同 <code>plugin.json</code> 提交至
+        <a href="https://github.com/yunend/openvue-plugins" target="_blank">openvue-plugins</a>
+        仓库，即可在插件市场中展示。
+      </p>
+      <a href="https://github.com/yunend/openvue/blob/main/README.md" class="btn btn-primary" style="background:#1e1b4b;">
+        📖 查看完整插件开发文档
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 快速开始 ==================== -->
+<section class="section" style="background:#f1f5f9;">
+  <div class="container">
+    <h2 class="section-title">⚡ 快速开始</h2>
+    <div class="divider"></div>
+    <p class="section-subtitle">从 Releases 下载即可使用，也可自行构建</p>
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; justify-content: center;">
+      <div style="background:#fff; border-radius:12px; padding:24px; flex:1; min-width:280px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+        <h3 style="margin-bottom:12px;">📦 下载安装</h3>
+        <ol style="padding-left:20px; color:#6b7280; font-size:0.92rem;">
+          <li style="margin-bottom:6px;">前往 <a href="https://github.com/yunend/openvue/releases">Releases</a> 下载最新版本</li>
+          <li style="margin-bottom:6px;">Windows: 运行安装包；macOS: 挂载 DMG；Linux: 使用 AppImage</li>
+          <li>启动后在 <strong>桌面端</strong> 管理配置，在 <strong>浏览器</strong> 访问预览</li>
+        </ol>
+      </div>
+      <div style="background:#fff; border-radius:12px; padding:24px; flex:1; min-width:280px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+        <h3 style="margin-bottom:12px;">🔧 自行构建</h3>
+        <ol style="padding-left:20px; color:#6b7280; font-size:0.92rem;">
+          <li style="margin-bottom:6px;"><code>git clone https://github.com/yunend/openvue.git</code></li>
+          <li style="margin-bottom:6px;"><code>cd openvue &amp;&amp; npm install</code></li>
+          <li style="margin-bottom:6px;"><code>cargo tauri dev</code>（开发模式）</li>
+          <li><code>cargo tauri build</code>（生产构建）</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 贡献 ==================== -->
+<section class="section">
+  <div class="container" style="text-align:center;">
+    <h2 class="section-title">🤝 加入贡献</h2>
+    <div class="divider"></div>
+    <p style="color:#6b7280; max-width:600px; margin:0 auto 24px;">
+      OpenVue 是完全开源的项目，欢迎任何形式的贡献——Bug 反馈、功能建议、
+      插件提交、文档改进、代码 PR，都对我们有巨大帮助！
+    </p>
+    <div style="display:flex; justify-content:center; flex-wrap:wrap; gap:14px;">
+      <a href="https://github.com/yunend/openvue/issues" class="btn btn-primary">🐛 提交 Issue</a>
+      <a href="https://github.com/yunend/openvue/fork" class="btn btn-primary" style="background:#8b5cf6;">🍴 Fork 项目</a>
+      <a href="https://github.com/yunend/openvue-plugins" class="btn btn-primary" style="background:#059669;">🧩 提交插件</a>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== Footer ==================== -->
+<footer class="footer">
+  <div class="container">
+    <p>
+      <a href="https://github.com/yunend/openvue">GitHub</a> &nbsp;·&nbsp;
+      <a href="https://github.com/yunend/openvue/releases">Releases</a> &nbsp;·&nbsp;
+      <a href="https://github.com/yunend/openvue/blob/main/README.md">文档</a> &nbsp;·&nbsp;
+      <a href="https://github.com/yunend/openvue/issues">Issues</a>
+    </p>
+    <p style="margin-top:10px; font-size:0.8rem;">
+      Built with ❤️ &nbsp;|&nbsp; MIT License &nbsp;|&nbsp; Tauri 2 + Rust + Vue 3
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
