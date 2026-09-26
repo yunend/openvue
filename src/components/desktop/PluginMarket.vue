@@ -2,12 +2,12 @@
   <div class="animate-fadeIn" :class="isActive ? 'block' : 'hidden'">
     <div class="bg-primary-50 border-b border-primary-100 px-[26px] py-[22px]">
       <div class="text-[1.05rem] font-bold text-primary-900 mb-4 pb-[10px] border-b border-primary-50">
-        🏪 插件市场
+        {{ t('plugins.market.title') }}
       </div>
 
       <!-- 下载源偏好切换 -->
       <div class="mb-4 px-1 flex items-center gap-3">
-        <span class="text-[0.82rem] text-primary-500 font-medium">🌐 全局下载源:</span>
+        <span class="text-[0.82rem] text-primary-500 font-medium">{{ t('plugins.market.globalSource') }}</span>
         <div class="flex gap-1 bg-white border border-primary-200 rounded-[8px] overflow-hidden">
           <button
             v-for="src in availableLabels"
@@ -19,20 +19,20 @@
             @click="setPreferredSource(src)"
           >{{ src }}</button>
         </div>
-        <span v-if="savingSource" class="text-[0.75rem] text-primary-400">⏳ 保存中...</span>
+        <span v-if="savingSource" class="text-[0.75rem] text-primary-400">{{ t('plugins.market.saving') }}</span>
       </div>
 
       <!-- 加载中 -->
-      <div v-if="loading" class="text-primary-500 py-8 text-center">⏳ 正在加载插件市场列表...</div>
+      <div v-if="loading" class="text-primary-500 py-8 text-center">{{ t('plugins.market.loading') }}</div>
 
       <!-- 加载失败 -->
       <div v-else-if="error" class="text-red-500 py-4">
         ❌ {{ error }}
-        <button class="ml-3 px-3 py-1 text-sm bg-blue-500 text-white border-none rounded cursor-pointer hover:bg-blue-600" @click="fetchAll">🔄 重试</button>
+        <button class="ml-3 px-3 py-1 text-sm bg-blue-500 text-white border-none rounded cursor-pointer hover:bg-blue-600" @click="fetchAll">{{ t('plugins.market.retry') }}</button>
       </div>
 
       <!-- 列表 -->
-      <div v-else-if="plugins.length === 0" class="text-primary-400 py-8 text-center">暂无可用插件</div>
+      <div v-else-if="plugins.length === 0" class="text-primary-400 py-8 text-center">{{ t('plugins.market.empty') }}</div>
 
       <div v-else class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));">
         <div v-for="p in plugins" :key="p.id" class="bg-white border border-primary-100 rounded-[10px] p-4 flex flex-col gap-3">
@@ -41,14 +41,14 @@
           <div class="flex items-start justify-between gap-2">
             <div class="font-bold text-primary-900 text-[0.95rem] leading-snug flex-1">{{ p.name }}</div>
             <div class="flex items-center gap-1.5 shrink-0">
-              <span class="text-[0.75rem] text-primary-400 bg-primary-50 px-2 py-0.5 rounded">v{{ p.version }}</span>
-              <span v-if="installStatus[p.id]?.installed && !needsUpdate(p.id)" class="text-[0.7rem] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-medium">已安装</span>
-              <span v-else-if="needsUpdate(p.id)" class="text-[0.7rem] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-medium">可更新</span>
+              <span class="text-[0.75rem] text-primary-400 bg-primary-50 px-2 py-0.5 rounded">{{ t('plugins.market.versionPrefix', { version: p.version }) }}</span>
+              <span v-if="installStatus[p.id]?.installed && !needsUpdate(p.id)" class="text-[0.7rem] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-medium">{{ t('plugins.market.installed') }}</span>
+              <span v-else-if="needsUpdate(p.id)" class="text-[0.7rem] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-medium">{{ t('plugins.market.canUpdate') }}</span>
             </div>
           </div>
 
           <!-- 描述 -->
-          <div class="text-[0.82rem] text-primary-500 leading-relaxed">{{ p.description || '暂无描述' }}</div>
+          <div class="text-[0.82rem] text-primary-500 leading-relaxed">{{ p.description || t('plugins.market.noDesc') }}</div>
 
           <!-- 扩展名标签 -->
           <div class="flex flex-wrap gap-1.5">
@@ -57,22 +57,22 @@
 
           <!-- 大小 -->
           <div class="text-[0.75rem] text-primary-400">
-            <span v-if="p.sizeBytes">📦 {{ formatSize(p.sizeBytes) }} &nbsp;|&nbsp; {{ p.archiveFormat || 'zip' }}</span>
+            <span v-if="p.sizeBytes">{{ t('plugins.market.sizeInfo', { size: formatSize(p.sizeBytes), format: p.archiveFormat || 'zip' }) }}</span>
           </div>
 
           <!-- 下载源选择 -->
           <div v-if="p.downloadSources && p.downloadSources.length > 0" class="flex items-center gap-2">
-            <span class="text-[0.75rem] text-primary-500 shrink-0">⬇️ 下载源:</span>
+            <span class="text-[0.75rem] text-primary-500 shrink-0">{{ t('plugins.market.selectSource') }}</span>
             <select
               v-model="selectedSources[p.id]"
               class="flex-1 text-[0.8rem] border border-primary-200 rounded px-2 py-1 bg-white text-primary-800 outline-none focus:border-blue-400"
             >
               <option v-for="ds in p.downloadSources" :key="ds.label" :value="ds.label">
-                {{ ds.label }}{{ ds.priority === 1 ? ' ⭐' : '' }}
+                {{ ds.label }}{{ ds.priority === 1 ? t('plugins.market.downloadPrioritySuffix') : '' }}
               </option>
             </select>
           </div>
-          <div v-else class="text-[0.75rem] text-red-400">暂无可用下载源</div>
+          <div v-else class="text-[0.75rem] text-red-400">{{ t('plugins.market.noSource') }}</div>
 
           <!-- 下载进度条 -->
           <div v-if="downloadingProgress[p.id]" class="flex flex-col gap-1">
@@ -98,7 +98,7 @@
               :disabled="!!downloadingProgress[p.id]"
               @click="handleDownload(p)"
             >
-              {{ downloadingProgress[p.id] ? '下载中...' : '⬇️ 下载安装' }}
+              {{ downloadingProgress[p.id] ? t('plugins.market.downloading') : t('plugins.market.download') }}
             </button>
 
             <!-- 已安装且需更新 → 更新 -->
@@ -108,7 +108,7 @@
               :disabled="!!downloadingProgress[p.id]"
               @click="handleUpdate(p)"
             >
-              {{ downloadingProgress[p.id] ? '更新中...' : '🔄 更新' }}
+              {{ downloadingProgress[p.id] ? t('plugins.market.updating') : t('plugins.market.update') }}
             </button>
 
             <!-- 已安装 → 卸载 -->
@@ -118,7 +118,7 @@
               :disabled="!!downloadingProgress[p.id]"
               @click="handleUninstall(p)"
             >
-              🗑️ 卸载
+              {{ t('plugins.market.uninstall') }}
             </button>
           </div>
         </div>
@@ -129,8 +129,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useToast } from '../../composables/useToast'
 
+const { t } = useI18n()
 const { showToast } = useToast()
 
 defineProps<{ isActive: boolean }>()
@@ -229,11 +231,11 @@ async function setPreferredSource(label: string) {
     const { invoke } = window.__TAURI__.core
     await invoke('set_preferred_download_source', { label })
     preferredSource.value = label
-    showToast(`✅ 默认下载源已切换为: ${label}`, 'success')
+    showToast(t('plugins.market.preferredSourceSaved', { label }), 'success')
     // 重新为每个插件选中偏好源（若有）
     applyPreferredSourceToAll()
   } catch (e: any) {
-    showToast(`❌ 保存下载源偏好失败: ${e.message || String(e)}`, 'error')
+    showToast(t('plugins.market.preferredSourceFailed', { msg: e.message || String(e) }), 'error')
   } finally {
     savingSource.value = false
   }
@@ -289,19 +291,19 @@ async function handleDownload(p: PluginMeta) {
     downloadSources: p.downloadSources.filter(ds => ds.label === selectedSources[p.id]),
   }
 
-  downloadingProgress[p.id] = { percentage: 0, stage: 'resolving', message: '准备中...' }
+  downloadingProgress[p.id] = { percentage: 0, stage: 'resolving', message: t('plugins.market.stageResolving') }
 
   try {
     const { invoke } = window.__TAURI__.core
     await invoke('download_and_install_plugin', { pluginJson: payload })
-    showToast(`✅ 插件 [${p.name}] 安装完成！`, 'success')
+    showToast(t('plugins.market.installSuccess', { name: p.name }), 'success')
     delete downloadingProgress[p.id]
     // 小延迟确保后端文件扫描完成
     await new Promise(r => setTimeout(r, 300))
     await refreshInstallStatus()
     window.dispatchEvent(new CustomEvent('plugin-installed'))
   } catch (e: any) {
-    showToast(`❌ 下载安装失败: ${e.message || String(e)}`, 'error')
+    showToast(t('plugins.market.installFailed', { msg: e.message || String(e) }), 'error')
     delete downloadingProgress[p.id]
   }
 }
@@ -313,18 +315,18 @@ async function handleUpdate(p: PluginMeta) {
     downloadSources: p.downloadSources.filter(ds => ds.label === selectedSources[p.id]),
   }
 
-  downloadingProgress[p.id] = { percentage: 0, stage: 'downloading', message: '更新中...' }
+  downloadingProgress[p.id] = { percentage: 0, stage: 'downloading', message: t('plugins.market.updating') }
 
   try {
     const { invoke } = window.__TAURI__.core
     await invoke('download_and_install_plugin', { pluginJson: payload })
-    showToast(`✅ 插件 [${p.name}] 已更新到 v${p.version}！`, 'success')
+    showToast(t('plugins.market.updateSuccess', { name: p.name, version: p.version }), 'success')
     delete downloadingProgress[p.id]
     await new Promise(r => setTimeout(r, 300))
     await refreshInstallStatus()
     window.dispatchEvent(new CustomEvent('plugin-installed'))
   } catch (e: any) {
-    showToast(`❌ 更新失败: ${e.message || String(e)}`, 'error')
+    showToast(t('plugins.market.updateFailed', { msg: e.message || String(e) }), 'error')
     delete downloadingProgress[p.id]
   }
 }
@@ -334,11 +336,11 @@ async function handleUninstall(p: PluginMeta) {
   try {
     const { invoke } = window.__TAURI__.core
     await invoke('uninstall_plugin_command', { pluginId: p.id })
-    showToast(`🗑️ 插件 [${p.name}] 已卸载`, 'info')
+    showToast(t('plugins.market.uninstallSuccess', { name: p.name }), 'info')
     delete installStatus[p.id]
     window.dispatchEvent(new CustomEvent('plugin-installed'))
   } catch (e: any) {
-    showToast(`❌ 卸载失败: ${e.message || String(e)}`, 'error')
+    showToast(t('plugins.market.uninstallFailed', { msg: e.message || String(e) }), 'error')
   }
 }
 
@@ -372,12 +374,12 @@ function progressBarColor(stage: string): string {
 
 function progressStageLabel(stage: string): string {
   switch (stage) {
-    case 'resolving': return '⏳ 选择下载源...'
-    case 'downloading': return '⬇️ 下载中...'
-    case 'verifying': return '🔐 校验中...'
-    case 'extracting': return '📦 解压中...'
-    case 'installing': return '📋 安装中...'
-    case 'done': return '✅ 完成'
+    case 'resolving': return t('plugins.market.stageResolving')
+    case 'downloading': return t('plugins.market.stageDownloading')
+    case 'verifying': return t('plugins.market.stageVerifying')
+    case 'extracting': return t('plugins.market.stageExtracting')
+    case 'installing': return t('plugins.market.stageInstalling')
+    case 'done': return t('plugins.market.stageDone')
     default: return stage
   }
 }

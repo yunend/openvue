@@ -182,13 +182,44 @@ pub fn remove_custom_plugin(
         .to_string_lossy()
         .to_string();
 
+    // 安全检查：确认目录在插件根目录下
+    let plugins_root = {
+        let guard = state.lock().map_err(|e| e.to_string())?;
+        crate::paths::resolve_plugins_dir(guard.app_config.plugins_folder.as_deref())?
+    };
+    let plugins_root_canonical = plugins_root
+        .canonicalize()
+        .unwrap_or_else(|_| plugins_root.clone());
+    let user_path_canonical = user_path
+        .canonicalize()
+        .map_err(|_| format!("目录不存在: {}", folder_path))?;
+    if !user_path_canonical.starts_with(&plugins_root_canonical) {
+        return Err(format!(
+            "只能删除插件根目录下的插件。\n\n插件根目录: {}",
+            plugins_root_canonical.display()
+        ));
+    }
+
+    // 1. 从运行时配置中移除
     let mut guard = state.lock().map_err(|e| e.to_string())?;
     guard.plugins_config.remove_custom_handler(&ext, &folder_name)?;
 
+    // 2. 更新 plugins_state.json：移除所有匹配该 handler_id 的 activeHandlers 条目
     let mut plugins_state = plugins::load_plugins_state().unwrap_or_default();
+    // 移除所有 value 匹配 folder_name（handler_id）的条目
+    plugins_state.active_handlers.retain(|_, v| v != &folder_name);
+    // 同时清除指定 ext 的激活状态（冗余安全）
     plugins_state.clear_active(&ext);
     plugins::save_plugins_state(&plugins_state)?;
 
+    // 3. 删除插件文件夹（含 plugin.json 及所有文件）
+    if user_path.exists() {
+        std::fs::remove_dir_all(&user_path)
+            .map_err(|e| format!("删除插件目录失败: {}", e))?;
+        println!("🗑️ 自定义插件目录已删除 -> {}", user_path.display());
+    }
+
+    // 4. 重启服务器
     let was_running = guard.cancel_token.is_some();
     drop(guard);
     if was_running {

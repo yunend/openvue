@@ -60,26 +60,30 @@ impl PluginsConfig {
     }
 
     /// 删除自定义插件处理器
+    /// 匹配顺序：先按 handler_id 匹配（直接添加），再按 plugin_id 匹配（扫描重建后）
     pub fn remove_custom_handler(&mut self, ext: &str, folder_name: &str) -> Result<(), String> {
         let ext_key = ext.to_lowercase();
-        let handler_id = folder_name.to_string();
         let config = self
             .extensions
             .get_mut(&ext_key)
             .ok_or_else(|| format!("扩展名 .{} 没有任何插件处理器", ext_key))?;
 
-        let idx = config.handlers.iter().position(|h| h.handler_id == handler_id);
+        let idx = config.handlers.iter().position(|h| {
+            // 优先按 handler_id 匹配，再按 plugin_id（目录名）匹配
+            h.handler_id == folder_name || h.plugin_id.as_deref() == Some(folder_name)
+        });
         match idx {
             Some(i) => {
                 let handler = &config.handlers[i];
                 if handler.source != PluginSource::Custom {
                     return Err(format!(
                         "❌ 内置插件不可删除（.{} / {}）",
-                        ext_key, handler_id
+                        ext_key, folder_name
                     ));
                 }
+                let removed_handler_id = handler.handler_id.clone();
                 config.handlers.remove(i);
-                if config.active_handler_id.as_deref() == Some(&handler_id) {
+                if config.active_handler_id.as_deref() == Some(&removed_handler_id) {
                     config.active_handler_id = None;
                 }
                 if config.handlers.is_empty() {
@@ -87,7 +91,7 @@ impl PluginsConfig {
                 }
                 Ok(())
             }
-            None => Err(format!("自定义插件不存在：.{} / {}", ext_key, handler_id)),
+            None => Err(format!("自定义插件不存在：.{} / {}", ext_key, folder_name)),
         }
     }
 }

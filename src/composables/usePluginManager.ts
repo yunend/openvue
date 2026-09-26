@@ -123,6 +123,7 @@ export function usePluginManager() {
       const { invoke } = window.__TAURI__.core
       await invoke('add_custom_plugin', { ext, folderPath }) as string
       await loadPluginsConfig()
+      showToast(i18n.global.t('toast.customPluginAdded', { ext }), 'success')
     } catch (e) {
       showToast(i18n.global.t('toast.customPluginFailed', { err: String(e) }), 'error')
     }

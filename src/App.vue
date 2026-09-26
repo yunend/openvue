@@ -107,7 +107,7 @@ const navItems = computed(() => [
   { id: 'config', icon: '⚙️', label: t('nav.config') },
   { id: 'system', icon: '🖥️', label: t('nav.system') },
   { id: 'plugins', icon: '🧩', label: t('nav.plugins') },
-  { id: 'market', icon: '🏪', label: '插件市场' },
+  { id: 'market', icon: '🏪', label: t('nav.market') },
   { id: 'about', icon: 'ℹ️', label: t('nav.about') }
 ])
 
