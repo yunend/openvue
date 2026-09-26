@@ -76,6 +76,11 @@ pub fn run() {
             commands::set_preferred_download_source,
             commands::install_plugin_from_market,
             commands::fetch_plugins_index,
+            commands::download_and_install_plugin,
+            commands::cancel_plugin_download,
+            commands::uninstall_plugin_command,
+            commands::check_plugin_update_command,
+            commands::get_plugins_install_status,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

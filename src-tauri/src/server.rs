@@ -11,20 +11,32 @@ pub struct ServerState {
 }
 
 /// 🔁 重启 HTTP 服务（停止后再启动，配置变更后自动调用）
+///
+/// 在后台线程中执行异步等待，避免阻塞 tokio 运行时线程（被 async 命令调用时）
 pub fn restart_server(state: &Arc<Mutex<ServerState>>) -> Result<u16, String> {
     // 先停止
-    {
+    let port = {
         let mut guard = state.lock().map_err(|e| e.to_string())?;
         if let Some(token) = &guard.cancel_token {
             token.cancel();
             guard.cancel_token = None;
             println!("🛑 [restart] HTTP 服务已停止");
         }
-    }
+        guard.app_config.port
+    };
     // 短暂等待确保端口释放
-    std::thread::sleep(std::time::Duration::from_millis(200));
-    // 再启动
-    do_spawn_server(state, "[reload] ")
+    std::thread::sleep(std::time::Duration::from_millis(500));
+
+    // 在后台线程中启动，不阻塞 tokio 运行时
+    let state_clone = Arc::clone(state);
+    std::thread::spawn(move || {
+        if let Err(e) = do_spawn_server(&state_clone, "[reload] ") {
+            eprintln!("⚠️ [reload] 后台重启失败: {}", e);
+        }
+    });
+
+    // 直接返回端口号（实际绑定在后台进行）
+    Ok(port)
 }
 
 /// 启动 HTTP 服务（被自动启动 / 手动启动复用）
@@ -51,6 +63,7 @@ pub fn do_spawn_server(
     drop(guard);
 
     let addr = format!("0.0.0.0:{}", port);
+    // 使用 std::sync::mpsc，可在任何线程上下文安全使用
     let (bind_tx, bind_rx) = std::sync::mpsc::channel::<Result<(), String>>();
 
     // 启动异步 HTTP 服务
@@ -89,7 +102,7 @@ pub fn do_spawn_server(
         println!("🛑 {log_prefix}HTTP 服务器已停止");
     });
 
-    // 等待绑定结果（阻塞当前线程），把错误传递给调用方
+    // 等待绑定结果（阻塞当前线程，仅在 setup 阶段调用，不阻塞 tokio 运行时）
     match bind_rx.recv() {
         Ok(Ok(())) => Ok(port),
         Ok(Err(msg)) => Err(msg),

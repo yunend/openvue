@@ -10,6 +10,7 @@ pub mod types;
 pub mod state;
 pub mod scanner;
 pub mod actions;
+pub mod download;
 
 // ========== 重新导出公共 API ==========
 
@@ -22,4 +23,10 @@ pub use state::{load_plugins_state, save_plugins_state, save_plugins_state_to_pa
 
 pub use scanner::{
     apply_plugins_state, merge_configs, scan_and_build_config, scan_plugins_dir,
+};
+
+pub use download::{
+    DownloadProgress, ProgressCallback, resolve_download_url, download_zip, verify_sha256,
+    extract_zip, install_plugin, uninstall_plugin, is_plugin_installed, check_plugin_update,
+    installed_plugin_json_path, noop_progress,
 };

@@ -1,6 +1,6 @@
 [package]
 name = "openvue"
-version = "1.5.2"
+version = "2.0.0"
 description = "A fast, cross-platform desktop tool for local file transfer and sharing"
 authors = ["yunend <303218145@qq.com>"]
 edition = "2021"
@@ -29,4 +29,10 @@ tauri-plugin-dialog = "2"
 serde_json = "1"
 open = "5"
 get_if_addrs = "0.5"
-reqwest = { version = "0.12", features = ["json"] }
+reqwest = { version = "0.12", features = ["json", "stream"] }
+zip = "2"
+sha2 = "0.10"
+hex = "0.4"
+tempfile = "3"
+futures-util = "0.3"
+uuid = { version = "1", features = ["v4"] }
