@@ -41,7 +41,7 @@ flowchart LR
 |------|--------|------|
 | **桌面端 (Server)** | Tauri 2.x + Rust + Axum + tower-http | 启动 HTTP 服务、托盘图标、文件服务、API 路由 |
 | **客户端 (Web)** | Vue 3 + Vue Router + Vue i18n + Tailwind CSS | 文件浏览、目录导航、文件上传、插件展示 |
-| **插件系统** | JSON 配置驱动 (plugins.json) | 扩展名 → 打开方式映射，支持 GeoGebra 等第三方工具 |
+| **插件系统** | 插件目录内 `plugin.json` 元信息驱动 | 扩展名 → 打开方式映射，支持 GeoGebra 等第三方工具 |
 
 ---
 
@@ -107,7 +107,7 @@ npm run tauri dev
 
 2. **修改插件配置** — 在设置界面中启用或禁用各个文件扩展名对应的插件（如 GeoGebra、MD 等），控制文件的打开方式
 
-   ![插件配置](screenshots/plugins.png)
+   ![插件配置](screenshots/plugins-config.png)
 
 3. **浏览器访问** — 程序启动后自动打开浏览器，或手动访问 `http://localhost:8005`
 
@@ -117,45 +117,32 @@ npm run tauri dev
 
    ![目录浏览](screenshots/dir-browse.png)
 
-### 扩展名启用/禁用
+### 插件元信息 (plugin.json)
 
-通过 `plugins.json` 控制不同文件扩展名的打开方式：
+每个插件目录下包含一个 `plugin.json` 文件，描述自身信息。程序启动时自动扫描 `plugins/` 目录，聚合所有插件信息生成运行时配置。
 
 ```json
 {
-  "extensions": {
-   "ggb": {
-      "handlers": [
-        {
-          "handlerId": "ggb-official",
-          "pluginId": "ggb",
-          "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
-          "description": "GeoGebra 官方 HTML5 播放器 / Official GeoGebra Player",
-          "name": "GeoGebra 官方插件 / Official GeoGebra Plugin"
-        }
-      ],
-      "activeHandlerId": "ggb-official"
-    },
-    "gif": {
-      "handlers": [
-        {
-          "handlerId": "image-default-4",
-          "pluginId": null,
-          "urlTemplate": null,
-          "description": "GIF 动图 / GIF Animation",
-          "name": "图片预览 / Image Viewer"
-        }
-      ],
-      "activeHandlerId": null
-    },
-  }
+  "id": "ggb",
+  "name": "GeoGebra",
+  "version": "1.0.0",
+  "description": "数学动态几何课件预览",
+  "extensions": ["ggb"],
+  "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
+  "downloadSources": [
+    { "label": "Github", "url": "https://github.com/.../plugin.zip", "priority": 1 },
+    { "label": "Github Proxy", "url": "https://gh-proxy.com/.../plugin.zip", "priority": 2 }
+  ],
+  "sha256": "e261d6162b91991c..."
 }
 ```
+
+> 📌 插件市场下载的插件、自定义添加的插件，都会在其目录下生成 `plugin.json`。无需手动维护全局配置文件。
 ---
 
 ## 🔌 插件持续开发与集成
 
-OpenVue 支持通过插件系统扩展文件打开方式。插件存放在 `plugins/` 目录下，通过 `plugins.json` 注册。
+OpenVue 支持通过插件系统扩展文件打开方式。插件存放在 `plugins/` 目录下，每个插件目录包含 `plugin.json`（元信息）和 `index.html`（入口页面）。
 
 ### GeoGebra (GGB) 插件
 
@@ -174,20 +161,97 @@ plugins/
     └── ...                 # 插件资源文件
 ```
 
-在 `plugins.json` 的 `extensions` 中添加对应扩展名配置即可完成注册。
+在插件目录中放置 `plugin.json` 及 `index.html`，重启应用或重新扫描即可自动注册。
 
 ### 🧩 自定义插件（图形化添加）
 
-除了手动编辑 `plugins.json`，你还可以在桌面端插件配置面板中**一键添加自定义插件**，无需改代码、无需重启：
+除了手动创建 `plugin.json`，你还可以在桌面端插件配置面板中**一键添加自定义插件**，无需改代码、无需重启：
 
 1. **准备插件目录**：在**用户插件目录**（默认 `用户配置目录/plugins/`，可在 ⚙️ 配置管理 → 插件文件夹 设置中自定义）下新建一个子目录，放入插件文件（必须包含 `index.html`）
 2. **打开插件配置面板**：启动 OpenVue 桌面应用 → 点击左侧边栏 🧩 插件配置 → 进入 🔧 自定义插件区域
 3. **注册插件**：输入文件后缀名（如 `xmind`），点击 📁 浏览选择第 1 步准备好的插件目录
 4. 点击 ➕ 添加插件
 
-程序会自动将该后缀名注册到 `plugins.json`，并设置为激活状态。添加后页面立即生效，浏览器访问对应文件时自动使用你的插件打开。
+程序会自动在该插件目录下生成 `plugin.json`，并设置为激活状态。添加后页面立即生效，浏览器访问对应文件时自动使用你的插件打开。
 
 > 💡 适合场景：临时想用某个第三方在线预览工具打开某类文件，只需把 HTML 页面放到 plugins 目录、在面板里点两下即可。
+
+### 🏪 插件市场（桌面端）
+![插件市场](screenshots/plugins-market.png)
+
+插件市场提供了**一键下载安装**第三方插件的功能，无需手动配置，直接在桌面端界面操作：
+
+1. **打开插件市场**：启动 OpenVue 桌面应用 → 点击左侧边栏 🏪 插件市场
+2. **浏览可用插件**：自动从远程索引加载插件列表，展示名称、描述、版本、扩展名等信息
+3. **选择下载源**：每个插件可能提供多个下载镜像（如 `Github`、`Github Proxy`），可根据网络情况自由切换
+4. **下载安装**：点击 ⬇️ 下载安装，实时显示下载、校验、解压、安装各阶段进度
+5. **更新与卸载**：已安装的插件若有新版本可一键更新，不再需要也可直接卸载
+
+> 🔗 插件市场索引地址：`https://github.com/yunend/openvue-plugins`
+> 欢迎提交插件，让更多人使用你的插件！
+
+### 📦 插件开发
+
+插件本质上是一个**标准的 Web 页面**（HTML + CSS + JS），通过 `plugin.json` 描述自身信息。OpenVue 通过 iframe 嵌入插件页面来渲染对应格式的文件。
+
+#### 目录结构
+
+```
+plugins/
+└── <插件ID>/
+    ├── plugin.json          # 插件元信息（必需）
+    ├── index.html           # 插件入口页面（必需）
+    └── ...                  # 其他资源文件
+```
+
+#### plugin.json 规范
+
+```json
+{
+  "id": "my-plugin",
+  "name": "我的插件",
+  "version": "1.0.0",
+  "description": "插件功能描述",
+  "extensions": ["ext1", "ext2"],
+  "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
+  "downloadSources": [
+    {
+      "label": "Github",
+      "url": "https://github.com/user/repo/releases/download/v1.0.0/plugin.zip",
+      "priority": 1
+    },
+    {
+      "label": "Github Proxy",
+      "url": "https://gh-proxy.com/https://github.com/user/repo/releases/download/v1.0.0/plugin.zip",
+      "priority": 2
+    }
+  ],
+  "sha256": "e261d6162b91991c...",
+  "archiveFormat": "zip",
+  "sizeBytes": 1048576
+}
+```
+
+| 字段 | 说明 |
+|------|------|
+| `id` | 插件唯一标识，必须与目录名一致 |
+| `name` | 插件显示名称 |
+| `version` | 版本号，用于检测更新 |
+| `extensions` | 支持的文件扩展名列表 |
+| `urlTemplate` | 插件页面 URL 模板，`{pluginId}` 和 `{publicPath}` 会被自动替换 |
+| `downloadSources` | 下载源数组（每个源提供相同的 ZIP 包，哈希一致），用户可自由选择 |
+| `sha256` | ZIP 包的 SHA256 校验值，确保下载完整性 |
+| `archiveFormat` | 打包格式（目前仅支持 `zip`） |
+| `sizeBytes` | 包大小（字节），用于前端展示 |
+
+#### 插件页面开发要点
+
+1. **URL 参数**：插件页面通过 `?path=` 参数获取当前文件的 HTTP 访问路径
+2. **文件加载**：利用 `path` 参数拼接完整 URL，通过 fetch / iframe / 等方式加载文件内容
+3. **样式适配**：建议使用响应式布局，适应不同尺寸的预览区域
+4. **无需后端**：插件是纯静态页面，所有逻辑在浏览器端完成
+
+> 💡 开发完成后，将插件打包为 ZIP，连同 `plugin.json` 提交到 [openvue-plugins](https://github.com/yunend/openvue-plugins) 仓库，即可在插件市场中展示给所有用户。
 
 ### ✅ 已支持的插件
 
@@ -195,14 +259,9 @@ plugins/
 |--------|--------|------|
 | `ggb` | GeoGebra | 数学动态几何课件预览 |
 | `md` | Markdown | Markdown 文档预览 |
-| `xls` `xlsx` | office-vue | Excel 表格预览（本地渲染，✅ 无需公网） |
-| `doc` `docx` | office-vue | Word 文档预览（本地渲染，✅ 无需公网） |
-| `pdf` | office-vue | PDF 文档预览（本地渲染，✅ 无需公网） |
 | `ppt` `pptx` | Office Viewer | PowerPoint 演示文稿预览（微软在线查看器，⚠️ 需 HTTPS 公网） |
 
-> **📌 office-vue（无需公网）**：`xlsx`、`docx`、`pdf` 通过 `office-vue` 插件在浏览器端本地渲染，文件直接从本地 HTTP 服务加载，**无需公网、无需 HTTPS**，纯局域网环境即可使用。
->
-> **⚠️ Office Viewer（需公网）**：`ppt`、`pptx` 仍通过 `https://view.officeapps.live.com` 微软在线查看器渲染，要求文件 URL 必须满足：
+> **⚠️ Office Viewer（需公网）**：`ppt`、`pptx` 通过 `https://view.officeapps.live.com` 微软在线查看器渲染，要求文件 URL 必须满足：
 > 1. **公网可访问**：微软服务器需要能从外网拉取到你的文件，纯局域网 IP（`192.168.x.x` / `10.x.x.x`）无法使用
 > 2. **HTTPS 协议**：建议使用 HTTPS（若为 HTTP 微软可能拒绝加载），请配合内网穿透或公网服务器托管使用
 

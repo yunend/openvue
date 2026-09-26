@@ -127,6 +127,30 @@ pub fn add_custom_plugin(
         .to_string_lossy()
         .to_string();
 
+    // ========== 生成 plugin.json 并保存到插件目录 ==========
+    let ext_lower = ext.to_lowercase();
+    let plugin_meta = plugins::PluginMeta {
+        id: folder_name.clone(),
+        name: format!("自定义 {}", ext_lower),
+        version: "1.0.0".to_string(),
+        description: format!("本地自定义插件，支持 .{} 格式文件预览", ext_lower),
+        extensions: vec![ext_lower],
+        url_template: "/pfolder/{pluginId}/?path={publicPath}".to_string(),
+        homepage: String::new(),
+        download_sources: vec![],
+        sha256: String::new(),
+        archive_format: String::new(),
+        size_bytes: 0,
+    };
+
+    let plugin_json_path = user_path_canonical.join("plugin.json");
+    let json_str = serde_json::to_string_pretty(&plugin_meta)
+        .map_err(|e| format!("序列化 plugin.json 失败: {}", e))?;
+    std::fs::write(&plugin_json_path, &json_str)
+        .map_err(|e| format!("写入 plugin.json 失败: {}", e))?;
+    println!("📝 自定义插件 plugin.json 已生成 -> {}", plugin_json_path.display());
+
+    // ========== 注册运行时配置 ==========
     let mut guard = state.lock().map_err(|e| e.to_string())?;
     guard.plugins_config.add_custom_handler(&ext, &folder_name)?;
 
