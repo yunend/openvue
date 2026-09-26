@@ -19,7 +19,7 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src *; frame-src 'self' https://*.officeapps.live.com https://*.wopi.net; worker-src 'self' data: blob:; frame-ancestors 'none'"
     }
   },
   "bundle": {

@@ -68,7 +68,10 @@
         <!-- 面板 4：插件配置 -->
         <PluginManager :isActive="activePanel === 'plugins'" />
 
-        <!-- 面板 5：关于 -->
+        <!-- 面板 5：插件市场 -->
+        <PluginMarket :isActive="activePanel === 'market'" />
+
+        <!-- 面板 6：关于 -->
         <AboutPanel :isActive="activePanel === 'about'" :version="version" />
       </div>
     </main>
@@ -85,6 +88,7 @@ import StatusPanel from './components/desktop/StatusPanel.vue'
 import ConfigPanel from './components/desktop/ConfigPanel.vue'
 import SystemSettings from './components/desktop/SystemSettings.vue'
 import PluginManager from './components/desktop/PluginManager.vue'
+import PluginMarket from './components/desktop/PluginMarket.vue'
 import AboutPanel from './components/desktop/AboutPanel.vue'
 import ToastContainer from './components/desktop/ToastContainer.vue'
 import { useServerControl } from './composables/useServerControl'
@@ -103,6 +107,7 @@ const navItems = computed(() => [
   { id: 'config', icon: '⚙️', label: t('nav.config') },
   { id: 'system', icon: '🖥️', label: t('nav.system') },
   { id: 'plugins', icon: '🧩', label: t('nav.plugins') },
+  { id: 'market', icon: '🏪', label: '插件市场' },
   { id: 'about', icon: 'ℹ️', label: t('nav.about') }
 ])
 

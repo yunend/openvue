@@ -180,5 +180,7 @@ async function handleRemoveCustomPlugin() {
 
 onMounted(async () => {
   await loadPluginsConfig()
+  // 监听插件市场安装事件，自动刷新配置
+  window.addEventListener('plugin-installed', loadPluginsConfig)
 })
 </script>

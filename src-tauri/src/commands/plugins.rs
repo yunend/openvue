@@ -290,6 +290,35 @@ pub fn install_plugin_from_market(
     Ok("__OK__".to_string())
 }
 
+// ========== 插件市场 ==========
+
+/// 从远程 URL 获取插件市场索引（后端请求，无 CORS 限制）
+#[tauri::command]
+pub async fn fetch_plugins_index(url: String) -> Result<serde_json::Value, String> {
+    let client = reqwest::Client::builder()
+        .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36")
+        .build()
+        .map_err(|e| format!("创建 HTTP 客户端失败: {}", e))?;
+
+    let resp = client
+        .get(&url)
+        .timeout(std::time::Duration::from_secs(15))
+        .send()
+        .await
+        .map_err(|e| format!("请求失败: {}", e))?;
+
+    if !resp.status().is_success() {
+        return Err(format!("HTTP {}", resp.status()));
+    }
+
+    let json: serde_json::Value = resp
+        .json()
+        .await
+        .map_err(|e| format!("解析 JSON 失败: {}", e))?;
+
+    Ok(json)
+}
+
 // ========== 下载源偏好 ==========
 
 #[tauri::command]
