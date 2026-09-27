@@ -85,7 +85,7 @@ pub fn create_router(
     Router::new()
         .merge(api_routes)
         .with_state(state)
-        // 🆕 /pfolder —— 用户自定义可写插件目录（与 /plugins 内置前缀相异）
+        // /pfolder —— 用户自定义可写插件目录（与 /plugins 内置前缀相异）
         .nest_service(
             "/pfolder",
             ServeDir::new(&plugins_folder)

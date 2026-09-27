@@ -14,19 +14,12 @@ pub mod download;
 
 // ========== 重新导出公共 API ==========
 
-pub use types::{
-    DownloadSource, ExtensionConfig, ExtensionHandler, PluginMeta, PluginSource, PluginsConfig,
-    PluginsState,
-};
+pub use types::{PluginMeta, PluginsConfig, PluginsState};
 
-pub use state::{load_plugins_state, save_plugins_state, save_plugins_state_to_path};
+pub use state::{load_plugins_state, save_plugins_state};
 
-pub use scanner::{
-    apply_plugins_state, merge_configs, scan_and_build_config, scan_plugins_dir,
-};
+pub use scanner::scan_and_build_config;
 
-pub use download::{
-    DownloadProgress, ProgressCallback, resolve_download_url, download_zip, verify_sha256,
-    extract_zip, install_plugin, uninstall_plugin, is_plugin_installed, check_plugin_update,
-    installed_plugin_json_path, noop_progress,
+pub use download::{ProgressCallback, install_plugin, uninstall_plugin, is_plugin_installed,
+    check_plugin_update, installed_plugin_json_path,
 };

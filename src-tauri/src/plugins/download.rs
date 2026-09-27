@@ -1,6 +1,6 @@
 //! 插件下载、校验、解压、安装、卸载核心功能
 
-use std::io::{Cursor, Read};
+use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 
@@ -26,10 +26,6 @@ pub struct DownloadProgress {
 /// 进度回调
 pub type ProgressCallback = Arc<dyn Fn(DownloadProgress) + Send + Sync + 'static>;
 
-/// 无进度回调的空实现
-pub fn noop_progress() -> ProgressCallback {
-    Arc::new(|_| {})
-}
 
 // ========== 下载源选择 ==========
 

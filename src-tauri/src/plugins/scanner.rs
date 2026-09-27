@@ -8,7 +8,7 @@ use super::types::{
 
 /// 读取单个插件目录下的 plugin.json，返回 PluginMeta
 /// 如果目录下没有 plugin.json 或解析失败，返回 None 并打印警告
-fn read_plugin_meta(plugin_dir: &Path, source: PluginSource) -> Option<PluginMeta> {
+fn read_plugin_meta(plugin_dir: &Path, _source: PluginSource) -> Option<PluginMeta> {
     let plugin_json_path = plugin_dir.join("plugin.json");
     if !plugin_json_path.exists() {
         return None;
@@ -83,10 +83,17 @@ pub fn scan_plugins_dir(plugins_root: &Path, source: PluginSource) -> PluginsCon
         let plugin_id = meta.id.clone();
         let source_for_handler = source.clone();
 
+        // 自定义插件强制使用 /pfolder/ 路由（插件市场下载的 plugin.json 可能写的是 /plugins/）
+        let url_template = if source == PluginSource::Custom {
+            meta.url_template.replace("/plugins/", "/pfolder/")
+        } else {
+            meta.url_template
+        };
+
         let handler = ExtensionHandler {
             handler_id: handler_id.clone(),
             plugin_id: Some(plugin_id),
-            url_template: Some(meta.url_template),
+            url_template: Some(url_template),
             description: meta.description.clone(),
             name: meta.name,
             source: source_for_handler,

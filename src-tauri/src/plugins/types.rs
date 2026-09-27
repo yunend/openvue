@@ -125,11 +125,6 @@ pub struct PluginsState {
 }
 
 impl PluginsState {
-    /// 获取指定扩展名的用户激活 handler_id
-    pub fn get_active(&self, ext: &str) -> Option<&str> {
-        self.active_handlers.get(ext).map(|s| s.as_str())
-    }
-
     /// 记录指定扩展名的用户激活选择
     pub fn set_active(&mut self, ext: &str, handler_id: &str) {
         self.active_handlers

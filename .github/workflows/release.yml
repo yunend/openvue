@@ -90,8 +90,8 @@ jobs:
       - name: Build Tauri app (Windows)
         if: matrix.target == 'windows'
         run: |
-          # 直接调用 tauri build 并指定只生成 NSIS
-          npm run tauri build -- --target x86_64-pc-windows-msvc --bundles nsis
+          # 直接调用 tauri build 并生成 NSIS 和 MSI
+          npm run tauri build -- --target x86_64-pc-windows-msvc --bundles nsis,msi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -115,7 +115,9 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: "Release ${{ github.ref_name }}"
           body: "See the assets to download this version and install."
-          files: src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*
+          files: |
+            src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*
+            src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*
           update_existing_releases: true
           overwrite_files: true
         env:
