@@ -599,20 +599,21 @@ pub fn get_plugins_install_status(
             plugins_root.clone()
         };
 
-        let version = if installed {
+        let (version, sha256) = if installed {
             let json_path = plugins::installed_plugin_json_path(&check_dir, pid);
             std::fs::read_to_string(&json_path)
                 .ok()
                 .and_then(|s| serde_json::from_str::<plugins::PluginMeta>(&s).ok())
-                .map(|m| m.version)
+                .map(|m| (m.version, m.sha256))
                 .unwrap_or_default()
         } else {
-            String::new()
+            (String::new(), String::new())
         };
 
         statuses.insert(pid.clone(), serde_json::json!({
             "installed": installed,
             "version": version,
+            "sha256": sha256,
         }));
     }
 

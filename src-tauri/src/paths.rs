@@ -3,7 +3,7 @@
 //! 🗂️ 两类目录必须区分开：
 //!   1. **应用资源目录**（只读）—— 由 installer 放置，属 root/System，不可写
 //!      放 dist-web/、默认配置模板等静态内容
-//!   2. **用户配置目录**（可写）—— 用户个人空间，运行时读写 config.json / plugins.json
+//!   2. **用户配置目录**（可写）—— 用户个人空间，运行时读写 config.json
 //!      Linux:   ~/.config/openvue/  (XDG Base Directory)
 //!      macOS:   ~/Library/Application Support/openvue/
 //!      Windows: %APPDATA%\openvue\
@@ -17,7 +17,7 @@ use std::path::PathBuf;
 /// macOS:    返回 Contents/Resources
 /// Linux:    探测 /usr/lib*, /usr/share, /app/* 等发行版标准路径
 ///
-/// 在返回的目录下应能找到 config.json、plugins.json、dist-web/ 等资源
+/// 在返回的目录下应能找到 config.json、dist-web/ 等资源
 pub fn find_app_root() -> Result<PathBuf, String> {
     let exe_path = std::env::current_exe()
         .map_err(|e| format!("无法获取当前可执行文件路径: {}", e))?;

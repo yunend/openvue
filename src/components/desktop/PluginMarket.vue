@@ -162,6 +162,7 @@ interface PluginMeta {
 interface InstallStatus {
   installed: boolean
   version: string
+  sha256?: string
 }
 
 interface ProgressInfo {
@@ -194,7 +195,11 @@ function needsUpdate(id: string): boolean {
   if (!st?.installed) return false
   const p = plugins.value.find(x => x.id === id)
   if (!p) return false
-  return st.version !== p.version
+  // 版本不同 → 需要更新
+  if (st.version !== p.version) return true
+  // 版本相同但 hash 不同 → 需要更新
+  if (p.sha256 && st.sha256 && st.sha256 !== p.sha256) return true
+  return false
 }
 
 /// 获取所有插件ID，批量查询安装状态

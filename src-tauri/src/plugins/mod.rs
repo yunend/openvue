@@ -4,7 +4,6 @@
 //! - 每个插件目录下自带 plugin.json 定义元信息
 //! - 运行时通过扫描插件目录聚合出 PluginsConfig
 //! - 用户偏好（激活选择、下载源偏好）存储在 plugins_state.json
-//! - 全局 plugins.json 已废弃
 
 pub mod types;
 pub mod state;
