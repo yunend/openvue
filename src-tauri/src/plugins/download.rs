@@ -237,16 +237,22 @@ pub fn check_plugin_update(
     let installed_meta: PluginMeta = serde_json::from_str(&content)
         .map_err(|e| format!("解析已安装 plugin.json 失败: {}", e))?;
 
-    // 版本不同 → 需要更新
+    // 版本不同 → 不更新（仅同一版本间进行 hash/日期比较）
     if installed_meta.version != remote_meta.version {
-        return Ok(true);
+        return Ok(false);
     }
-    // 版本相同但 hash 不同 → 需要更新
-    if installed_meta.sha256 != remote_meta.sha256 {
-        return Ok(true);
+    // 同版本且 hash 一致 → 已是最新
+    if installed_meta.sha256 == remote_meta.sha256 {
+        return Ok(false);
     }
-    // 完全一致 → 已是最新
-    Ok(false)
+    // 同版本但 hash 不同 → 比较发布日期，仅远程日期晚于本地才更新
+    if remote_meta.published_at.is_empty() {
+        return Ok(false); // 远程无日期，无法判断，保守不更新
+    }
+    if installed_meta.published_at.is_empty() {
+        return Ok(true);  // 本地旧版本无日期，远程有新日期 → 更新
+    }
+    Ok(remote_meta.published_at > installed_meta.published_at)
 }
 
 // ========== 安装流程 ==========

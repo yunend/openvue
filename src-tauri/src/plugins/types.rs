@@ -108,6 +108,9 @@ pub struct PluginMeta {
     /// 包大小（字节）
     #[serde(default)]
     pub size_bytes: u64,
+    /// 发布日期（ISO 8601，如 2026-09-27T10:30:00Z，可选，历史数据可能缺失）
+    #[serde(default)]
+    pub published_at: String,
 }
 
 // ========== 用户偏好状态 ==========

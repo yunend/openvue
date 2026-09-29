@@ -141,6 +141,7 @@ pub fn add_custom_plugin(
         sha256: String::new(),
         archive_format: String::new(),
         size_bytes: 0,
+        published_at: String::new(),
     };
 
     let plugin_json_path = user_path_canonical.join("plugin.json");
@@ -599,21 +600,22 @@ pub fn get_plugins_install_status(
             plugins_root.clone()
         };
 
-        let (version, sha256) = if installed {
+        let (version, sha256, published_at) = if installed {
             let json_path = plugins::installed_plugin_json_path(&check_dir, pid);
             std::fs::read_to_string(&json_path)
                 .ok()
                 .and_then(|s| serde_json::from_str::<plugins::PluginMeta>(&s).ok())
-                .map(|m| (m.version, m.sha256))
+                .map(|m| (m.version, m.sha256, m.published_at))
                 .unwrap_or_default()
         } else {
-            (String::new(), String::new())
+            (String::new(), String::new(), String::new())
         };
 
         statuses.insert(pid.clone(), serde_json::json!({
             "installed": installed,
             "version": version,
             "sha256": sha256,
+            "publishedAt": published_at,
         }));
     }
 
