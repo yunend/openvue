@@ -1,8 +1,15 @@
 <template>
   <div class="animate-fadeIn" :class="isActive ? 'block' : 'hidden'">
     <div class="bg-primary-50 border-b border-primary-100 px-[26px] py-[22px]">
-      <div class="text-[1.05rem] font-bold text-primary-900 mb-4 pb-[10px] border-b border-primary-50">
-        {{ t('plugins.market.title') }}
+      <div class="flex items-center justify-between mb-4 pb-[10px] border-b border-primary-50">
+        <div class="text-[1.05rem] font-bold text-primary-900">{{ t('plugins.market.title') }}</div>
+        <button
+          class="flex items-center gap-1.5 px-3 py-1.5 text-[0.8rem] font-medium border border-primary-200 bg-white text-primary-600 rounded-[6px] cursor-pointer transition-colors hover:bg-blue-50 hover:border-blue-300 disabled:opacity-60 disabled:cursor-wait"
+          :disabled="loading"
+          @click="() => handleRefresh()"
+        >
+          <span>{{ loading ? t('plugins.market.refreshing') : t('plugins.market.refreshList') }}</span>
+        </button>
       </div>
 
       <!-- 下载源偏好切换 -->
@@ -28,7 +35,7 @@
       <!-- 加载失败 -->
       <div v-else-if="error" class="text-red-500 py-4">
         ❌ {{ error }}
-        <button class="ml-3 px-3 py-1 text-sm bg-blue-500 text-white border-none rounded cursor-pointer hover:bg-blue-600" @click="fetchAll">{{ t('plugins.market.retry') }}</button>
+        <button class="ml-3 px-3 py-1 text-sm bg-blue-500 text-white border-none rounded cursor-pointer hover:bg-blue-600" @click="() => fetchAll()">{{ t('plugins.market.retry') }}</button>
       </div>
 
       <!-- 列表 -->
@@ -271,7 +278,7 @@ function applyPreferredSourceToAll() {
 }
 
 /// 获取插件市场数据 + 安装状态
-async function fetchAll() {
+async function fetchAll(showSuccessToast = false) {
   loading.value = true
   error.value = ''
   try {
@@ -285,13 +292,29 @@ async function fetchAll() {
     // 初始化下载源选择（优先用用户偏好，其次按 priority）
     applyPreferredSourceToAll()
 
-    // 查询安装状态
+    // 查询安装状态（含本地插件目录扫描）
     await refreshInstallStatus()
+
+    if (showSuccessToast) {
+      showToast(
+        t('plugins.market.refreshSuccess', { count: plugins.value.length }),
+        'success'
+      )
+    }
   } catch (e: any) {
     error.value = e.message || String(e)
+    if (showSuccessToast) {
+      showToast(t('plugins.market.refreshFailed', { msg: e.message || String(e) }), 'error')
+    }
   } finally {
     loading.value = false
   }
+}
+
+/// 手动点击刷新按钮：重新扫描 + 重新获取远程 index + 显示状态
+async function handleRefresh() {
+  if (loading.value) return
+  await fetchAll(true)
 }
 
 /// 下载安装插件

@@ -127,13 +127,17 @@ const en = {
       stageDone: '✅ Done',
       installSuccess: '✅ Plugin [{name}] installed successfully!',
       installFailed: '❌ Install failed: {msg}',
-      updateSuccess: '✅ Plugin [{name}] updated to v{version}!',
+      updateSuccess: '✅ Plugin [{name}] updated  v{version}!',
       updateFailed: '❌ Update failed: {msg}',
       uninstallSuccess: '🗑️ Plugin [{name}] uninstalled',
       uninstallFailed: '❌ Uninstall failed: {msg}',
       preferredSourceSaved: '✅ Default source switched to: {label}',
       preferredSourceFailed: '❌ Failed to save source preference: {msg}',
-      downloadPrioritySuffix: ' ⭐'
+      downloadPrioritySuffix: ' ⭐',
+      refreshList: '🔄 Refresh List',
+      refreshing: 'Refreshing...',
+      refreshSuccess: '✅ Fetched latest status for {count} plugins',
+      refreshFailed: '❌ Refresh failed: {msg}'
     }
   },
   about: {

@@ -51,7 +51,7 @@ export function usePluginResolver() {
 
         pluginsMap.value = normalized
         const totalHandlers = Object.values(normalized).reduce((a, c) => a + c.handlers.length, 0)
-        console.log('🧩 插件映射表已加载，共', Object.keys(normalized).length, '个扩展名 /', totalHandlers, '个处理器')
+
       } else {
         console.warn('获取 /api/plugins 失败:', response.status)
       }

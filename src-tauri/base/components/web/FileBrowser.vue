@@ -173,10 +173,8 @@ function handleClick(item: FileItem): void {
   const pluginUrl = resolvePluginUrl(ext, publicPath)
 
   if (pluginUrl) {
-    console.log(`🧩 使用插件打开 .${ext}：`, pluginUrl)
     window.open(pluginUrl, `${ext}_viewer`)
   } else {
-    console.log(`👁️ 预览文件 .${ext}：`, publicPath)
     previewFile(item)
   }
 }

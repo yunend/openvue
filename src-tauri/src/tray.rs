@@ -54,18 +54,15 @@ pub fn setup_system_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Err
 /// 显示主窗口
 pub fn show_main_window(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
-        println!("🪟 [show_main_window] 尝试恢复窗口…");
         let _ = window.unminimize();
         let _ = window.show();
         let _ = window.set_focus();
-        println!("🪟 [show_main_window] 窗口恢复完成");
     }
 }
 
 /// 隐藏到托盘
 pub fn hide_to_tray(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
-        println!("🪟 [hide_to_tray] 隐藏窗口到托盘…");
         #[cfg(target_os = "macos")]
         {
             let _ = window.minimize();

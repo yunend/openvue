@@ -431,21 +431,6 @@ pub async fn install_plugin(
         let _ = f.sync_all();
     }
 
-    // 打印目标目录内容用于调试
-    eprintln!("📋 [install_plugin] 安装后验证 - 目标目录: {:?}", target_dir);
-    eprintln!("   📁 目录存在: {}", target_dir.exists());
-    eprintln!("   📄 plugin.json 存在: {}", final_plugin_json.exists());
-    if target_dir.exists() {
-        match std::fs::read_dir(&target_dir) {
-            Ok(entries) => {
-                for entry in entries.flatten() {
-                    eprintln!("      - {}", entry.path().display());
-                }
-            }
-            Err(e) => eprintln!("   ❌ 读取目录失败: {}", e),
-        }
-    }
-
     // ---- 9. 清理临时目录 ----
     std::fs::remove_dir_all(&temp_dir)
         .map_err(|e| format!("清理临时目录失败: {}", e))?;

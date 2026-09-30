@@ -127,13 +127,17 @@ const zh = {
       stageDone: '✅ 完成',
       installSuccess: '✅ 插件 [{name}] 安装完成！',
       installFailed: '❌ 下载安装失败: {msg}',
-      updateSuccess: '✅ 插件 [{name}] 已更新到 v{version}！',
+      updateSuccess: '✅ 插件 [{name}] 已更新 v{version}！',
       updateFailed: '❌ 更新失败: {msg}',
       uninstallSuccess: '🗑️ 插件 [{name}] 已卸载',
       uninstallFailed: '❌ 卸载失败: {msg}',
       preferredSourceSaved: '✅ 默认下载源已切换为: {label}',
       preferredSourceFailed: '❌ 保存下载源偏好失败: {msg}',
-      downloadPrioritySuffix: ' ⭐'
+      downloadPrioritySuffix: ' ⭐',
+      refreshList: '🔄 更新列表',
+      refreshing: '刷新中...',
+      refreshSuccess: '✅ 已获取 {count} 个插件的最新状态',
+      refreshFailed: '❌ 刷新失败: {msg}'
     }
   },
   about: {

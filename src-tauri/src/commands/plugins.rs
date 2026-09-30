@@ -447,22 +447,6 @@ pub async fn download_and_install_plugin(
         return Err(e.clone());
     }
 
-    // 安装后验证：打印目标目录内容
-    let verify_dir = plugins_root.join(&pid);
-    eprintln!("🔎 [download_and_install_plugin] 安装后验证目录: {:?}", verify_dir);
-    eprintln!("   📁 目录存在: {}", verify_dir.exists());
-    eprintln!("   📄 plugin.json 存在: {}", verify_dir.join("plugin.json").exists());
-    if verify_dir.exists() {
-        match std::fs::read_dir(&verify_dir) {
-            Ok(entries) => {
-                for entry in entries.flatten() {
-                    eprintln!("      - {}", entry.path().display());
-                }
-            }
-            Err(e) => eprintln!("   ❌ 读取目录失败: {}", e),
-        }
-    }
-
     // 成功：重新扫描插件目录
     let arc_state = Arc::clone(state.inner());
     {
@@ -565,11 +549,6 @@ pub fn get_plugins_install_status(
     };
     let builtin_root = crate::paths::builtin_plugins_dir().ok();
 
-    eprintln!("🔍 [get_plugins_install_status] 插件根目录: {:?}", plugins_root);
-    if let Some(ref b) = builtin_root {
-        eprintln!("   📁 内置目录: {:?}", b);
-    }
-
     let mut statuses = serde_json::Map::new();
     for pid in &plugin_ids {
         // 同时检查 用户目录 和 内置目录
@@ -579,17 +558,6 @@ pub fn get_plugins_install_status(
             .map(|r| plugins::is_plugin_installed(r, pid))
             .unwrap_or(false);
         let installed = installed_user || installed_builtin;
-
-        // 调试输出来诊断文件系统状态
-        let user_dir = plugins_root.join(pid);
-        let user_json = user_dir.join("plugin.json");
-        eprintln!(
-            "   🧪 [{}] 用户目录存在:{} plugin.json存在:{} | is_installed={}",
-            pid,
-            user_dir.exists(),
-            user_json.exists(),
-            installed
-        );
 
         // 优先级：用户目录 > 内置目录
         let check_dir = if installed_user {

@@ -5,10 +5,7 @@ use std::cell::RefCell;
 
 #[tauri::command]
 pub fn get_version() -> String {
-    let version = env!("CARGO_PKG_VERSION");
-    let tauri_version = tauri::VERSION;
-    println!("🔖 版本查询: app={}, tauri={}", version, tauri_version);
-    version.to_string()
+    env!("CARGO_PKG_VERSION").to_string()
 }
 
 #[tauri::command]
@@ -36,18 +33,9 @@ pub async fn choose_folder(
         let exists = resolved.exists();
         let canonical_raw = resolved.canonicalize().unwrap_or_else(|_| resolved.clone());
         let canonical = normalize_path_for_dialog(&canonical_raw);
-        println!("📂 [choose_folder] title={}", dialog_title);
-        println!("📂 [choose_folder] initial_dir 原始: {}", dir_str);
-        println!("📂 [choose_folder] 解析后: {}", resolved.display());
-        println!("📂 [choose_folder] 存在: {} | 规范化后: {}", exists, canonical.display());
         if exists {
             builder = builder.set_directory(&canonical);
-            println!("📂 [choose_folder] ✅ 已设置初始目录");
-        } else {
-            println!("⚠️ [choose_folder] 初始目录不存在，跳过 set_directory");
         }
-    } else {
-        println!("📂 [choose_folder] 无 initial_dir，使用系统默认");
     }
 
     builder.pick_folder(move |fp_opt| {
@@ -62,15 +50,8 @@ pub async fn choose_folder(
     let result = rx.await.map_err(|e| format!("等待对话框失败: {}", e))?;
 
     match result {
-        Some(pb) => {
-            let s = pb.to_string_lossy().replace('\\', "/");
-            println!("📁 [choose_folder] 用户选中: {}", s);
-            Ok(Some(s))
-        }
-        None => {
-            println!("📁 [choose_folder] 用户取消了选择");
-            Ok(None)
-        }
+        Some(pb) => Ok(Some(pb.to_string_lossy().replace('\\', "/"))),
+        None => Ok(None)
     }
 }
 
