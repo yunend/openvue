@@ -1,3 +1,5 @@
+<p align="center"><a href="./readme.en.md"><img src="https://img.shields.io/badge/Language-English-blue.svg?style=flat-square" alt="English"></a></p>
+
 # OpenVue
 
 🚀 **OpenVue** 是一款跨平台的本地文件共享与浏览工具，基于 **Tauri 2.x** 构建。它将 Rust 的高性能 HTTP 服务与 Vue 3 的现代化前端界面相结合，让你在局域网内快速分享文件、浏览目录，并支持插件扩展。
@@ -152,11 +154,11 @@ npm run tauri dev
 
 3. **浏览器访问** — 程序启动后自动打开浏览器，或手动访问 `http://localhost:8005`
 
-   ![浏览器界面](screenshots/web-ui.png)
+   ![浏览器界面](screenshots/local-browser.png)
 
 4. **局域网内其他设备访问** — 使用 `http://<本机IP>:8005`
 
-   ![目录浏览](screenshots/dir-browse.png)
+   ![目录浏览](screenshots/web-browse.png)
 
 ### 插件元信息 (plugin.json)
 
