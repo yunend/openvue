@@ -149,14 +149,45 @@ pub fn plugins_state_path() -> Result<PathBuf, String> {
     Ok(user_config_dir()?.join("plugins_state.json"))
 }
 
-// dist-web 目录仍然在资源目录下（只读静态资源）
-pub fn dist_web_dir() -> Result<PathBuf, String> {
-    Ok(find_app_root()?.join("dist-web"))
-}
-
-/// 内置插件目录（资源目录/dist-web/plugins/，只读）
+/// 内置插件目录（只读）
+/// 查找策略：从 app_root 向上爬最多 5 层，每层依次探测：
+///   - <dir>/dist-web/plugins-buildin   ← vite build 产物
+///   - <dir>/plugins/plugins-buildin    ← 开发模式项目根
+///   - <dir>/public/plugins-buildin     ← 兜底
+///
+/// 之所以要向上爬，是因为 Windows 开发时 find_app_root() 返回
+/// target/debug/（exe 所在目录），而插件在项目根目录下。
 pub fn builtin_plugins_dir() -> Result<PathBuf, String> {
-    Ok(dist_web_dir()?.join("plugins"))
+    let app_root = find_app_root()?;
+    let mut fallback: Option<PathBuf> = None;
+
+    // 从 app_root 开始，向上最多爬 5 层
+    let mut current = Some(app_root.as_path());
+    for _ in 0..6 {
+        if let Some(dir) = current {
+            let tries = [
+                dir.join("dist-web").join("plugins-buildin"),
+                dir.join("plugins").join("plugins-buildin"),
+                dir.join("public").join("plugins-buildin"),
+            ];
+            for candidate in &tries {
+                if fallback.is_none() {
+                    fallback = Some(candidate.clone());
+                }
+                if candidate.exists() && candidate.is_dir() {
+                    println!("📦 内置插件目录: {}", candidate.display());
+                    return Ok(candidate.clone());
+                }
+            }
+            current = dir.parent();
+        } else {
+            break;
+        }
+    }
+
+    let fb = fallback.unwrap_or_else(|| app_root.join("public").join("plugins-buildin"));
+    println!("⚠️ 内置插件目录不存在，返回兜底路径: {}", fb.display());
+    Ok(fb)
 }
 
 /// 用户可写插件目录（用户配置目录/plugins/，默认放用户新建的插件）

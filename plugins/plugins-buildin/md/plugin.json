@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "内置 Markdown 渲染器 / Built-in Markdown Renderer",
   "extensions": ["md"],
-  "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
+  "urlTemplate": "/plugins-buildin/{pluginId}/?path={publicPath}",
   "homepage": "",
   "downloadSources": [],
   "sha256": "",

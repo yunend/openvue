@@ -83,11 +83,16 @@ pub fn scan_plugins_dir(plugins_root: &Path, source: PluginSource) -> PluginsCon
         let plugin_id = meta.id.clone();
         let source_for_handler = source.clone();
 
-        // 自定义插件强制使用 /pfolder/ 路由（插件市场下载的 plugin.json 可能写的是 /plugins/）
+        // 外置插件强制使用 /plugins-external/ 路由，内置插件使用 /plugins-buildin/ 路由
         let url_template = if source == PluginSource::Custom {
-            meta.url_template.replace("/plugins/", "/pfolder/")
+            // 插件市场下载的 plugin.json 可能写的是旧的 /plugins/ 或其他路径，统一替换
+            meta.url_template
+                .replace("/plugins/", "/plugins-external/")
+                .replace("/pfolder/", "/plugins-external/")
         } else {
             meta.url_template
+                .replace("/plugins/", "/plugins-buildin/")
+                .replace("/plugins-buildin/", "/plugins-buildin/")
         };
 
         let handler = ExtensionHandler {

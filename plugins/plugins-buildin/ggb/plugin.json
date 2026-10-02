@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "GeoGebra 官方 HTML5 播放器 / Official GeoGebra Player",
   "extensions": ["ggb"],
-  "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
+  "urlTemplate": "/plugins-buildin/{pluginId}/?path={publicPath}",
   "homepage": "https://www.geogebra.org/",
   "downloadSources": [],
   "sha256": "",

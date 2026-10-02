@@ -36,7 +36,7 @@ impl PluginsConfig {
         let ext_key = ext.to_lowercase();
         let handler_id = folder_name.to_string();
         let plugin_id = folder_name.to_string();
-        let url_template = "/pfolder/{pluginId}/?path={publicPath}".to_string();
+        let url_template = "/plugins-external/{pluginId}/?path={publicPath}".to_string();
         let name = format!("自定义{}", ext_key);
 
         let new_handler = ExtensionHandler {

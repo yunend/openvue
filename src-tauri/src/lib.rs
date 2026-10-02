@@ -18,7 +18,11 @@ pub fn run() {
     let app_config = config::load_config(None).expect("加载配置失败");
     config::validate_config(&app_config).expect("配置验证失败");
 
-    let builtin_dir = paths::builtin_plugins_dir().expect("获取内置插件目录失败");
+    let app_root = paths::find_app_root().expect("无法定位应用资源根目录");
+    let builtin_dir = paths::builtin_plugins_dir()
+        .ok()
+        .filter(|p| p.exists())
+        .unwrap_or_else(|| app_root.join("public").join("plugins-buildin"));
     let user_dir = paths::resolve_plugins_dir(app_config.plugins_folder.as_deref())
         .expect("获取用户插件目录失败");
     let plugins_state = plugins::load_plugins_state().unwrap_or_default();

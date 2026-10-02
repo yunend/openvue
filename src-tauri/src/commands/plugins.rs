@@ -135,7 +135,7 @@ pub fn add_custom_plugin(
         version: "1.0.0".to_string(),
         description: format!("本地自定义插件，支持 .{} 格式文件预览", ext_lower),
         extensions: vec![ext_lower],
-        url_template: "/pfolder/{pluginId}/?path={publicPath}".to_string(),
+        url_template: "/plugins-external/{pluginId}/?path={publicPath}".to_string(),
         homepage: String::new(),
         download_sources: vec![],
         sha256: String::new(),

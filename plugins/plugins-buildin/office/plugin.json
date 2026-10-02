@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Office 文档查看器 / Office Viewer",
   "extensions": ["doc", "docx", "ppt", "pptx", "xls", "xlsx"],
-  "urlTemplate": "/plugins/{pluginId}/?path={publicPath}",
+  "urlTemplate": "/plugins-buildin/{pluginId}/?path={publicPath}",
   "homepage": "",
   "downloadSources": [],
   "sha256": "",

@@ -79,21 +79,21 @@ pub fn create_router(
         println!("⚠️ 未找到 dist-web 构建产物，使用目录: {}", fallback.display());
         fallback
     };
-    // 🔀 路由注册顺序很重要：/pfolder /plugins /public 等前缀路由必须在根 / 之前
+    // 路由注册顺序很重要：/plugins-external /plugins-buildin /public 等前缀路由必须在根 / 之前
     let builtin_plugins_dir = crate::paths::builtin_plugins_dir()
-        .unwrap_or_else(|_| base_dir.join("plugins"));
+        .unwrap_or_else(|_| base_dir.join("plugins-buildin"));
     Router::new()
         .merge(api_routes)
         .with_state(state)
-        // /pfolder —— 用户自定义可写插件目录（与 /plugins 内置前缀相异）
+        // /plugins-external —— 用户自定义可写插件目录（与 /plugins-buildin 内置前缀相异）
         .nest_service(
-            "/pfolder",
+            "/plugins-external",
             ServeDir::new(&plugins_folder)
                 .fallback(ServeFile::new(base_dir.join("404.html"))),
         )
-        // /plugins —— 内置只读插件目录（资源目录）
+        // /plugins-buildin —— 内置只读插件目录（资源目录）
         .nest_service(
-            "/plugins",
+            "/plugins-buildin",
             ServeDir::new(&builtin_plugins_dir)
                 .fallback(ServeFile::new(base_dir.join("404.html"))),
         )
