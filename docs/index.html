@@ -46,7 +46,14 @@
       margin-bottom: 28px;
     }
     .hero-badges img { height: 28px; border-radius: 4px; }
-    .hero-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; }
+    .hero-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; margin-bottom: 40px; }
+    .hero-demo {
+      max-width: 720px; margin: 0 auto;
+      border-radius: 14px; overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .hero-demo img { display: block; width: 100%; height: auto; }
     .btn {
       display: inline-flex; align-items: center; gap: 6px;
       padding: 12px 28px; border-radius: 8px; font-size: 1rem; font-weight: 600;
@@ -172,6 +179,9 @@
       <a href="https://github.com/yunend/openvue/releases" class="btn btn-primary">⬇️ Download Now</a>
       <a href="#plugin-dev" class="btn btn-outline">🧩 Build Plugins</a>
       <a href="https://github.com/yunend/openvue" class="btn btn-outline">📦 GitHub</a>
+    </div>
+    <div class="hero-demo">
+      <img src="../screenshots/web-demo.gif" alt="OpenVue Demo">
     </div>
   </div>
 </section>
