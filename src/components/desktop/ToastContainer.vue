@@ -5,10 +5,18 @@
   >
     <div
       v-if="toast.show"
-      class="px-[26px] py-[13px] rounded-[10px] text-white font-semibold shadow-[0_4px_22px_rgba(0,0,0,0.22)] animate-slideDown text-[0.95rem] max-w-[90%]"
+      class="relative px-[24px] pr-[36px] py-[13px] rounded-[10px] text-white font-semibold shadow-[0_4px_22px_rgba(0,0,0,0.22)] animate-slideDown text-[0.95rem] max-w-[90%]"
       :class="toastClass"
     >
-      {{ toast.message }}
+      <span class="break-all">{{ toast.message }}</span>
+      <button
+        type="button"
+        class="absolute top-[6px] right-[8px] w-[22px] h-[22px] flex items-center justify-center rounded-full text-white/70 hover:text-white hover:bg-white/20 transition-colors text-[0.9rem] leading-none cursor-pointer border-none bg-transparent p-0"
+        @click="hideToast"
+        aria-label="Close"
+      >
+        ✕
+      </button>
     </div>
   </div>
 </template>
@@ -17,7 +25,7 @@
 import { computed } from 'vue'
 import { useToast } from '../../composables/useToast'
 
-const { toast } = useToast()
+const { toast, hideToast } = useToast()
 
 const toastClass = computed(() => {
   const map: Record<string, string> = {

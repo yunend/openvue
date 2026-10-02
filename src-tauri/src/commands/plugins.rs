@@ -96,23 +96,27 @@ pub fn add_custom_plugin(
         let guard = state.lock().map_err(|e| e.to_string())?;
         crate::paths::resolve_plugins_dir(guard.app_config.plugins_folder.as_deref())?
     };
+
+    // 若用户输入的是相对路径，解析为基于插件根目录的绝对路径
+    let user_path_raw = PathBuf::from(&folder_path);
+    let user_path = if user_path_raw.is_absolute() {
+        user_path_raw
+    } else {
+        plugins_root.join(&user_path_raw)
+    };
+
     let plugins_root_canonical = plugins_root
         .canonicalize()
         .unwrap_or_else(|_| plugins_root.clone());
-
-    let user_path = PathBuf::from(&folder_path);
     let user_path_canonical = user_path
         .canonicalize()
         .map_err(|_| format!("目录不存在: {}", folder_path))?;
 
-    if !user_path_canonical.starts_with(&plugins_root_canonical) {
+   
+    if user_path_canonical.parent() != Some(plugins_root_canonical.as_path()) {
         return Err(format!(
-            "插件目录必须位于插件根目录下。\n\n\
-             插件根目录: {}\n\
-             当前选择:   {}\n\n\
-             请在【配置面板】修改插件根目录，或把插件文件夹移到插件根目录下。",
-            plugins_root_canonical.display(),
-            folder_path
+            "插件目录必须是插件根目录的直接子目录.",
+            
         ));
     }
 
@@ -176,28 +180,38 @@ pub fn remove_custom_plugin(
     folder_path: String,
 ) -> Result<String, String> {
     let arc_state = Arc::clone(state.inner());
-    let user_path = PathBuf::from(&folder_path);
+
+    // 先拿到插件根目录
+    let plugins_root = {
+        let guard = state.lock().map_err(|e| e.to_string())?;
+        crate::paths::resolve_plugins_dir(guard.app_config.plugins_folder.as_deref())?
+    };
+
+    // 若用户输入的是相对路径，解析为基于插件根目录的绝对路径
+    let user_path_raw = PathBuf::from(&folder_path);
+    let user_path = if user_path_raw.is_absolute() {
+        user_path_raw
+    } else {
+        plugins_root.join(&user_path_raw)
+    };
+
     let folder_name = user_path
         .file_name()
         .ok_or_else(|| "无法从路径中提取目录名".to_string())?
         .to_string_lossy()
         .to_string();
 
-    // 安全检查：确认目录在插件根目录下
-    let plugins_root = {
-        let guard = state.lock().map_err(|e| e.to_string())?;
-        crate::paths::resolve_plugins_dir(guard.app_config.plugins_folder.as_deref())?
-    };
+    // 安全检查：确认目录是插件根目录的直接子目录
     let plugins_root_canonical = plugins_root
         .canonicalize()
         .unwrap_or_else(|_| plugins_root.clone());
     let user_path_canonical = user_path
         .canonicalize()
         .map_err(|_| format!("目录不存在: {}", folder_path))?;
-    if !user_path_canonical.starts_with(&plugins_root_canonical) {
+    
+    if user_path_canonical.parent() != Some(plugins_root_canonical.as_path()) {
         return Err(format!(
-            "只能删除插件根目录下的插件。\n\n插件根目录: {}",
-            plugins_root_canonical.display()
+            "只能删除插件根目录下的直接子目录."
         ));
     }
 
