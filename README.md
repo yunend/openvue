@@ -18,7 +18,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-888?style=flat-square" alt="Platform">
 </p>
 
-<p align="center"><img src="screenshots/web-demo.gif" alt="OpenVue Demo" width="720"></p>
+<p align="center"><img src="docs/screenshots/web-demo.gif" alt="OpenVue Demo" width="720"></p>
 
 🚀 **OpenVue** 是一款跨平台的本地文件共享与浏览工具，基于 **Tauri 2.x** 构建。它将 Rust 的高性能 HTTP 服务与 Vue 3 的现代化前端界面相结合，让你在局域网内快速分享文件、浏览目录，并支持插件扩展。
 
@@ -164,19 +164,19 @@ npm run tauri dev
 
 1. **打开程序界面修改文件夹路径** — 在程序主界面中点击"配置文件管理"按钮，修改文件根目录（`publicFolder`）为你想要共享的文件夹路径
 
-   ![修改文件夹路径](screenshots/config.png)
+   ![修改文件夹路径](docs/screenshots/config.png)
 
 2. **修改插件配置** — 在设置界面中启用或禁用各个文件扩展名对应的插件（如 GeoGebra、MD 等），控制文件的打开方式
 
-   ![插件配置](screenshots/plugins-config.png)
+   ![插件配置](docs/screenshots/plugins-config.png)
 
 3. **浏览器访问** — 程序启动后自动打开浏览器，或手动访问 `http://localhost:8005`
 
-   ![浏览器界面](screenshots/local-browser.png)
+   ![浏览器界面](docs/screenshots/local-browser.png)
 
 4. **局域网内其他设备访问** — 使用 `http://<本机IP>:8005`
 
-   ![目录浏览](screenshots/web-browse.png)
+   ![目录浏览](docs/screenshots/web-browse.png)
 
 ### 插件元信息 (plugin.json)
 
@@ -233,7 +233,7 @@ plugins/
 > 💡 适合场景：临时想用某个第三方在线预览工具打开某类文件，只需把 HTML 页面放到 plugins 目录、在面板里点两下即可。
 
 ### 🏪 插件市场（桌面端）
-![插件市场](screenshots/plugins-market.png)
+![插件市场](docs/screenshots/plugins-market.png)
 
 插件市场提供了**一键下载安装**第三方插件的功能，无需手动配置，直接在桌面端界面操作：
 

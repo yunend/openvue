@@ -18,7 +18,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-888?style=flat-square" alt="Platform">
 </p>
 
-<p align="center"><img src="screenshots/web-demo.gif" alt="OpenVue Demo" width="720"></p>
+<p align="center"><img src="docs/screenshots/web-demo.gif" alt="OpenVue Demo" width="720"></p>
 
 🚀 **OpenVue** is a cross-platform local file sharing and browsing tool built with **Tauri 2.x**. It combines Rust's high-performance HTTP service with Vue 3's modern frontend interface, letting you quickly share files, browse directories, and extend functionality through plugins on your local network.
 
@@ -163,19 +163,19 @@ After extracting or installing, find `config.json` in the program directory:
 
 1. **Open the program interface to change the folder path** — In the main program window, click the "Configuration Management" button and change the file root directory (`publicFolder`) to the folder path you want to share
 
-   ![Change folder path](screenshots/config-en.png)
+   ![Change folder path](docs/screenshots/config-en.png)
 
 2. **Modify plugin configuration** — In the settings interface, enable or disable the plugins for each file extension (e.g., GeoGebra, MD) to control how files are opened
 
-   ![Plugin configuration](screenshots/plugins-config-en.png)
+   ![Plugin configuration](docs/screenshots/plugins-config-en.png)
 
 3. **Access via browser** — The browser opens automatically after startup, or manually visit `http://localhost:8005`
 
-   ![Browser interface](screenshots/local-browse-en.png)
+   ![Browser interface](docs/screenshots/local-browse-en.png)
 
 4. **Access from other devices on the local network** — Use `http://<Your-Local-IP>:8005`
 
-   ![Directory browsing](screenshots/web-browse-en.png)
+   ![Directory browsing](docs/screenshots/web-browse-en.png)
 
 ### Plugin metadata (plugin.json)
 
@@ -234,7 +234,7 @@ The program automatically generates `plugin.json` in that plugin directory and s
 
 ### 🏪 Plugin marketplace (desktop)
 
-![Plugin marketplace](screenshots/plugins-market-en.png)
+![Plugin marketplace](docs/screenshots/plugins-market-en.png)
 
 The plugin marketplace provides **one-click download and installation** of third-party plugins. No manual configuration is needed — just operate directly in the desktop interface:
 
