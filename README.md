@@ -2,6 +2,24 @@
 
 # OpenVue
 
+<p align="center">
+  <img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License">
+  <img src="https://img.shields.io/badge/Tauri-2.x-ffc131?logo=tauri&logoColor=black&style=flat-square" alt="Tauri 2.x">
+  <img src="https://img.shields.io/badge/Vue-3-42b883?logo=vue.js&style=flat-square" alt="Vue 3">
+  <img src="https://img.shields.io/badge/Rust-1.70+-ce422b?logo=rust&style=flat-square" alt="Rust">
+  <img src="https://img.shields.io/badge/TypeScript-3178c6?logo=typescript&logoColor=white&style=flat-square" alt="TypeScript">
+  <img src="https://img.shields.io/badge/TailwindCSS-3-38bdf8?logo=tailwindcss&logoColor=white&style=flat-square" alt="TailwindCSS">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/v/release/yunend/openvue?style=flat-square" alt="Release">
+  <img src="https://img.shields.io/github/stars/yunend/openvue?style=flat-square" alt="Stars">
+  <img src="https://img.shields.io/github/downloads/yunend/openvue/total?style=flat-square" alt="Downloads">
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-888?style=flat-square" alt="Platform">
+</p>
+
+<p align="center"><img src="screenshots/web-demo.gif" alt="OpenVue Demo" width="720"></p>
+
 🚀 **OpenVue** 是一款跨平台的本地文件共享与浏览工具，基于 **Tauri 2.x** 构建。它将 Rust 的高性能 HTTP 服务与 Vue 3 的现代化前端界面相结合，让你在局域网内快速分享文件、浏览目录，并支持插件扩展。
 
 ---
@@ -187,11 +205,6 @@ npm run tauri dev
 
 OpenVue 支持通过插件系统扩展文件打开方式。插件存放在 `plugins/` 目录下，每个插件目录包含 `plugin.json`（元信息）和 `index.html`（入口页面）。
 
-### GeoGebra (GGB) 插件
-
-已集成的 GeoGebra 插件支持在浏览器中直接打开 `.ggb` 数学课件文件。
-
-![GeoGebra 插件演示](screenshots/ggb-demo.gif)
 
 ### 插件开发
 

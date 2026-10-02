@@ -1,32 +1,32 @@
-# 欢迎使用 Markdown 编辑器
+# Welcome to the Markdown Editor
 
 
 
-这是一个 **完全在浏览器本地** 运行的 Markdown 编辑器：左侧编辑、右侧实时预览，草稿自动保存到 localStorage。
+This is a Markdown editor that runs **entirely in the browser locally**: edit on the left, preview in real time on the right, and drafts are automatically saved to localStorage.
 
 
 
-## 功能特性
+## Features
 
 
 
-- 📝 **实时预览** — 左侧编辑，右侧即时渲染
+- 📝 **Live Preview** — Edit on the left, instant rendering on the right
 
-- 🌙 **深色模式** — 一键切换主题
+- 🌙 **Dark Mode** — Toggle theme with one click
 
-- 💾 **自动保存** — 内容保存在浏览器本地
+- 💾 **Auto Save** — Content saved locally in the browser
 
-- 🎨 **代码高亮** — 支持多种编程语言
+- 🎨 **Code Highlighting** — Supports multiple programming languages
 
-- 📊 **Mermaid 图表** — 流程图、时序图等
+- 📊 **Mermaid Diagrams** — Flowcharts, sequence diagrams, etc.
 
-- 🧮 **数学公式** — 支持 KaTeX 渲染
+- 🧮 **Math Formulas** — Supports KaTeX rendering
 
-- 📋 **目录生成** — 使用 [TOC] 插入目录
+- 📋 **Table of Contents** — Insert TOC with [TOC]
 
 
 
-## 目录
+## Table of Contents
 
 
 
@@ -34,114 +34,114 @@
 
 
 
-## 语法示例
+## Syntax Examples
 
 
 
-### 文本样式
+### Text Styles
 
 
 
-**粗体**、*斜体*、~~删除线~~、==高亮==、`行内代码`
+**Bold**, *Italic*, ~~Strikethrough~~, ==Highlight==, `inline code`
 
 
 
-### 标题
+### Headings
 
 
 
-不同数量的`#`可以完成不同的标题，如下：
+Use different numbers of `#` to create different heading levels, as follows:
 
 
 
 ```
 
-# 一级标题
+# Heading Level 1
 
 
 
-## 二级标题
+## Heading Level 2
 
 
 
-### 三级标题
+### Heading Level 3
 
 ```
 
 
 
-### 链接
+### Links
 
 
 
-对于该论述，欢迎读者查阅之前发过的文章，[你是《未来世界的幸存者》么？](https:mp.weixin.qq.comss5IhxV2ooX3JN_X416nidA)
+For more on this topic, you may refer to a previously published article: [Are You a Survivor of the Future World?](https:mp.weixin.qq.comss5IhxV2ooX3JN_X416nidA)
 
 
-### 图片
-
-
-
-插入图片，格式如下：
+### Images
 
 
 
-![这里写图片描述](./images/demo.jpg)
+To insert an image, use the following format:
 
 
 
-
-
-
-
-### 无序列表
-
-
-
-无序列表的使用，在符号`-`后加空格使用。如下：
-
-
-
-- 无序列表 1
-
-- 无序列表 2
-
-- 无序列表 3
-
-
-
-如果要控制列表的层级，则需要在符号`-`前使用空格。如下：
-
-
-
-- 无序列表 1
-
-- 无序列表 2
-
-&nbsp; - 无序列表 2.1
-
-&nbsp; - 无序列表 2.2
+![Image description here](./images/demo.jpg)
 
 
 
 
 
-### 有序列表
+
+
+### Unordered Lists
 
 
 
-有序列表的使用，在数字及符号`.`后加空格后输入内容，如下：
+To use unordered lists, add a space after the `-` symbol. As follows:
 
 
 
-1. 有序列表 1
+- Item 1
 
-2. 有序列表 2
+- Item 2
 
-3. 有序列表 3
+- Item 3
 
 
 
-### 代码块
+To control list nesting, use spaces before the `-` symbol. As follows:
+
+
+
+- Item 1
+
+- Item 2
+
+&nbsp; - Item 2.1
+
+&nbsp; - Item 2.2
+
+
+
+
+
+### Ordered Lists
+
+
+
+To use ordered lists, add a space after the number and `.`, then enter content. As follows:
+
+
+
+1. Item 1
+
+2. Item 2
+
+3. Item 3
+
+
+
+### Code Blocks
 
 
 
@@ -157,61 +157,61 @@ function hello() {
 
 
 
-### 任务列表
+### Task Lists
 
 
 
-- [x] 已完成的项目
+- [x] Completed item
 
-- [ ] 待办事项
+- [ ] Todo item
 
-- [ ] 另一个任务
-
-
-
-### 表格
+- [ ] Another task
 
 
 
-| 功能 | 状态 | 说明 |
-
-|------|------|------|
-
-| 实时预览 | ✅ | 左侧编辑右侧渲染 |
-
-| 自动保存 | ✅ | localStorage 存储 |
-
-| 导出文件 | ✅ | 支持 Markdown  HTML |
+### Tables
 
 
 
-### 引用
+| Feature | Status | Description |
+
+|---------|--------|-------------|
+
+| Live Preview | ✅ | Edit left, render right |
+
+| Auto Save | ✅ | localStorage storage |
+
+| Export | ✅ | Markdown & HTML supported |
 
 
 
-> "Markdown 是一种轻量级标记语言，让你专注于写作本身。"
+### Blockquotes
 
 
 
-### 脚注
+> "Markdown is a lightweight markup language that lets you focus on writing itself."
 
 
 
-这里有一个脚注引用[^1]。
+### Footnotes
 
 
 
-[^1]: 这是脚注的内容。
+Here is a footnote reference[^1].
 
 
 
-### 数学公式
-
-行内公式：$E = mc^2$
+[^1]: This is the footnote content.
 
 
 
-块级公式：
+### Math Formulas
+
+Inline formula: $E = mc^2$
+
+
+
+Block formula:
 
 
 
@@ -225,14 +225,13 @@ $$
 
 ```mermaid
 graph TD
-    A[开始] --> B{判断}
-    B -->|条件1| C[处理1]
-    B -->|条件2| D[处理2]
-    C --> E[结束]
+    A[Start] --> B{Decision}
+    B -->|Condition 1| C[Process 1]
+    B -->|Condition 2| D[Process 2]
+    C --> E[End]
     D --> E
 ```
 
 
 
-**开始你的写作之旅吧！** ✨
-
+**Start your writing journey!** ✨

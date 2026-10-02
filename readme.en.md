@@ -2,6 +2,24 @@
 
 # OpenVue
 
+<p align="center">
+  <img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License">
+  <img src="https://img.shields.io/badge/Tauri-2.x-ffc131?logo=tauri&logoColor=black&style=flat-square" alt="Tauri 2.x">
+  <img src="https://img.shields.io/badge/Vue-3-42b883?logo=vue.js&style=flat-square" alt="Vue 3">
+  <img src="https://img.shields.io/badge/Rust-1.70+-ce422b?logo=rust&style=flat-square" alt="Rust">
+  <img src="https://img.shields.io/badge/TypeScript-3178c6?logo=typescript&logoColor=white&style=flat-square" alt="TypeScript">
+  <img src="https://img.shields.io/badge/TailwindCSS-3-38bdf8?logo=tailwindcss&logoColor=white&style=flat-square" alt="TailwindCSS">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/v/release/yunend/openvue?style=flat-square" alt="Release">
+  <img src="https://img.shields.io/github/stars/yunend/openvue?style=flat-square" alt="Stars">
+  <img src="https://img.shields.io/github/downloads/yunend/openvue/total?style=flat-square" alt="Downloads">
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-888?style=flat-square" alt="Platform">
+</p>
+
+<p align="center"><img src="screenshots/web-demo.gif" alt="OpenVue Demo" width="720"></p>
+
 🚀 **OpenVue** is a cross-platform local file sharing and browsing tool built with **Tauri 2.x**. It combines Rust's high-performance HTTP service with Vue 3's modern frontend interface, letting you quickly share files, browse directories, and extend functionality through plugins on your local network.
 
 ---
@@ -187,11 +205,6 @@ Each plugin directory contains a `plugin.json` file describing itself. On startu
 
 OpenVue supports extending file opening methods through the plugin system. Plugins are stored in the `plugins/` directory, and each plugin directory contains `plugin.json` (metadata) and `index.html` (entry page).
 
-### GeoGebra (GGB) plugin
-
-The integrated GeoGebra plugin supports opening `.ggb` math courseware files directly in the browser.
-
-![GeoGebra plugin demo](screenshots/ggb-demo.gif)
 
 ### Plugin development
 
