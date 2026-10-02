@@ -94,12 +94,10 @@ const en = {
     customExtLabel: 'File Extension (without dot)',
     customExtPlaceholder: 'e.g. xmind',
     customFolderLabel: 'Plugin Folder (must contain index.html)',
-    customFolderPlaceholder: 'Click browse to select a folder with index.html',
-    customBrowse: 'Browse',
+    customFolderPlaceholder: 'e.g. xmd (must contain index.html)',
     customAdd: 'Add Plugin',
     customRemove: 'Remove Plugin',
     customSection: '🔧 Custom Plugin',
-    customFolderMustBeUnder: 'Plugin folder must be under: {root}',
     market: {
       title: '🏪 Plugin Market',
       globalSource: '🌐 Global Source:',

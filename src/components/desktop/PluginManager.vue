@@ -17,22 +17,12 @@
           </div>
           <div class="flex-1 min-w-[240px]">
             <label class="block text-[0.82rem] text-primary-500 font-medium mb-1">{{ t('plugins.customFolderLabel') }}</label>
-            <div class="flex gap-[8px] items-stretch">
-              <input
-                type="text"
-                class="flex-1 min-w-0 px-[12px] py-[9px] border-2 border-primary-100 rounded-[8px] text-sm text-primary-900 bg-white focus:outline-none focus:border-blue-400"
-                v-model="customFolderPath"
-                :placeholder="t('plugins.customFolderPlaceholder')"
-                readonly
-              >
-              <button
-                type="button"
-                class="flex-none px-[14px] py-[9px] text-[0.88rem] font-semibold border-none rounded-[8px] cursor-pointer bg-slate-500 text-white hover:bg-slate-600 whitespace-nowrap"
-                @click="handleBrowseCustomFolder"
-              >
-                📁 {{ t('plugins.customBrowse') }}
-              </button>
-            </div>
+            <input
+              type="text"
+              class="w-full px-[12px] py-[9px] border-2 border-primary-100 rounded-[8px] text-sm text-primary-900 bg-white focus:outline-none focus:border-blue-400"
+              v-model="customFolderPath"
+              :placeholder="t('plugins.customFolderPlaceholder')"
+            >
           </div>
           <button
             type="button"
@@ -109,7 +99,6 @@ const {
   loadPluginsConfig,
   activateHandler,
   setBrowserDefault,
-  getPluginsDir,
   addCustomPlugin,
   removeCustomPlugin
 } = usePluginManager()
@@ -137,32 +126,6 @@ async function handleSelectChange(ext: string, value: string) {
   } else {
     // 切换到某个 handler
     await activateHandler(ext, value)
-  }
-}
-
-async function handleBrowseCustomFolder() {
-  try {
-    const pluginsDir = await getPluginsDir()
-    const { invoke } = window.__TAURI__.core
-    const chosen = await invoke('choose_folder', {
-      initialDir: pluginsDir,
-      title: '选择插件目录（必须在插件根目录下）'
-    }) as string | null
-    if (chosen) {
-      // 🔒 前端即时校验：选的目录必须在当前插件根目录下
-      const normChosen = chosen.replace(/\\/g, '/')
-      const normRoot = pluginsDir.replace(/\\/g, '/').replace(/\/$/, '')
-      if (!normChosen.startsWith(normRoot + '/') && normChosen !== normRoot) {
-        showToast(
-          t('plugins.customFolderMustBeUnder', { root: pluginsDir }),
-          'error'
-        )
-        return
-      }
-      customFolderPath.value = chosen
-    }
-  } catch (e) {
-    console.error('浏览文件夹失败:', e)
   }
 }
 

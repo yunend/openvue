@@ -94,12 +94,10 @@ const zh = {
     customExtLabel: '文件后缀名（不含点）',
     customExtPlaceholder: '例如：xmind',
     customFolderLabel: '插件目录（含 index.html）',
-    customFolderPlaceholder: '点击右侧按钮选择已含 index.html 的插件目录',
-    customBrowse: '浏览',
+    customFolderPlaceholder: '例如:xmd（必须含 index.html）',
     customAdd: '添加插件',
     customRemove: '删除插件',
     customSection: '🔧 自定义插件',
-    customFolderMustBeUnder: '插件目录必须位于插件根目录下：{root}',
     market: {
       title: '🏪 插件市场',
       globalSource: '🌐 全局下载源:',
