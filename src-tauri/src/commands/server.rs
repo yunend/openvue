@@ -6,7 +6,7 @@ use crate::server;
 #[tauri::command]
 pub fn start_server(state: tauri::State<'_, Arc<Mutex<server::ServerState>>>) -> Result<String, String> {
     let port = server::do_spawn_server(state.inner(), "")?;
-    Ok(format!("HTTP 服务已启动，访问 http://127.0.0.1:{}", port))
+    Ok(format!("HTTP 服务已启动 / HTTP server started, visit http://127.0.0.1:{}", port))
 }
 
 #[tauri::command]
@@ -16,9 +16,9 @@ pub fn stop_server(state: tauri::State<Arc<Mutex<server::ServerState>>>) -> Resu
         Some(token) => {
             token.cancel();
             state.cancel_token = None;
-            Ok("HTTP 服务已停止".to_string())
+            Ok("HTTP 服务已停止 / HTTP server stopped".to_string())
         }
-        None => Err("HTTP 服务未运行".to_string()),
+        None => Err("HTTP 服务未运行 / HTTP server is not running".to_string()),
     }
 }
 

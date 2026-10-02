@@ -47,7 +47,7 @@ pub async fn choose_folder(
         }
     });
 
-    let result = rx.await.map_err(|e| format!("等待对话框失败: {}", e))?;
+    let result = rx.await.map_err(|e| format!("等待对话框失败 / Dialog await failed: {}", e))?;
 
     match result {
         Some(pb) => Ok(Some(pb.to_string_lossy().replace('\\', "/"))),

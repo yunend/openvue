@@ -31,15 +31,15 @@ pub fn save_config(
 ) -> Result<String, String> {
     let arc_state = Arc::clone(state.inner());
     if port == 0 {
-        return Err("端口号不能为 0".to_string());
+        return Err("端口号不能为 0 / Port number cannot be 0".to_string());
     }
     if public_folder.trim().is_empty() {
-        return Err("指定文件目录不能为空".to_string());
+        return Err("指定文件目录不能为空 / Public folder path cannot be empty".to_string());
     }
 
     let path = config::get_default_config_path().map_err(|e| e.to_string())?;
     let config_dir = path.parent()
-        .ok_or_else(|| "无法获取配置目录".to_string())?.to_path_buf();
+        .ok_or_else(|| "无法获取配置目录 / Cannot resolve config directory".to_string())?.to_path_buf();
 
     let public_path = PathBuf::from(&public_folder);
     let abs_public_path = if public_path.is_absolute() {

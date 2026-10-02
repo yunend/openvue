@@ -36,7 +36,7 @@ pub fn resolve_download_url(
     state: &PluginsState,
 ) -> Result<(String, String), String> {
     if sources.is_empty() {
-        return Err("插件没有可用的下载源".to_string());
+        return Err("插件没有可用的下载源 / No download source available for this plugin".to_string());
     }
 
     // 1. 如果用户有偏好标签，先用它
@@ -70,10 +70,10 @@ pub async fn download_zip(
         .get(url)
         .send()
         .await
-        .map_err(|e| format!("下载请求失败: {}", e))?;
+        .map_err(|e| format!("下载请求失败 / Download request failed: {}", e))?;
 
     if !resp.status().is_success() {
-        return Err(format!("下载失败: HTTP {}", resp.status()));
+        return Err(format!("下载失败 / Download failed: HTTP {}", resp.status()));
     }
 
     let total_size = resp.content_length().unwrap_or(0);
@@ -89,10 +89,10 @@ pub async fn download_zip(
     while let Some(chunk_result) = stream.next().await {
         if cancel_flag.load(Ordering::Relaxed) {
             let _ = std::fs::remove_file(dest_path);
-            return Err("下载已取消".to_string());
+            return Err("下载已取消 / Download cancelled".to_string());
         }
 
-        let chunk = chunk_result.map_err(|e| format!("下载数据流错误: {}", e))?;
+        let chunk = chunk_result.map_err(|e| format!("下载数据流错误 / Download stream error: {}", e))?;
         let len = chunk.len() as u64;
         downloaded += len;
 
@@ -331,7 +331,7 @@ pub async fn install_plugin(
 
     if cancel_flag.load(Ordering::Relaxed) {
         cleanup()?;
-        return Err("下载已取消".to_string());
+        return Err("下载已取消 / Download cancelled".to_string());
     }
 
     // ---- 5. 校验 SHA256 ----
@@ -348,7 +348,7 @@ pub async fn install_plugin(
 
     if cancel_flag.load(Ordering::Relaxed) {
         cleanup()?;
-        return Err("校验完成后取消".to_string());
+        return Err("校验完成后取消 / Cancelled after verification".to_string());
     }
 
     // ---- 6. 解压 ZIP ----

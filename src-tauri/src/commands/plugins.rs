@@ -110,24 +110,22 @@ pub fn add_custom_plugin(
         .unwrap_or_else(|_| plugins_root.clone());
     let user_path_canonical = user_path
         .canonicalize()
-        .map_err(|_| format!("目录不存在: {}", folder_path))?;
+        .map_err(|_| format!("目录不存在 / Directory not found: {}", folder_path))?;
 
-   
     if user_path_canonical.parent() != Some(plugins_root_canonical.as_path()) {
         return Err(format!(
-            "插件目录必须是插件根目录的直接子目录.",
-            
+            "插件目录必须是插件根目录的直接子目录 / Plugin directory must be a direct subdirectory of the plugins root."
         ));
     }
 
     let index_html = user_path_canonical.join("index.html");
     if !index_html.exists() {
-        return Err(format!("插件目录缺少 index.html: {}", index_html.display()));
+        return Err(format!("插件目录缺少 index.html / Missing index.html in plugin directory: {}", index_html.display()));
     }
 
     let folder_name = user_path_canonical
         .file_name()
-        .ok_or_else(|| "无法提取目录名".to_string())?
+        .ok_or_else(|| "无法提取目录名 / Cannot extract directory name".to_string())?
         .to_string_lossy()
         .to_string();
 
@@ -150,9 +148,9 @@ pub fn add_custom_plugin(
 
     let plugin_json_path = user_path_canonical.join("plugin.json");
     let json_str = serde_json::to_string_pretty(&plugin_meta)
-        .map_err(|e| format!("序列化 plugin.json 失败: {}", e))?;
+        .map_err(|e| format!("序列化 plugin.json 失败 / Failed to serialize plugin.json: {}", e))?;
     std::fs::write(&plugin_json_path, &json_str)
-        .map_err(|e| format!("写入 plugin.json 失败: {}", e))?;
+        .map_err(|e| format!("写入 plugin.json 失败 / Failed to write plugin.json: {}", e))?;
     println!("📝 自定义插件 plugin.json 已生成 -> {}", plugin_json_path.display());
 
     // ========== 注册运行时配置 ==========
@@ -197,7 +195,7 @@ pub fn remove_custom_plugin(
 
     let folder_name = user_path
         .file_name()
-        .ok_or_else(|| "无法从路径中提取目录名".to_string())?
+        .ok_or_else(|| "无法从路径中提取目录名 / Cannot extract directory name from path".to_string())?
         .to_string_lossy()
         .to_string();
 
@@ -207,11 +205,11 @@ pub fn remove_custom_plugin(
         .unwrap_or_else(|_| plugins_root.clone());
     let user_path_canonical = user_path
         .canonicalize()
-        .map_err(|_| format!("目录不存在: {}", folder_path))?;
-    
+        .map_err(|_| format!("目录不存在 / Directory not found: {}", folder_path))?;
+
     if user_path_canonical.parent() != Some(plugins_root_canonical.as_path()) {
         return Err(format!(
-            "只能删除插件根目录下的直接子目录."
+            "只能删除插件根目录下的直接子目录 / Can only delete a direct subdirectory under the plugins root."
         ));
     }
 
@@ -230,7 +228,7 @@ pub fn remove_custom_plugin(
     // 3. 删除插件文件夹（含 plugin.json 及所有文件）
     if user_path.exists() {
         std::fs::remove_dir_all(&user_path)
-            .map_err(|e| format!("删除插件目录失败: {}", e))?;
+            .map_err(|e| format!("删除插件目录失败 / Failed to delete plugin directory: {}", e))?;
         println!("🗑️ 自定义插件目录已删除 -> {}", user_path.display());
     }
 
@@ -258,7 +256,7 @@ pub fn set_plugins_folder(
     let pf = PathBuf::from(&folder_path);
     if !pf.exists() {
         std::fs::create_dir_all(&pf)
-            .map_err(|e| format!("创建插件目录失败: {} ({})", folder_path, e))?;
+            .map_err(|e| format!("创建插件目录失败 / Failed to create plugin directory: {} ({})", folder_path, e))?;
     }
 
     let mut current_config = config::load_config(Some(path.to_string_lossy().as_ref()))?;
@@ -326,7 +324,7 @@ pub fn install_plugin_from_market(
     let arc_state = Arc::clone(state.inner());
 
     let meta: plugins::PluginMeta = serde_json::from_value(plugin_json)
-        .map_err(|e| format!("解析插件元信息失败: {}", e))?;
+        .map_err(|e| format!("解析插件元信息失败 / Failed to parse plugin metadata: {}", e))?;
 
     let plugins_root = {
         let guard = state.lock().map_err(|e| e.to_string())?;
@@ -336,14 +334,14 @@ pub fn install_plugin_from_market(
     let plugin_dir = plugins_root.join(&meta.id);
     if !plugin_dir.exists() {
         std::fs::create_dir_all(&plugin_dir)
-            .map_err(|e| format!("创建插件目录失败: {}", e))?;
+            .map_err(|e| format!("创建插件目录失败 / Failed to create plugin directory: {}", e))?;
     }
 
     let plugin_json_path = plugin_dir.join("plugin.json");
     let json_str = serde_json::to_string_pretty(&meta)
-        .map_err(|e| format!("序列化 plugin.json 失败: {}", e))?;
+        .map_err(|e| format!("序列化 plugin.json 失败 / Failed to serialize plugin.json: {}", e))?;
     std::fs::write(&plugin_json_path, &json_str)
-        .map_err(|e| format!("写入 plugin.json 失败: {}", e))?;
+        .map_err(|e| format!("写入 plugin.json 失败 / Failed to write plugin.json: {}", e))?;
 
     println!("📦 插件市场安装 [{}]: plugin.json 已生成 -> {}",
         meta.id, plugin_json_path.display());
@@ -369,23 +367,23 @@ pub async fn fetch_plugins_index(url: String) -> Result<serde_json::Value, Strin
     let client = reqwest::Client::builder()
         .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36")
         .build()
-        .map_err(|e| format!("创建 HTTP 客户端失败: {}", e))?;
+        .map_err(|e| format!("创建 HTTP 客户端失败 / Failed to create HTTP client: {}", e))?;
 
     let resp = client
         .get(&url)
         .timeout(std::time::Duration::from_secs(15))
         .send()
         .await
-        .map_err(|e| format!("请求失败: {}", e))?;
+        .map_err(|e| format!("请求失败 / Request failed: {}", e))?;
 
     if !resp.status().is_success() {
-        return Err(format!("HTTP {}", resp.status()));
+        return Err(format!("HTTP {} / HTTP {}", resp.status(), resp.status()));
     }
 
     let json: serde_json::Value = resp
         .json()
         .await
-        .map_err(|e| format!("解析 JSON 失败: {}", e))?;
+        .map_err(|e| format!("解析 JSON 失败 / Failed to parse JSON: {}", e))?;
 
     Ok(json)
 }

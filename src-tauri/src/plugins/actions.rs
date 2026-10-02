@@ -9,11 +9,11 @@ impl PluginsConfig {
         let config = self
             .extensions
             .get_mut(&ext_key)
-            .ok_or_else(|| format!("扩展名 .{} 不存在", ext_key))?;
+            .ok_or_else(|| format!("扩展名 .{} 不存在 / Extension .{} not found", ext_key, ext_key))?;
         if !config.handlers.iter().any(|h| h.handler_id == handler_id) {
             return Err(format!(
-                "扩展名 .{} 下找不到处理器 id={}",
-                ext_key, handler_id
+                "扩展名 .{} 下找不到处理器 handler_id={} / Handler not found under extension .{}: {}",
+                ext_key, handler_id, ext_key, handler_id
             ));
         }
         config.active_handler_id = Some(handler_id.to_string());
@@ -26,7 +26,7 @@ impl PluginsConfig {
         let config = self
             .extensions
             .get_mut(&ext_key)
-            .ok_or_else(|| format!("扩展名 .{} 不存在", ext_key))?;
+            .ok_or_else(|| format!("扩展名 .{} 不存在 / Extension .{} not found", ext_key, ext_key))?;
         config.active_handler_id = None;
         Ok(())
     }
@@ -66,7 +66,7 @@ impl PluginsConfig {
         let config = self
             .extensions
             .get_mut(&ext_key)
-            .ok_or_else(|| format!("扩展名 .{} 没有任何插件处理器", ext_key))?;
+            .ok_or_else(|| format!("扩展名 .{} 没有任何插件处理器 / No plugin handler for extension .{}", ext_key, ext_key))?;
 
         let idx = config.handlers.iter().position(|h| {
             // 优先按 handler_id 匹配，再按 plugin_id（目录名）匹配
@@ -77,7 +77,7 @@ impl PluginsConfig {
                 let handler = &config.handlers[i];
                 if handler.source != PluginSource::Custom {
                     return Err(format!(
-                        "❌ 内置插件不可删除（.{} / {}）",
+                        "❌ 内置插件不可删除 / Built-in plugins cannot be deleted (.{} / {})",
                         ext_key, folder_name
                     ));
                 }
@@ -91,7 +91,7 @@ impl PluginsConfig {
                 }
                 Ok(())
             }
-            None => Err(format!("自定义插件不存在：.{} / {}", ext_key, folder_name)),
+            None => Err(format!("自定义插件不存在 / Custom plugin not found: .{} / {}", ext_key, folder_name)),
         }
     }
 }

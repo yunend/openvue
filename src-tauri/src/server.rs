@@ -48,7 +48,7 @@ pub fn do_spawn_server(
 
     // 重复运行检查
     if guard.cancel_token.is_some() {
-        return Err(format!("{log_prefix}HTTP 服务已在运行"));
+        return Err(format!("{log_prefix}HTTP 服务已在运行 / HTTP server is already running"));
     }
 
     // 取出配置（必须在 drop(guard) 之前克隆）
@@ -84,7 +84,7 @@ pub fn do_spawn_server(
         let listener = match tokio::net::TcpListener::bind(&addr).await {
             Ok(l) => l,
             Err(e) => {
-                let msg = format!("无法绑定端口 {}: {}", port, e);
+                let msg = format!("无法绑定端口 / Failed to bind port {}: {}", port, e);
                 eprintln!("❌ {log_prefix}{}", msg);
                 let _ = bind_tx.send(Err(msg));
                 return;
@@ -106,7 +106,7 @@ pub fn do_spawn_server(
     match bind_rx.recv() {
         Ok(Ok(())) => Ok(port),
         Ok(Err(msg)) => Err(msg),
-        Err(_) => Err("HTTP 服务启动任务异常退出".to_string()),
+        Err(_) => Err("HTTP 服务启动任务异常退出 / HTTP server spawn task exited abnormally".to_string()),
     }
 }
 
