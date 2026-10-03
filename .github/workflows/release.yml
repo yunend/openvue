@@ -114,7 +114,7 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: "Release ${{ github.ref_name }}"
-          body: "See the assets to download this version and install."
+          body: "Add function:plugins market."
           files: |
             src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*
             src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*

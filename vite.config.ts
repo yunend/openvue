@@ -11,7 +11,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
     plugins: [vue()],
     root: isDesktop ? 'src' : (isWeb ? 'src-tauri/base' : '.'),
     // web 模式下将 plugins-buildin 文件夹作为公共资源
-    publicDir: isWeb ? resolve(__dirname, 'plugins-buildin') : undefined,
+    publicDir: isWeb ? resolve(__dirname, 'plugins') : undefined,
     build: {
       outDir: isDesktop ? '../dist-desktop' : (isWeb ? '../dist-web' : '../dist'),
       emptyOutDir: true,

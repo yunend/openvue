@@ -254,6 +254,9 @@ pub fn set_plugins_folder(
     let path = config::get_default_config_path().map_err(|e| e.to_string())?;
 
     let pf = PathBuf::from(&folder_path);
+    if !pf.is_absolute() {
+        return Err("插件目录必须使用绝对路径 / Plugin directory must be an absolute path".to_string());
+    }
     if !pf.exists() {
         std::fs::create_dir_all(&pf)
             .map_err(|e| format!("创建插件目录失败 / Failed to create plugin directory: {} ({})", folder_path, e))?;
@@ -264,9 +267,14 @@ pub fn set_plugins_folder(
     config::save_config_to_path(&current_config, &path)?;
 
     let mut guard = state.lock().map_err(|e| e.to_string())?;
-    guard.app_config.plugins_folder = Some(pf);
+    guard.app_config.plugins_folder = Some(pf.clone());
     let plugins_state = plugins::load_plugins_state().unwrap_or_default();
-    let _ = rescan_and_rebuild(&mut guard, &plugins_state);
+    if let Err(e) = rescan_and_rebuild(&mut guard, &plugins_state) {
+        eprintln!("⚠️ [set_plugins_folder] 重新扫描插件失败: {}", e);
+        drop(guard);
+        return Err(format!("重新扫描插件失败 / Rescan failed: {}", e));
+    }
+    println!("✅ [set_plugins_folder] 插件目录已切换: {}", pf.display());
     let was_running = guard.cancel_token.is_some();
     drop(guard);
     if was_running {
@@ -291,7 +299,11 @@ pub fn reset_plugins_folder(
     let mut guard = state.lock().map_err(|e| e.to_string())?;
     guard.app_config.plugins_folder = None;
     let plugins_state = plugins::load_plugins_state().unwrap_or_default();
-    let _ = rescan_and_rebuild(&mut guard, &plugins_state);
+    if let Err(e) = rescan_and_rebuild(&mut guard, &plugins_state) {
+        eprintln!("⚠️ [reset_plugins_folder] 重新扫描插件失败: {}", e);
+        drop(guard);
+        return Err(format!("重新扫描插件失败 / Rescan failed: {}", e));
+    }
     let was_running = guard.cancel_token.is_some();
     drop(guard);
     if was_running {

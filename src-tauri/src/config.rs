@@ -117,30 +117,9 @@ pub fn load_config(config_path: Option<&str>) -> Result<AppConfig, String> {
         config.public_folder = normalize_path(config.public_folder.clone());
     }
 
-    // 解析 plugins_folder 相对路径
+    // plugins_folder 仅使用绝对路径，直接规范化
     if let Some(ref mut pf) = config.plugins_folder {
-        if !pf.is_absolute() {
-            let config_dir = path.parent()
-                .ok_or_else(|| "无法获取配置文件目录".to_string())?;
-            let raw = config_dir.join(&*pf);
-            let resolved = if raw.exists() {
-                raw
-            } else {
-                match crate::paths::find_app_root() {
-                    Ok(app_root) => {
-                        let fallback = app_root.join(&*pf);
-                        if fallback.exists() { fallback } else { raw }
-                    }
-                    Err(_) => raw,
-                }
-            };
-            *pf = match resolved.canonicalize() {
-                Ok(p) => normalize_path(p),
-                Err(_) => normalize_path(resolved),
-            };
-        } else {
-            *pf = normalize_path(pf.clone());
-        }
+        *pf = normalize_path(pf.clone());
     }
 
     let plugins_dir_display = match &config.plugins_folder {
@@ -205,19 +184,10 @@ pub fn save_config_to_path(config: &AppConfig, path: &PathBuf) -> Result<(), Str
         config.public_folder.to_string_lossy().to_string()
     };
 
-    let plugins_folder_write = match &config.plugins_folder {
-        Some(p) => {
-            if p.is_absolute() {
-                match p.strip_prefix(config_dir) {
-                    Ok(rel) => Some(rel.to_string_lossy().to_string()),
-                    Err(_) => Some(p.to_string_lossy().to_string()),
-                }
-            } else {
-                Some(p.to_string_lossy().to_string())
-            }
-        }
-        None => None,
-    };
+    // plugins_folder 始终写入绝对路径
+    let plugins_folder_write = config.plugins_folder
+        .as_ref()
+        .map(|p| p.to_string_lossy().to_string());
 
     #[derive(Serialize)]
     #[serde(rename_all = "camelCase")]

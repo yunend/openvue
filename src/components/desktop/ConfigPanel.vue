@@ -66,9 +66,10 @@
         <div class="flex gap-[8px] items-stretch flex-wrap">
           <input
             type="text"
-            class="flex-1 min-w-[180px] px-[12px] py-[9px] border-2 border-primary-100 rounded-[8px] text-sm text-primary-900 bg-white focus:outline-none focus:border-blue-400"
+            class="flex-1 min-w-[180px] px-[12px] py-[9px] border-2 border-primary-100 rounded-[8px] text-sm text-primary-900 bg-slate-50 cursor-default focus:outline-none"
             v-model="pluginsFolderInput"
             :placeholder="t('config.pluginsFolderPlaceholder')"
+            readonly
           >
           <button
             type="button"
@@ -107,6 +108,7 @@ import { ref, onMounted, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useConfigManager, type AppConfig } from '../../composables/useConfigManager'
 import { useServerControl } from '../../composables/useServerControl'
+import { usePluginManager } from '../../composables/usePluginManager'
 
 defineProps({ isActive: Boolean })
 
@@ -114,6 +116,7 @@ const { t } = useI18n()
 
 const { config, loadConfig, saveConfig, browseFolder, setPluginsFolder, resetPluginsFolder, openPluginsFolder } = useConfigManager()
 const { refreshStatus } = useServerControl()
+const { loadPluginsConfig } = usePluginManager()
 const localConfig = ref<AppConfig>({
   port: 8005,
   publicFolder: 'public',
@@ -191,6 +194,7 @@ async function handleApplyPluginsFolder() {
   }
   await setPluginsFolder(path)
   localConfig.value = { ...config.value }
+  await loadPluginsConfig()
   setTimeout(refreshStatus, 300)
 }
 
@@ -198,6 +202,7 @@ async function handleResetPluginsFolder() {
   await resetPluginsFolder()
   pluginsFolderInput.value = ''
   localConfig.value = { ...config.value }
+  await loadPluginsConfig()
   setTimeout(refreshStatus, 300)
 }
 
