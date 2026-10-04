@@ -1,6 +1,4 @@
-<p align="center"><a href="./README.md"><img src="https://img.shields.io/badge/Language-中文-green.svg?style=flat-square" alt="中文"></a></p>
-
-# OpenVue
+# OpenVue &nbsp; [![中文](https://img.shields.io/badge/Language-中文-green.svg?style=flat-square)](./README.md)
 
 <p align="center">
   <img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License">
