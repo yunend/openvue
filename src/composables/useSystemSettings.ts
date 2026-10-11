@@ -45,7 +45,6 @@ export function useSystemSettings(): UseSystemSettingsReturn {
     try {
       const { invoke } = window.__TAURI__.core
       await invoke('hide_window')
-      showToast(i18n.global.t('toast.minimized'), 'info')
     } catch (e) {
       showToast(i18n.global.t('toast.hideFailed', { err: String(e) }), 'error')
     }
