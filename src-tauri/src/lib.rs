@@ -32,6 +32,7 @@ pub fn run() {
         cancel_token: None,
         app_config: app_config.clone(),
         plugins_config: plugins_config.clone(),
+        last_error: None,
     }));
 
     tauri::Builder::default()

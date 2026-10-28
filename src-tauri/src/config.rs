@@ -145,15 +145,20 @@ pub fn get_default_config_path() -> Result<PathBuf, String> {
 
 /// 验证配置有效性
 pub fn validate_config(config: &AppConfig) -> Result<(), String> {
+    // u16 类型本身保证了端口范围 0-65535，只需校验 0（端口 0 系统保留不可用）
     if config.port == 0 {
-        return Err("端口号不能为 0".to_string());
+        return Err("端口号不能为 0（有效范围 1-65535）".to_string());
+    }
+    if config.port < 1024 {
+        println!("⚠️ 端口 {} 属于系统保留端口范围（1-1023），可能需要管理员权限", config.port);
     }
 
+    // public_folder 不存在时自动创建
     if !config.public_folder.exists() {
-        return Err(format!(
-            "指定文件目录不存在: {}",
-            config.public_folder.display()
-        ));
+        match std::fs::create_dir_all(&config.public_folder) {
+            Ok(_) => println!("📂 指定文件目录不存在，已自动创建: {}", config.public_folder.display()),
+            Err(e) => return Err(format!("指定文件目录不存在且无法自动创建: {} ({})", config.public_folder.display(), e)),
+        }
     }
 
     // plugins_folder 不存在时自动创建，不阻断

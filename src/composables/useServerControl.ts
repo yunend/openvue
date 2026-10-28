@@ -7,6 +7,7 @@ interface ServerStatus {
   port: number | string
   publicFolder: string
   urls: string[]
+  lastError: string | null
 }
 
 const isRunning = ref(false)
@@ -14,7 +15,8 @@ const status = ref<ServerStatus>({
   isRunning: false,
   port: '-',
   publicFolder: '-',
-  urls: []
+  urls: [],
+  lastError: null
 })
 
 export function useServerControl() {

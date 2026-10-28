@@ -54,9 +54,9 @@ const en = {
     enabled: 'Enabled',
     disabled: 'Disabled',
     minimizeHint: 'Hide main window, HTTP service keeps running',
-    hideToTray: '📦 Hide to Tray',
+    hideToTray: 'Hide to Tray',
     quitHint: 'Stop HTTP service and completely close the app',
-    quit: '🚪 Quit'
+    quit: 'Quit'
   },
   plugins: {
     title: '🧩 Extension & Plugin Mapping',

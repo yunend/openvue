@@ -223,7 +223,11 @@ fn register_api_routes(enable_upload: bool) -> Router<RouterState> {
 
     // 条件挂载文件上传 API
     if enable_upload {
-        router = router.route("/upload", axum::routing::post(upload::handle_upload));
+        router = router.route(
+            "/upload",
+            axum::routing::post(upload::handle_upload)
+                .layer(axum::extract::DefaultBodyLimit::max(1024 * 1024 * 1024)), // 1GB 限制
+        );
     } else {
         router = router.route(
             "/upload",

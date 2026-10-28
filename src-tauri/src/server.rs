@@ -8,6 +8,8 @@ pub struct ServerState {
     pub app_config: config::AppConfig,
     /// 插件配置（运行时内存副本）
     pub plugins_config: plugins::PluginsConfig,
+    /// 最近一次启动失败的错误信息
+    pub last_error: Option<String>,
 }
 
 /// 🔁 重启 HTTP 服务（停止后再启动，配置变更后自动调用）
@@ -44,7 +46,7 @@ pub fn do_spawn_server(
     state: &Arc<Mutex<ServerState>>,
     log_prefix: &'static str,
 ) -> Result<u16, String> {
-    let mut guard = state.lock().map_err(|e| e.to_string())?;
+    let guard = state.lock().map_err(|e| e.to_string())?;
 
     // 重复运行检查
     if guard.cancel_token.is_some() {
@@ -56,23 +58,23 @@ pub fn do_spawn_server(
     let plugins_config = guard.plugins_config.clone();
     let port = app_config.port;
 
-    // 创建取消令牌并存入状态
+    // 创建取消令牌（先不存入状态，等 bind 成功后再存）
     let cancel_token = CancellationToken::new();
     let token_clone = cancel_token.clone();
-    guard.cancel_token = Some(cancel_token);
     drop(guard);
 
+    // 提前 clone state，因为 async 块需要 'static
+    let state_clone = Arc::clone(state);
+    let log_prefix_owned = log_prefix.to_string();
+
     let addr = format!("0.0.0.0:{}", port);
-    // 使用 std::sync::mpsc，可在任何线程上下文安全使用
     let (bind_tx, bind_rx) = std::sync::mpsc::channel::<Result<(), String>>();
 
-    // 启动异步 HTTP 服务
     tauri::async_runtime::spawn(async move {
         let public_folder = app_config.public_folder.clone();
         let enable_upload = app_config.enable_upload;
         let plugins_for_router = plugins_config;
         let version_str = env!("CARGO_PKG_VERSION").to_string();
-        // 从 config 解析最终插件目录
         let plugins_folder = crate::paths::resolve_plugins_dir(
             app_config.plugins_folder.as_deref()
         ).unwrap_or_else(|_| std::path::PathBuf::from("./plugins"));
@@ -82,15 +84,25 @@ pub fn do_spawn_server(
         );
 
         let listener = match tokio::net::TcpListener::bind(&addr).await {
-            Ok(l) => l,
+            Ok(l) => {
+                // 绑定成功才写入 cancel_token，并清除上次错误
+                let mut g = state_clone.lock().unwrap();
+                g.cancel_token = Some(cancel_token);
+                g.last_error = None;
+                l
+            }
             Err(e) => {
                 let msg = format!("无法绑定端口 / Failed to bind port {}: {}", port, e);
-                eprintln!("❌ {log_prefix}{}", msg);
+                eprintln!("❌ {}{}", log_prefix_owned, msg);
+                {
+                    let mut g = state_clone.lock().unwrap();
+                    g.last_error = Some(msg.clone());
+                }
                 let _ = bind_tx.send(Err(msg));
                 return;
             }
         };
-        println!("🚀 {log_prefix}HTTP 服务器启动成功: http://{}", addr);
+        println!("🚀 {}HTTP 服务器启动成功: http://{}", log_prefix_owned, addr);
         let _ = bind_tx.send(Ok(()));
 
         axum::serve(listener, app)
@@ -99,7 +111,7 @@ pub fn do_spawn_server(
             })
             .await
             .ok();
-        println!("🛑 {log_prefix}HTTP 服务器已停止");
+        println!("🛑 {}HTTP 服务器已停止", log_prefix_owned);
     });
 
     // 等待绑定结果（阻塞当前线程，仅在 setup 阶段调用，不阻塞 tokio 运行时）

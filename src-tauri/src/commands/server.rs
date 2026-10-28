@@ -39,6 +39,7 @@ pub fn get_server_status(state: tauri::State<'_, Arc<Mutex<server::ServerState>>
         "port": state.app_config.port,
         "publicFolder": state.app_config.public_folder.to_string_lossy().to_string(),
         "enableUpload": state.app_config.enable_upload,
-        "urls": urls
+        "urls": urls,
+        "lastError": state.last_error
     }))
 }

@@ -104,7 +104,15 @@ jobs:
           args: ${{ matrix.args }}
           tagName: ${{ github.ref_name }}
           releaseName: "Release ${{ github.ref_name }}"
-          releaseBody: "See the assets to download this version and install."
+          releaseBody: |
+            ## 🚀 New Major Release / 主版本升级
+
+            **Highlights / 主要更新:**
+
+            1. 🛒 **Plugin Market** / **插件市场** - Added a brand-new plugin marketplace feature
+            2. 📤 **File Upload** / **文件上传** - Significantly improved and enhanced the file upload functionality
+
+            ---
           releaseDraft: false
           prerelease: false
       
@@ -114,7 +122,15 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: "Release ${{ github.ref_name }}"
-          body: "Add function:plugins market."
+          body: |
+            ## 🚀 New Major Release / 主版本升级
+
+            **Highlights / 主要更新:**
+
+            1. 🛒 **Plugin Market** / **插件市场** - Added a brand-new plugin marketplace feature
+            2. 📤 **File Upload** / **文件上传** - Significantly improved and enhanced the file upload functionality
+
+            ---
           files: |
             src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*
             src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*

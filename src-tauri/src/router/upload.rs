@@ -13,6 +13,7 @@ use axum::{
     response::{IntoResponse, Json},
 };
 use serde::Serialize;
+use tokio::io::AsyncWriteExt;
 
 use super::RouterState;
 
@@ -70,16 +71,20 @@ pub async fn handle_upload(
     let mut uploaded: Vec<UploadedFile> = Vec::new();
 
     // 遍历 multipart 每个字段
-    while let Ok(Some(field)) = multipart.next_field().await {
+    while let Ok(Some(mut field)) = multipart.next_field().await {
         let original_name = field.file_name().unwrap_or("unnamed").to_string();
-        let data = match field.bytes().await {
-            Ok(b) => b,
+        let saved_filename = original_name.clone();
+        let full_save_path = upload_dir.join(&saved_filename);
+
+        // 创建文件用于流式写入
+        let mut dest_file = match tokio::fs::File::create(&full_save_path).await {
+            Ok(f) => f,
             Err(e) => {
                 return (
-                    StatusCode::BAD_REQUEST,
+                    StatusCode::INTERNAL_SERVER_ERROR,
                     Json(UploadResponse {
                         success: false,
-                        message: format!("读取上传文件失败: {}", e),
+                        message: format!("创建文件 '{}' 失败: {}", saved_filename, e),
                         files: None,
                     }),
                 )
@@ -87,17 +92,31 @@ pub async fn handle_upload(
             }
         };
 
-        let size = data.len() as u64;
+        let mut total_size: u64 = 0;
 
-        let saved_filename = original_name.clone();
-        let full_save_path = upload_dir.join(&saved_filename);
+        // 流式读取并写入，避免大文件一次性加载到内存
+        while let Some(chunk) = field.chunk().await.unwrap_or(None) {
+            total_size += chunk.len() as u64;
+            if let Err(e) = tokio::io::AsyncWriteExt::write_all(&mut dest_file, &chunk).await {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(UploadResponse {
+                        success: false,
+                        message: format!("写入文件 '{}' 失败: {}", saved_filename, e),
+                        files: None,
+                    }),
+                )
+                    .into_response();
+            }
+        }
 
-        if let Err(e) = tokio::fs::write(&full_save_path, &data).await {
+        // 确保所有数据都已写入磁盘
+        if let Err(e) = dest_file.flush().await {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(UploadResponse {
                     success: false,
-                    message: format!("写入文件 '{}' 失败: {}", saved_filename, e),
+                    message: format!("刷新文件 '{}' 失败: {}", saved_filename, e),
                     files: None,
                 }),
             )
@@ -110,7 +129,7 @@ pub async fn handle_upload(
         uploaded.push(UploadedFile {
             filename: saved_filename,
             url,
-            size,
+            size: total_size,
             original_name,
         });
     }
